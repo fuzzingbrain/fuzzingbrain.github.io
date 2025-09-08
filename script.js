@@ -209,9 +209,53 @@ window.addEventListener('load', () => {
     }, 100);
 });
 
+// Mobile menu toggle functionality
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded, setting up mobile menu');
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+    const nav = document.querySelector('.nav');
+    
+    console.log('Mobile menu button:', mobileMenuBtn);
+    console.log('Navigation:', nav);
+    
+    if (mobileMenuBtn && nav) {
+        mobileMenuBtn.addEventListener('click', (e) => {
+            console.log('Menu button clicked!');
+            e.preventDefault();
+            mobileMenuBtn.classList.toggle('active');
+            nav.classList.toggle('active');
+        });
+        
+        // Close menu when clicking on a link
+        const navLinks = nav.querySelectorAll('a');
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenuBtn.classList.remove('active');
+                nav.classList.remove('active');
+            });
+        });
+        
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!nav.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+                mobileMenuBtn.classList.remove('active');
+                nav.classList.remove('active');
+            }
+        });
+    }
+});
+
 // Enhanced keyboard navigation
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
+        // Close mobile menu
+        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+        const nav = document.querySelector('.nav');
+        if (mobileMenuBtn && nav) {
+            mobileMenuBtn.classList.remove('active');
+            nav.classList.remove('active');
+        }
+        
         // Close any modals or overlays if implemented
         document.querySelectorAll('.modal, .overlay').forEach(el => {
             el.style.display = 'none';

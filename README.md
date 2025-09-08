@@ -87,15 +87,14 @@ This project is open source and available under the [MIT License](LICENSE).
 
 ## 👥 Research Team
 
-- **Jeff Huang** - Texas A&M University
 - **Ze Sheng** - Texas A&M University  
 - **Qingxiao Xu** - Texas A&M University
 - **Jianwei Huang** - Texas A&M University
 - **Matthew Woodcock** - Texas A&M University
-- **Guofei Gu** - Texas A&M University
 - **Heqing Huang** - City University of Hong Kong
 - **Alastair F. Donaldson** - Imperial College London
-
+- **Guofei Gu** - Texas A&M University
+- **Jeff Huang (Team Lead)** - Texas A&M University
 ---
 
 Made with ❤️ by the All You Need Is A Fuzzing Brain team
