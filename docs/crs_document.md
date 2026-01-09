@@ -1,0 +1,410 @@
+# CRS Document
+
+> Made By Team All_you_need_is_a_fuzzing_brain
+
+<aside>
+💡This Cyber Reasoning System (CRS) is an AI-driven automated vulnerability detection and remediation framework built upon the OSS-Fuzz infrastructure. Developed by the team "all_you_need_is_a_fuzzing_brain" for the 2025 DARPA AIxCC (Artificial Intelligence Cyber Challenge) finals, CRS represents a state-of-the-art approach to automated software security analysis.
+</aside>
+
+## CRS Configuration Parameters
+
+This CRS detection is based on vulnerabilities from the OSS-Fuzz project. The following are the CRS configuration parameters:
+
+| Parameter | Value |
+|-----------|-------|
+| **Version** | 1.2.0 |
+| **Supported Languages** | C/C++, Java |
+| **Fuzzer Engine** | libfuzzer |
+| **Architecture** | x86_64 |
+
+# CRS Overview
+
+![CRS Framework](images/CRS_Framework.png)
+
+The CRS architecture comprises four distinct services that work in concert to deliver comprehensive vulnerability detection and remediation capabilities: Task Service, Worker Service, Submission Service, and Static Analysis Service. The system leverages artificial intelligence techniques combined with fuzzing methodologies to provide end-to-end vulnerability management capabilities. The architectural framework and workflow are illustrated in the system diagram above.
+
+CRS is designed to handle three primary task categories:
+
+- **Delta Scan Task**: Attempts to identify whether a specific commit introduces vulnerabilities that can be triggered by existing fuzzers, subsequently generating appropriate remediation solutions.
+- **Full Scan Task**: Conducts comprehensive analysis of entire source code repositories to identify vulnerabilities exploitable by known fuzzers, providing corresponding patches.
+- **SARIF Analysis Task**: Validates vulnerabilities based on SARIF (Static Analysis Results Interchange Format) reports, verifying their existence and generating remediation patches when confirmed.
+
+In general, the usage of 4 services are:
+
+### Task Service
+
+The Task Service functions as the orchestration layer, responsible for parsing and processing incoming tasks while acquiring target repositories and fuzzing toolchains. This service constructs appropriate fuzzers and sanitizers based on project specifications, formatting tasks for downstream processing. Subsequently, it decomposes tasks into subtasks organized by different fuzzer and sanitizer combinations, distributing them to parallel Worker Services for execution.
+
+### Worker Service
+
+The Worker Service represents the core computational engine of CRS, handling task execution based on assigned workspaces, fuzzers, and sanitizers. This service implements the primary vulnerability localization and patching logic through parallel invocation of various LLM-based vulnerability detection and reproduction strategies. It operates fuzzers to identify inputs capable of reproducing vulnerabilities (proof-of-vulnerability or proof-of-concept), and upon successful vulnerability triggering, applies diverse patching strategies to generate remediation patches in hunk diff format.
+
+### Submission Service
+
+The Submission Service is specifically designed for competition submission management, handling the organization and deduplication of discovered proofs-of-vulnerability (POV) and patches. It manages the pairing of valid POVs with corresponding patches to generate bundled submissions suitable for evaluation frameworks.
+
+### Static Analysis Service
+
+The Static Analysis Service provides essential static analysis capabilities that support various CRS strategies. It implements comprehensive functionality including call graph generation and extraction of software context metadata (function metadata, variable metadata), thereby enhancing LLM-driven POV generation and patch synthesis processes.
+
+# Case Study: libpng
+
+![CRS Workflow](images/workflow.png)
+
+This section demonstrates CRS functionality through a practical example involving the identification and remediation of a dynamic stack buffer overflow vulnerability in the libpng project. This walkthrough illustrates the complete CRS workflow from vulnerability detection to patch generation.
+
+**Project**: libpng
+
+**Vulnerability Type**: Dynamic Stack Buffer Overflow
+
+**Root Cause**: An improper use of `sizeof` operator leading to out-of-bounds read and write operations in the `png_handle_iCCP` function.
+
+**Expected Sanitizer Report:**
+
+```bash
+=================================================================
+==18==ERROR: AddressSanitizer: dynamic-stack-buffer-overflow on address 0x7ffe7e032b52 at pc 0x563915a23a9b bp 0x7ffe7e032ad0 sp 0x7ffe7e032ac8
+READ of size 2 at 0x7ffe7e032b52 thread T0
+....
+```
+
+This stack trace indicates a 2-byte read operation occurring at an invalid memory address within the `png_handle_iCCP` function, specifically at line 1447 of `pngrutil.c`.
+
+The following sections detail how CRS processes this vulnerability through its automated detection and patching pipeline:
+
+## Step 1: Repository Setup
+
+First, clone the CRS repository from the official source:
+
+```bash
+git clone git@github.com:aixcc-finals/afc-crs-all-you-need-is-a-fuzzing-brain.git
+```
+
+## Step 2: Service Deployment
+
+For this demonstration, we deploy all four CRS services locally. In production environments, these services can be distributed across multiple nodes for enhanced scalability and performance.
+
+### Task & Worker Service
+
+In local testing mode, the Task Service and Worker Service can operate as a unified service, where the task service distributes work to itself:
+
+```bash
+cd crs
+LOCAL_TEST=1 go run cmd/server/main.go
+```
+
+Upon successful initialization, the service produces the following output:
+
+```
+Logs will be saved to: logs/20250727/run.log
+2025/07/27 18:22:30 Raw OTEL headers: Authorization=<redacted>
+2025/07/27 18:22:30 Authorization header found and parsed
+2025/07/27 18:22:30 OpenTelemetry tracer initialized with endpoint: https://otel.synthetic-dawn.aixcc.tech
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:   export GIN_MODE=release
+ - using code:  gin.SetMode(gin.ReleaseMode)
+2025/07/27 18:22:30 Worker configuration: 24 nodes starting at port 9081
+[GIN-debug] GET    /status/                  --> crs/internal/handlers.(*Handler).GetStatus-fm (3 handlers)
+[GIN-debug] POST   /sarifx/                  --> crs/internal/handlers.(*Handler).SubmitSarif-fm (3 handlers)
+[GIN-debug] POST   /v1/sarif/                --> crs/internal/handlers.(*Handler).SubmitSarif-fm (4 handlers)
+[GIN-debug] POST   /v1/task/                 --> crs/internal/handlers.(*Handler).SubmitTask-fm (4 handlers)
+[GIN-debug] DELETE /v1/task/                 --> crs/internal/handlers.(*Handler).CancelAllTasks-fm (4 handlers)
+[GIN-debug] DELETE /v1/task/:task_id/        --> crs/internal/handlers.(*Handler).CancelTask-fm (4 handlers)
+[GIN-debug] POST   /v1/status/reset/         --> crs/internal/handlers.(*Handler).ResetStatus-fm (4 handlers)
+2025/07/27 18:22:30 LOCAL_TEST node listening at port 5080
+[GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
+Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
+[GIN-debug] Listening and serving HTTP on :1324
+```
+
+The service is now accessible at port 1324.
+
+### Submission Service
+
+Launch the submission service for managing POV and patch submissions:
+
+```bash
+cd competition-api
+LOCAL_TEST=1 go run cmd/server/main.go
+```
+
+Service initialization output:
+
+```
+2025/07/27 14:37:31 Raw OTEL headers: Authorization=<redacted>
+2025/07/27 14:37:31 Authorization header found and parsed
+2025/07/27 14:37:31 OpenTelemetry tracer initialized with endpoint: https://otel.synthetic-dawn.aixcc.tech
+2025/07/27 14:37:31 Telemetry Configuration:
+2025/07/27 14:37:31 Endpoint: https://otel.synthetic-dawn.aixcc.tech
+2025/07/27 14:37:31 Enabled: true
+2025/07/27 14:37:31 Headers: map[authorization:<redacted>]
+2025/07/27 14:37:31 Server Configuration:
+2025/07/27 14:37:31 API Key ID: cc...da
+2025/07/27 14:37:31 API Token: <redacted>
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:   export GIN_MODE=release
+ - using code:  gin.SetMode(gin.ReleaseMode)
+[GIN-debug] POST   /sarifx/                  --> competition-api/internal/handlers.(*Handler).SubmitSARIFX-fm (3 handlers)
+[GIN-debug] GET    /v1/ping/                 --> competition-api/internal/handlers.(*Handler).Ping-fm (4 handlers)
+[GIN-debug] GET    /v1/task/:task_id/pov_stats/ --> competition-api/internal/handlers.(*Handler).GetPOVStats-fm (4 handlers)
+[GIN-debug] POST   /v1/sarifx/invalid/:task_id/:broadcast_sarif_id/ --> competition-api/internal/handlers.(*Handler).SubmitSarifInvalid-fm (4 handlers)
+[GIN-debug] POST   /v1/sarifx/:task_id/:broadcast_sarif_id/ --> competition-api/internal/handlers.(*Handler).CheckSarifValidity-fm (4 handlers)
+[GIN-debug] POST   /v1/sarifx/check_invalid/:task_id/:broadcast_sarif_id/ --> competition-api/internal/handlers.(*Handler).CheckSarifInValidity-fm (4 handlers)
+[GIN-debug] POST   /v1/task/:task_id/pov/    --> competition-api/internal/handlers.(*Handler).SubmitPOV-fm (4 handlers)
+[GIN-debug] POST   /v1/task/:task_id/patch/  --> competition-api/internal/handlers.(*Handler).SubmitPatch-fm (4 handlers)
+[GIN-debug] POST   /v1/task/:task_id/freeform/pov/ --> competition-api/internal/handlers.(*Handler).SubmitFreeformPOV-fm (4 handlers)
+[GIN-debug] POST   /v1/task/:task_id/freeform/patch/ --> competition-api/internal/handlers.(*Handler).SubmitFreeformPatch-fm (4 handlers)
+[GIN-debug] POST   /v1/task                  --> competition-api/internal/handlers.(*Handler).HandleTask-fm (4 handlers)
+2025/07/27 14:37:31 CRS submission node listening at port 7081
+[GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
+Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
+[GIN-debug] Listening and serving HTTP on :7081
+```
+
+The submission service is now accessible at port 7081.
+
+### Static Analysis Service
+
+Initialize the static analysis service for code analysis and metadata extraction:
+
+```bash
+cd static-analysis
+go run cmd/server/main.go
+```
+
+Service startup confirmation:
+
+```
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:   export GIN_MODE=release
+ - using code:  gin.SetMode(gin.ReleaseMode)
+[GIN-debug] GET    /v1/health                --> main.handleHealth (3 handlers)
+[GIN-debug] POST   /v1/analysis              --> main.main.func1 (3 handlers)
+[GIN-debug] POST   /v1/analysis_qx           --> main.main.func2 (3 handlers)
+[GIN-debug] POST   /v1/reachable             --> main.main.func3 (3 handlers)
+[GIN-debug] POST   /v1/reachable_qx          --> main.main.func4 (3 handlers)
+[GIN-debug] POST   /v1/funmeta               --> main.main.func5 (3 handlers)
+[GIN-debug] POST   /v1/task                  --> main.main.func6 (3 handlers)
+[GIN-debug] GET    /v1/task/:taskID          --> main.main.func7 (3 handlers)
+[GIN-debug] DELETE /v1/task/:taskID          --> main.main.func8 (3 handlers)
+2025/07/27 19:25:12 Starting analysis service on port 7082...
+[GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
+Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
+[GIN-debug] Listening and serving HTTP on :7082
+```
+
+The static analysis service is now operational at port 7082.
+
+## Send Task To CRS
+
+Now we submit the libpng vulnerability detection task to CRS. For this demonstration, we'll perform a delta scan task to identify vulnerabilities introduced by a specific commit.
+
+### Task Metadata
+
+The following metadata is required for task submission:
+
+- **Repository URL**: The target project repository
+- **Base Reference**: The code version before the target commit
+- **Head Reference**: The new version after introducing the commit
+- **Fuzz Tooling Repository**: The fuzzing infrastructure codebase
+- **Fuzz Tooling Version**: Specific version/commit of the fuzzing tools
+- **Duration (Optional)**: Time limit for analysis in seconds
+
+### Method 1: Using AIxCC Competition Infrastructure (Optional)
+
+If using the official AIxCC competition infrastructure, tasks can be submitted through the competition webhook:
+
+```bash
+curl -X 'POST' 'http://localhost:1323/webhook/trigger_task' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "challenge_repo_url": "git@github.com:aixcc-finals/example-libpng.git",
+    "challenge_repo_head_ref": "fdacd5a1dcff42175117d674b0fda9f8a005ae88",
+    "fuzz_tooling_url": "https://github.com/aixcc-finals/oss-fuzz-aixcc.git",
+    "fuzz_tooling_ref": "d5fbd68fca66e6fa4f05899170d24e572b01853d",
+    "fuzz_tooling_project_name": "libpng",
+    "duration": 3600
+  }'
+```
+
+The competition infrastructure processes this request and transforms it into a format compatible with CRS, automatically generating:
+
+- **Task ID**: Unique identifier for the analysis task
+- **Source Repository Blob**: Azure cloud storage URL for the source code
+- **Diff File**: Generated from head and base references
+- **Fuzz Tooling Blob**: Cloud storage URL for fuzzing infrastructure
+
+### Method 2: Direct CRS API Submission
+
+Users can also submit tasks directly to the CRS Task Service using the processed format:
+
+```bash
+curl -s -X POST "http://localhost:1324/v1/task/" \
+  -H "Content-Type: application/json" \
+  --user "api_key_id:api_key_token" \
+  -d '{
+    "message_id": "0d2ab7cd-766c-49f2-86f6-926fbdb96546",
+    "message_time": 1736889189000,
+    "tasks": [
+      {
+        "task_id": "42910c67-5aa6-4b36-b3d8-d2af94915784",
+        "type": "delta",
+        "deadline": 1736903589000,
+        "source": [
+          {
+            "type": "repo",
+            "url": "https://aixcctfstate123.blob.core.windows.net/tfstate/6506009e5f2cbfbc876c93f3ea9536812a16aa7dbb0326c6e86dcca891347840.tar.gz?se=2025-01-15T01%3A13%3A06Z&sp=r&sv=2022-11-02&sr=b&sig=GF3HvYKMrjd2s%2F%2B2gz8JxQP7J7UGG0mDG7NrCApN2E8%3D",
+            "sha256": "6506009e5f2cbfbc876c93f3ea9536812a16aa7dbb0326c6e86dcca891347840"
+          },
+          {
+            "type": "fuzz-tooling",
+            "url": "https://aixcctfstate123.blob.core.windows.net/tfstate/b2eb56760411cd47bca531bb914769fc9545244041d85e7cb6af14c7f074e9ca.tar.gz?se=2025-01-15T01%3A13%3A08Z&sp=r&sv=2022-11-02&sr=b&sig=C3jwhDwK%2Bl%2BSlk%2BTWIHp3%2Bvf8byi6IacXKIB85%2Bvfko%3D",
+            "sha256": "b2eb56760411cd47bca531bb914769fc9545244041d85e7cb6af14c7f074e9ca"
+          },
+          {
+            "type": "diff",
+            "url": "https://aixcctfstate123.blob.core.windows.net/tfstate/8f30a73bee0d410fe2b3046e2a108f2790888d125e0eb80f0eacf2bf4d9e4273.tar.gz?se=2025-01-15T01%3A13%3A05Z&sp=r&sv=2022-11-02&sr=b&sig=W4QoREUh63aa7yVyZwJpEJantp8oO0nkyjB74rJulWk%3D",
+            "sha256": "8f30a73bee0d410fe2b3046e2a108f2790888d125e0eb80f0eacf2bf4d9e4273"
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+### Task Processing
+
+Upon successful submission, the CRS Task Service will:
+
+1. Parse the task metadata and validate all required components
+2. Download source materials from the provided URLs
+3. Initialize workspace for the specific task
+4. Construct appropriate fuzzers and sanitizers based on the project configuration
+5. Distribute subtasks to available Worker Services for parallel processing
+
+Upon receiving the task, CRS automatically initiates its vulnerability detection and remediation workflow.
+
+CRS downloads the source materials and begins constructing the analysis environment within Docker containers. For the libpng project, the system identifies the target fuzzer and creates multiple sanitizer configurations:
+
+```
+2025/07/27 19:52:07 Building fuzzers with --sanitizer=coverage
+2025/07/27 19:52:07 Building fuzzers with --sanitizer=address  
+2025/07/27 19:52:07 Building fuzzers with --sanitizer=memory
+2025/07/27 19:52:07 Created sanitizer-specific project directory: /crs-workdir/295b27d6-6896-43d3-8ba8-fa61b9008220-20250727-195154/example-libpng-address
+2025/07/27 19:52:07 Created sanitizer-specific project directory: /crs-workdir/295b27d6-6896-43d3-8ba8-fa61b9008220-20250727-195154/example-libpng-memory
+```
+
+Each fuzzer-sanitizer combination receives its own dedicated workspace to prevent race conditions during parallel strategy execution
+
+CRS allocates time resources between POV (Proof-of-Vulnerability) generation and patch development phases, then executes LLM-based vulnerability reproduction strategies specifically designed for delta scan tasks.
+
+The core strategy operates by:
+
+**Analyzing the diff** content between base and head references to understand code changes
+
+**Examining fuzzer implementation** to understand input requirements and target attack surfaces
+
+**Generating targeted input blobs** designed to trigger the identified vulnerability through the available fuzzer
+
+**Executing fuzzer validation** by loading generated inputs and monitoring for sanitizer crashes
+
+In this phase, LLMs will return a Python file that can generate *.bin files which are used to trigger the vulnerability by a fuzzer. This approach is adopted because LLMs directly generating binary files often encounter formatting issues and reliability problems.
+
+CRS successfully reproduces the dynamic stack buffer overflow vulnerability:
+
+```
+2025/07/27 19:54:16 [basic xs0_delta.py stdout] Running: /out/x_d42d2c5a.bin
+2025/07/27 19:54:16 [basic xs0_delta.py stdout] =================================================================
+2025/07/27 19:54:16 [basic xs0_delta.py stdout] ==1==ERROR: AddressSanitizer: dynamic-stack-buffer-overflow on address 0x7ffc49c40372 at pc 0x55b09855742a bp 0x7ffc49c402f0 sp 0x7ffc49c402e8
+2025/07/27 19:54:16 [basic xs0_delta.py stdout] READ of size 2 at 0x7ffc49c40372 thread T0
+2025/07/27 19:54:16 [basic xs0_delta.py stdout]     #0 0x55b098557429 in OSS_FUZZ_png_handle_iCCP /src/libpng/pngrutil.c:1457:13
+2025/07/27 19:54:16 [basic xs0_delta.py stdout]     #1 0x55b09852adcd in OSS_FUZZ_png_read_info /src/libpng/pngread.c:229:10
+2025/07/27 19:54:16 [basic xs0_delta.py stdout]     #2 0x55b09847e4ae in LLVMFuzzerTestOneInput /src/libpng/contrib/oss-fuzz/libpng_read_fuzzer.cc:156:3
+[... stack trace continues ...]
+2025/07/27 19:54:16 [basic xs0_delta.py stdout] Fuzzer crashed with exit code 1 - potential vulnerability triggered!
+```
+
+Then this pov will be formatted into a json file that will be used by patching phase.
+
+```
+{
+  "conversation": "conversation_95629d9b_claude-3-7-sonnet-latest_1.json",
+  "fuzzer_output": "fuzzer_output_95629d9b_claude-3-7-sonnet-latest_1.txt",
+  "blob_file": "test_blob_95629d9b_claude-3-7-sonnet-latest_1.bin",
+  "fuzzer_name": "libpng_read_fuzzer",
+  "sanitizer": "address",
+  "project_name": "libpng",
+  "pov_signature": "libpng_read_fuzzer-OSS_FUZZ_png_handle_iCCP /src/libpng/pngrutil.c:1447"
+}
+```
+
+Then CRS will try to patch this vulnerability. For each generated patch, CRS attempts to reproduce the vulnerability using the POV. If the reproduction fails, it indicates that the vulnerability has been mitigated. Subsequently, CRS runs the project's existing functionality tests. If all tests pass, it proves that the patch is effective. 
+
+
+```
+INITIAL_PATCH_TEMPLATE = """# Vulnerability Patching Task
+
+## Your Role
+You are a world-leading security engineer tasked with fixing a vulnerability in code. Your goal is to generate minimal, precise patches that address only the vulnerability without changing other functionality. 
+Do not aplogize when you are wrong. Just keep optimizing the result directly and proceed the progress. Do not lie or guess when you are unsure about the answer.
+
+## Input Information
+### Vulnerability Report
+{crash_log}
+
+### Context Information
+The vulnerability is introduced by the following commit:
+{commit_diff}
+
+### Relevant Functions
+{functions_metadata_str}
+
+Please return the fixed functions to patch the vulnerability. 
+
+## Requirements
+1. Fix ONLY the vulnerability - do not add features or refactor code
+2. Preserve all existing functionality and logic
+3. Make minimal changes (fewest lines of code possible)
+4. Focus on security best practices
+
+## Output Format
+Return ONLY a JSON dictionary where keys are function names and values are code blocks:
+{{
+"function_name1": "function_content_with_fix",
+"function_name2": "function_content_with_fix",
+...
+}}
+
+IMPORTANT:
+- Return the fixed content for each changed function
+- Do NOT return diffs, patches, or partial code snippets
+- Do NOT include explanations or comments outside the JSON
+- Include ALL lines of the original function in your response, with your fixes applied
+
+Return ONLY the JSON dictionary described above.
+"""
+```
+
+CRS then runs patch strategies in parallel. Instead of directly generating patch diff files, CRS attempts to generate modified functions. Subsequently, through static analysis tools, we can obtain the specific locations of functions, then overlay them with the modified functions, and use git diff to generate diff files. This approach ensures that the generated diff files are 100% format-correct.
+
+Once a suitable patch is found, the task is considered complete and all other running strategies are cancelled. This optimization prevents unnecessary resource consumption and ensures efficient task completion.
+
+```
+2025/07/27 20:21:13 [Round 1][basic patch0_delta.py stdout] PATCH SUCCESS! Vulnerability patched on iteration 1
+2025/07/27 20:21:13 [Round 1] Patch success detected for patch0_delta.py! Cancelling other strategies in this round.
+2025/07/27 20:21:13 [Round 1][basic patch0_delta.py stdout] Successfully patched the vulnerability, exiting the process
+2025/07/27 20:21:13 [Round 1][basic patch0_delta.py stdout] Patch generated successfully, validating against all 1 POVs
+2025/07/27 20:21:13 [Round 1] patch3_delta.py canceled early (context canceled)
+2025/07/27 20:21:13 [Round 1] patch2_delta.py canceled early (context canceled)
+2025/07/27 20:21:13 [Round 1] patch1_delta.py canceled early (context canceled)
+2025/07/27 20:21:13 [Round 1] patch_delta.py canceled early (context canceled)
+2025/07/27 20:21:13 [Round 1] patch0_delta.py canceled early (context canceled)
+```
+
+At this point, we have successfully discovered a bug hidden in the libpng codebase and generated an effective patch to fix it.
+
+Of course, you can test with various OSS-Fuzz-based projects - you might find unexpected discoveries!
+

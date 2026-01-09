@@ -1,0 +1,360 @@
+---
+layout: docs
+title: X Strategies
+---
+
+# X Strategies
+When PoV generation fails or no vulnerability can be definitively proven, the system employs the XPatch Delta strategy as a fallback approach. This strategy represents a pragmatic compromise: rather than spending extensive resources attempting to generate PoVs for potentially non-existent vulnerabilities, it directly attempts to patch potential security issues based on commit analysis (for delta-scan tasks).
+
+
+## Basic Framework
+See **patch_strategies.md** for basic understanding of a patching strategy.
+
+
+## xpatch_delta.py
+The strategy is developed based on patch_delta.py with no pov info. The strategy assumes that the vulnerability is 100% introduced by the commit. Which means all the functions in the commit are potential vulnerable functions,including callers and callees.
+
+The functions' metadata are extracted by a static analysis tool called funtarget:
+
+```python
+def extract_diff_functions_using_funtarget(project_src_dir: str, out_dir: str) -> Union[List[Dict[str, Any]], None]:
+    # output file path
+    output_file = os.path.join(out_dir,"diff_functions.json")
+    # Read the JSON file
+    if os.path.exists(output_file):
+        with open(output_file, 'r') as f:
+            try:
+                functions = json.load(f)
+                if functions:        
+                    return functions
+            except Exception as e:
+                    print(f"Unexpected error in json load output_file {output_file}: {e}")
+
+    try:
+        # Assuming it's in the same directory as the script or in PATH
+        funtarget_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "funtarget")
+        if not os.path.exists(funtarget_path):
+            # Try to find it in PATH
+            funtarget_path = "funtarget"
+
+        cmd = [funtarget_path, "-dir", project_src_dir, "-output", output_file]
+        subprocess.run(cmd, check=True)
+        
+        # Read the JSON file
+        if os.path.exists(output_file):
+            with open(output_file, 'r') as f:
+                functions = json.load(f)
+            
+            if not functions:
+                return None
+            
+            return functions
+        else:
+            print(f"Output file {output_file} not found - likely the target function was not found")
+            return None
+        
+    except subprocess.CalledProcessError as e:
+        print(f"Error running funtarget: {e}")
+        return None
+    except json.JSONDecodeError as e:
+        print(f"Error parsing JSON file: {e}")
+        return None
+    except Exception as e:
+        print(f"Unexpected error in extract_diff_functions_using_funtarget: {e}")
+        return None
+```
+
+The function metadata is as:
+``` python
+function_metadata[func_name] = {
+                "file_path": file_path,
+                "class": class_name,  # Fixed: was using file_path instead of class_name
+                "content": func.get("content", ""),
+                "start_line": start_line,
+                "end_line": func.get("end_line", 0),
+            }
+```
+
+
+Then the rest is the same as patch_delta1 strategy:
+
+```python
+INITIAL_PATCH_TEMPLATE = """# Vulnerability Patching Task
+
+## Your Role
+You are a world-leading security engineer tasked with fixing a vulnerability in code. Your goal is to generate minimal, precise patches that address only the vulnerability without changing other functionality. 
+Do not aplogize when you are wrong. Just keep optimizing the result directly and proceed the progress. Do not lie or guess when you are unsure about the answer.
+
+### Context Information
+The vulnerability is introduced by the following commit:
+{commit_diff}
+
+### Relevant Functions
+{functions_metadata_str}
+
+Please return the fixed functions to patch the vulnerability. 
+
+## Requirements
+1. Fix ONLY the vulnerability - do not add features or refactor code
+2. Preserve all existing functionality and logic
+3. Make minimal changes (fewest lines of code possible)
+4. Focus on security best practices
+
+## Output Format
+Return ONLY a JSON dictionary where keys are function names and values are code blocks:
+{{
+"function_name1": "function_content_with_fix",
+"function_name2": "function_content_with_fix",
+...
+}}
+
+IMPORTANT:
+- Return the fixed content for each changed function
+- Do NOT return diffs, patches, or partial code snippets
+- Do NOT include explanations or comments outside the JSON
+- Include ALL lines of the original function in your response, with your fixes applied
+
+Return ONLY the JSON dictionary described above.
+"""
+```
+
+The feedback if failed is:
+
+```python
+if not success:
+            log_message(log_file, f"Failed to apply patch: {stderr}")
+            user_message = f"""
+The patch could not be applied. Here's the error:
+{truncate_output(stderr, 200)}
+
+Please generate a valid patch that can be applied to the code.
+"""
+
+or
+
+user_message = f"""
+The patch did not fix the vulnerability. The fuzzer crashes:
+
+Fuzzer output:
+{truncate_output(fuzzer_output, 200)}
+"""
+            user_message += """
+
+Please analyze the crash and provide a better patch.
+"""
+```
+
+
+## xpatch_full.py (TBD?)
+This strategy is based on xs0_full strategy. The document is based on the framework of that strategy.
+
+Based on `vul_funcs.json` file generated by static analysis tool, the strategy ranks the score of each function.
+
+```python 
+
+existing = []
+    try:
+        vul_json_path = os.path.join(base_dir, "vul_funcs.json")
+        # Load existing list (if any)
+        if os.path.exists(vul_json_path):
+            with open(vul_json_path, "r", encoding="utf-8") as fp:
+                try:
+                    existing = json.load(fp)
+                except Exception:
+                    existing = []
+            if not isinstance(existing, list):
+                existing = []
+    except Exception as e:
+        log_message(
+            log_file,
+            f"[ERROR] Could not load vul_funcs.json: {e}"
+        )
+    if not existing:
+        log_message(log_file, f"vul_json_path: {vul_json_path} does not exist!")
+        return False, patch_id
+
+    high_conf = [
+        vf for vf in existing
+        if float(vf.get("score", 0)) >= 9
+    ]
+    high_conf.sort(key=lambda x: float(x.get("score", 0)), reverse=True)
+    top_candidates = high_conf[:3]
+    if not top_candidates:
+        log_message(
+            log_file,
+            "[WARN] No ≥9-score vulnerable functions found – aborting patch run",
+        )
+        return False, patch_id
+
+```
+
+Higher score means higher chance to introduce the vulnerability. Here the strategy only get top 3 candidates as vulnerable functions.
+
+Then construct basic prompt based on the metadata:
+
+```python 
+
+INITIAL_PATCH_TEMPLATE = """# Vulnerability Patching Task
+
+## Your Role
+You are a world-leading security engineer tasked with fixing a vulnerability in code. Your goal is to generate minimal, precise patches that address only the vulnerability without changing other functionality. 
+Do not aplogize when you are wrong. Just keep optimizing the result directly and proceed the progress. Do not lie or guess when you are unsure about the answer.
+
+### Context Information
+The vulnerability lies in one or multiple functions listed below:
+{functions_metadata_str}
+
+Please return the fixed functions to patch the vulnerability. 
+
+## Requirements
+1. Fix ONLY the vulnerability - do not add features or refactor code
+2. Preserve all existing functionality and logic
+3. Make minimal changes (fewest lines of code possible)
+4. Focus on security best practices
+
+## Output Format
+Return ONLY a JSON dictionary where keys are function names and values are code blocks:
+{{
+"function_name1": "function_content_with_fix",
+"function_name2": "function_content_with_fix",
+...
+}}
+
+IMPORTANT:
+- Return the fixed content for each changed function
+- Do NOT return diffs, patches, or partial code snippets
+- Do NOT include explanations or comments outside the JSON
+- Include ALL lines of the original function in your response, with your fixes applied
+
+Return ONLY the JSON dictionary described above.
+"""
+```
+
+The patching strategy only has 2 tries. If both failed, it will exit immediately.
+
+
+## xpatch_sarif
+This is for sarif task if it cannot find a valid patch in time. It is similar to xpatch_full, sarif report naturally provides vulnerable functions. All we need to do is to try to assume the vulnerability is true, and give a patch.
+
+
+The strategy extracts function from sarif itself:
+
+```python
+
+        for func in sarif_targets:
+            func_name = func.get("Name", "")
+            file_path = func.get("FilePath", "")
+            start_line = func.get("StartLine", 0)
+            end_line = func.get("EndLine", 0)
+            if int(start_line) == 0 and int(end_line) == 0:
+                start_line = start_line_x
+                end_line = end_line_x
+
+            if not func_name:
+                func_name = f"unknown_function_at_line_{start_line}"
+                
+            source_code = func.get("SourceCode", "")
+            if not source_code and file_path:
+                file_path_x = file_path
+                if not os.path.exists(file_path_x):
+                    file_path_x = os.path.join(project_src_dir, file_path)
+                
+                if os.path.exists(file_path_x):
+                    try:
+                        with open(file_path_x, "r", encoding="utf-8", errors="ignore") as fh:
+                            lines = fh.readlines()
+                            
+                        # Extract source code based on line numbers
+                        if start_line > 0 and end_line >= start_line:
+                            source_code = "".join(lines[start_line - 1 : end_line])
+                        else:
+                            # If no valid line numbers, take a reasonable chunk
+                            source_code = "".join(lines[:1000])  # Cap at 1000 lines for safety
+                            
+                        # Update the function dict with the extracted source code
+                        func["SourceCode"] = source_code
+                        
+                    except Exception as e:
+                        log_message(log_file, f"Failed to load source for {file_path_x}: {e}")
+                        func["SourceCode"] = ""  # Mark as empty if failed
+                else:
+                    log_message(log_file, f"Source file not found: {file_path_x}")
+                    func["SourceCode"] = ""  # Mark as empty if file not found
+
+            # TODO if func_name is wrong, correct it by looking at start_line and end_line
+            # Add to function_metadata
+            function_metadata[func_name] = {
+                "file_path": file_path,
+                "content": source_code,
+                "start_line": start_line,
+                "end_line": end_line,
+            }
+```
+
+Since sarif report has a vulnerability description, we assume it is true, and build the prompt:
+
+```python 
+
+INITIAL_PATCH_TEMPLATE = """# Vulnerability Patching Task
+
+## Your Role
+You are a world-leading security engineer tasked with fixing a vulnerability in code. Your goal is to generate minimal, precise patches that address only the vulnerability without changing other functionality. 
+Do not aplogize when you are wrong. Just keep optimizing the result directly and proceed the progress. Do not lie or guess when you are unsure about the answer.
+
+### Context Information
+The vulnerability lies in one or multiple functions listed below:
+{functions_metadata_str}
+
+### The Vulnerability description
+{sarif_vulnerability_desc}
+
+Please return the fixed functions to patch the vulnerability. 
+
+## Requirements
+1. Fix ONLY the vulnerability - do not add features or refactor code
+2. Preserve all existing functionality and logic
+3. Make minimal changes (fewest lines of code possible)
+4. Focus on security best practices
+
+## Output Format
+Return ONLY a JSON dictionary where keys are function names and values are code blocks:
+{{
+"function_name1": "function_content_with_fix",
+"function_name2": "function_content_with_fix",
+...
+}}
+
+IMPORTANT:
+- Return the fixed content for each changed function
+- Do NOT return diffs, patches, or partial code snippets
+- Do NOT include explanations or comments outside the JSON
+- Include ALL lines of the original function in your response, with your fixes applied
+
+Return ONLY the JSON dictionary described above.
+"""
+
+```
+
+It also has 2 chances to generate a patch with feedback
+
+```python
+            user_message = f"""
+The patch fails to fix the vulnerability, though the fuzzer does not crash. Can you try again to generate a patch with high confidence to fix the vulnerability comprehensively?
+"""
+        else:
+            log_message(log_file, "Patch failed - fuzzer still crashes")
+            
+            user_message = f"""
+The patch did not fix the vulnerability. The fuzzer crashes:
+
+Fuzzer output:
+{truncate_output(fuzzer_output, 200)}
+"""
+            user_message += """
+
+Please analyze the crash and provide a better patch.
+"""
+```
+
+
+If both failed, then the strategy stops.

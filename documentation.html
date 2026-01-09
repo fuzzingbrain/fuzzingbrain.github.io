@@ -6,6 +6,139 @@
     <title>Documentation - All You Need Is A Fuzzing Brain</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .docs-container {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            gap: 2rem;
+        }
+        .docs-sidebar {
+            width: 280px;
+            flex-shrink: 0;
+            position: sticky;
+            top: 100px;
+            height: fit-content;
+        }
+        .docs-sidebar h3 {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary, #888);
+            margin-bottom: 1rem;
+        }
+        .docs-sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .docs-sidebar li {
+            margin-bottom: 0.5rem;
+        }
+        .docs-sidebar a {
+            display: block;
+            padding: 0.5rem 1rem;
+            color: var(--text-primary, #fff);
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+        .docs-sidebar a:hover {
+            background-color: var(--bg-secondary, #1a1a2e);
+        }
+        .docs-sidebar a.active {
+            background-color: var(--accent-color, #6366f1);
+            color: #fff;
+        }
+        .docs-content {
+            flex: 1;
+            min-width: 0;
+        }
+        .docs-content h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .docs-content h2 {
+            font-size: 1.75rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color, #333);
+        }
+        .docs-content h3 {
+            font-size: 1.25rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+        .docs-content p {
+            line-height: 1.7;
+            margin-bottom: 1rem;
+        }
+        .docs-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+        }
+        .docs-content pre {
+            background-color: var(--bg-secondary, #1a1a2e);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .docs-content code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+        .docs-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        .docs-content th, .docs-content td {
+            padding: 0.75rem;
+            text-align: left;
+            border: 1px solid var(--border-color, #333);
+        }
+        .docs-content th {
+            background-color: var(--bg-secondary, #1a1a2e);
+        }
+        .docs-toc {
+            background-color: var(--bg-secondary, #1a1a2e);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+        }
+        .docs-toc h4 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+        }
+        .docs-toc ul {
+            margin: 0;
+            padding-left: 1.5rem;
+        }
+        .docs-toc li {
+            margin-bottom: 0.5rem;
+        }
+        .docs-toc a {
+            color: var(--accent-color, #6366f1);
+            text-decoration: none;
+        }
+        .docs-toc a:hover {
+            text-decoration: underline;
+        }
+        .docs-intro {
+            font-size: 1.1rem;
+            color: var(--text-secondary, #aaa);
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background-color: var(--bg-secondary, #1a1a2e);
+            border-left: 4px solid var(--accent-color, #6366f1);
+            border-radius: 0 8px 8px 0;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -21,6 +154,7 @@
                 <nav class="nav">
                     <a href="index.html#about">About</a>
                     <a href="documentation.html" class="nav-active">Documentation</a>
+                    <a href="quickstart.html">Quickstart</a>
                     <a href="blog.html">Blog</a>
                     <a href="index.html#research">Research</a>
                     <a href="index.html#results">Results</a>
@@ -30,29 +164,97 @@
             </div>
         </header>
 
-        <!-- Documentation Header -->
-        <section class="blog-header">
-            <div class="section-content">
-                <h1 class="blog-title">Documentation</h1>
-                <p class="blog-subtitle">Get started with FuzzingBrain</p>
-            </div>
-        </section>
+        <!-- Docs Layout -->
+        <div class="docs-container">
+            <!-- Sidebar -->
+            <aside class="docs-sidebar">
+                <h3>Documentation</h3>
+                <ul>
+                    <li><a href="documentation.html" class="active">CRS Overview</a></li>
+                    <li><a href="docs/strategy_overview.html">Strategy Overview</a></li>
+                    <li><a href="docs/pov_strategies.html">POV Strategies</a></li>
+                    <li><a href="docs/patch_strategies.html">Patch Strategies</a></li>
+                    <li><a href="docs/sarif_processing.html">SARIF Processing</a></li>
+                    <li><a href="docs/task_processing.html">Task Processing</a></li>
+                    <li><a href="docs/x_strategies.html">X Strategies</a></li>
+                </ul>
+            </aside>
 
-        <!-- Install Section -->
-        <section class="featured-post">
-            <div class="section-content">
-                <h2 id="install">Installation</h2>
-                <!-- Install content placeholder -->
-            </div>
-        </section>
+            <!-- Content -->
+            <main class="docs-content">
+                <h1>CRS Document</h1>
+                <p><em>Made By Team All_you_need_is_a_fuzzing_brain</em></p>
 
-        <!-- Quickstart Section -->
-        <section class="upcoming-posts">
-            <div class="section-content">
-                <h2 id="quickstart">Quickstart</h2>
-                <!-- Quickstart content placeholder -->
-            </div>
-        </section>
+                <div class="docs-intro">
+                    This Cyber Reasoning System (CRS) is an AI-driven automated vulnerability detection and remediation framework built upon the OSS-Fuzz infrastructure. Developed by the team "all_you_need_is_a_fuzzing_brain" for the 2025 DARPA AIxCC (Artificial Intelligence Cyber Challenge) finals, CRS represents a state-of-the-art approach to automated software security analysis.
+                </div>
+
+                <!-- Table of Contents -->
+                <div class="docs-toc">
+                    <h4>Documentation</h4>
+                    <ul>
+                        <li><a href="docs/strategy_overview.html">Strategy Overview</a> - Framework and model configurations</li>
+                        <li><a href="docs/pov_strategies.html">POV Strategies</a> - Proof-of-Vulnerability generation techniques</li>
+                        <li><a href="docs/patch_strategies.html">Patch Strategies</a> - Vulnerability remediation approaches</li>
+                        <li><a href="docs/sarif_processing.html">SARIF Processing</a> - Static analysis integration</li>
+                        <li><a href="docs/task_processing.html">Task Processing</a> - Task distribution and execution</li>
+                        <li><a href="docs/x_strategies.html">X Strategies</a> - Fallback patching approaches</li>
+                    </ul>
+                </div>
+
+                <h2>CRS Configuration Parameters</h2>
+                <p>This CRS detection is based on vulnerabilities from the OSS-Fuzz project. The following are the CRS configuration parameters:</p>
+
+                <table>
+                    <tr><th>Parameter</th><th>Value</th></tr>
+                    <tr><td><strong>Version</strong></td><td>1.2.0</td></tr>
+                    <tr><td><strong>Supported Languages</strong></td><td>C/C++, Java</td></tr>
+                    <tr><td><strong>Fuzzer Engine</strong></td><td>libfuzzer</td></tr>
+                    <tr><td><strong>Architecture</strong></td><td>x86_64</td></tr>
+                </table>
+
+                <h2>CRS Overview</h2>
+                <img src="docs/images/CRS_Framework.png" alt="CRS Framework">
+
+                <p>The CRS architecture comprises four distinct services that work in concert to deliver comprehensive vulnerability detection and remediation capabilities: Task Service, Worker Service, Submission Service, and Static Analysis Service. The system leverages artificial intelligence techniques combined with fuzzing methodologies to provide end-to-end vulnerability management capabilities.</p>
+
+                <p>CRS is designed to handle three primary task categories:</p>
+                <ul>
+                    <li><strong>Delta Scan Task</strong>: Attempts to identify whether a specific commit introduces vulnerabilities that can be triggered by existing fuzzers, subsequently generating appropriate remediation solutions.</li>
+                    <li><strong>Full Scan Task</strong>: Conducts comprehensive analysis of entire source code repositories to identify vulnerabilities exploitable by known fuzzers, providing corresponding patches.</li>
+                    <li><strong>SARIF Analysis Task</strong>: Validates vulnerabilities based on SARIF (Static Analysis Results Interchange Format) reports, verifying their existence and generating remediation patches when confirmed.</li>
+                </ul>
+
+                <h3>Task Service</h3>
+                <p>The Task Service functions as the orchestration layer, responsible for parsing and processing incoming tasks while acquiring target repositories and fuzzing toolchains. This service constructs appropriate fuzzers and sanitizers based on project specifications, formatting tasks for downstream processing.</p>
+
+                <h3>Worker Service</h3>
+                <p>The Worker Service represents the core computational engine of CRS, handling task execution based on assigned workspaces, fuzzers, and sanitizers. This service implements the primary vulnerability localization and patching logic through parallel invocation of various LLM-based vulnerability detection and reproduction strategies.</p>
+
+                <h3>Submission Service</h3>
+                <p>The Submission Service is specifically designed for competition submission management, handling the organization and deduplication of discovered proofs-of-vulnerability (POV) and patches.</p>
+
+                <h3>Static Analysis Service</h3>
+                <p>The Static Analysis Service provides essential static analysis capabilities that support various CRS strategies. It implements comprehensive functionality including call graph generation and extraction of software context metadata.</p>
+
+                <h2>Case Study: libpng</h2>
+                <img src="docs/images/workflow.png" alt="CRS Workflow">
+
+                <p>This section demonstrates CRS functionality through a practical example involving the identification and remediation of a dynamic stack buffer overflow vulnerability in the libpng project.</p>
+
+                <p><strong>Project</strong>: libpng</p>
+                <p><strong>Vulnerability Type</strong>: Dynamic Stack Buffer Overflow</p>
+                <p><strong>Root Cause</strong>: An improper use of <code>sizeof</code> operator leading to out-of-bounds read and write operations in the <code>png_handle_iCCP</code> function.</p>
+
+                <p><strong>Expected Sanitizer Report:</strong></p>
+<pre><code>=================================================================
+==18==ERROR: AddressSanitizer: dynamic-stack-buffer-overflow on address 0x7ffe7e032b52 at pc 0x563915a23a9b bp 0x7ffe7e032ad0 sp 0x7ffe7e032ac8
+READ of size 2 at 0x7ffe7e032b52 thread T0
+....</code></pre>
+
+                <p>For the complete case study walkthrough, please refer to the <a href="quickstart.html">Quickstart Guide</a>.</p>
+            </main>
+        </div>
 
         <!-- Footer -->
         <footer class="footer">

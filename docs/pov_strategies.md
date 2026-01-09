@@ -1,0 +1,546 @@
+---
+layout: docs
+title: POV Strategies
+---
+
+# POV Strategies
+
+![Basic POV Strategy](images/basic_pov_strategy.png)
+
+*This diagram illustrates our basic strategy template, which serves as the foundation for all POV strategies.*
+
+In this section, the detailed implementation of each CRS strategy will be examined. This section will use `xs0_delta.py` as the foundational strategy for introduction, as all other strategies are developed based on this basic strategy. Therefore, other strategies will be described in detail focusing on their improvements and modifications.
+
+For a general overview of each strategy's purpose and classification, please refer to the Strategy Overview section.
+
+
+## Introduction
+The POV (Proof-of-Vulnerability) strategies form the core of CRS's vulnerability detection capabilities. These strategies leverage Large Language Models (LLMs) to analyze code changes, understand vulnerability patterns, and generate targeted inputs that can trigger security vulnerabilities through existing fuzzers.
+
+
+
+## xs0_delta.py
+The xs0_delta.py strategy establishes the foundational approach for delta-based vulnerability detection in CRS. As the baseline implementation, it defines the core patterns and methodologies that all subsequent strategies inherit and extend.
+
+The strategy operates entirely through text-based dialogue with LLMs, establishing a clean separation between analysis logic and execution environment:
+
+``` python
+# Core interaction pattern
+messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+messages.append({"role": "user", "content": initial_msg})
+
+for iteration in range(1, MAX_ITERATIONS + 1):
+    code = generate_pov(log_file, project_dir, messages, model_name)
+    # Execute and provide feedback
+    messages.append({"role": "user", "content": feedback_message})
+```
+The strategy implements a robust fallback mechanism across multiple Claude models:
+
+```python
+MODELS = [CLAUDE_MODEL, CLAUDE_MODEL_OPUS_4, CLAUDE_MODEL_35]
+
+for model_name in MODELS:
+    model_success_count = 0
+    for iteration in range(1, MAX_ITERATIONS + 1):
+        # Attempt POV generation with current model
+        if model_success_count >= 1:
+            break  # Move to next model after success
+```
+
+
+Commit Analysis is the first analysis step for a single delta-scan strategy. Here is the basic prompt of this strategy, followed by language and sanitizer-specific info
+
+```python
+base_prompt = f"""
+The provided commit introduces a vulnerability. Your job is to find the correct input to trigger the vulnerability.
+Please output a Python script that creates a x.bin file. Your blob file will be run by this fuzzer code:
+{fuzzer_code}
+
+# Commit Diff
+{commit_diff}
+"""
+```
+
+Here is an example for c/c++ tasks:
+```python
+language_specific = f"""
+IMPORTANT: Read the harness code carefully to understand how inputs are processed.
+
+Think through these steps:
+1. What function contains the vulnerability? How do you reach this function?
+2. What input will trigger the vulnerability?
+3. Are there any other inputs required before reaching the target function?
+4. How does the harness code process inputs? Follow the instructions in the harness.
+5. Combine all this information to generate a complete blob.
+
+{sanitizer_specific_guidance}
+"""
+```
+
+Sanitizer-specific input information:
+```python
+sanitizer_guidance = {
+            "address": """
+The target project uses AddressSanitizer, which detects:
+- Buffer overflows (stack, heap, global)
+- Use-after-free errors
+- Use-after-return bugs
+- Use-after-scope bugs
+- Double-free errors
+
+Your goal is to trigger an AddressSanitizer error by crafting an input that exploits the vulnerability.
+""",
+            "memory": """
+The target project uses MemorySanitizer, which detects:
+- Uninitialized memory reads
+- Use of uninitialized values in conditional operations
+- Passing uninitialized values to library functions
+
+Your goal is to trigger a MemorySanitizer error by crafting an input that causes the program to use uninitialized memory.
+""",
+            "undefined": """
+The target project uses UndefinedBehaviorSanitizer, which detects:
+- Integer overflow/underflow
+- Signed integer overflow
+- Division by zero
+- Null pointer dereference
+- Misaligned pointer dereference
+- Unreachable code
+- Invalid enum values
+- Floating-point errors
+
+Your goal is to trigger an UndefinedBehaviorSanitizer error by crafting an input that causes undefined behavior.
+"""
+```
+
+For Java, it also has information of language and sanitizer:
+
+```python
+language_specific = """
+IMPORTANT: Read the harness code carefully to understand how inputs are processed. You need to generate a complete blob that will trigger a Jazzer sanitizer error or Java exception.
+
+Think through these steps:
+1. What method contains the vulnerability? How do you reach this method?
+2. What input will trigger the vulnerability?
+3. Are there any other inputs required before reaching the target method?
+4. How does the harness code process inputs? Follow the instructions in the harness.
+5. Combine all this information to generate a complete blob.
+
+The target project uses Jazzer sanitizers that can detect various types of vulnerabilities:
+- ClojureLangHooks: detects vulnerabilities in Clojure code
+- Deserialization: detects unsafe deserialization
+- ExpressionLanguageInjection: detects expression language injection
+- FilePathTraversal: detects path traversal vulnerabilities
+- LdapInjection: detects LDAP injection
+- NamingContextLookup: detects JNDI injection
+- OsCommandInjection: detects OS command injection
+- ReflectiveCall: detects unsafe reflection
+- RegexInjection: detects regex injection
+- RegexRoadblocks: detects regex denial of service
+- ScriptEngineInjection: detects script engine injection
+- ServerSideRequestForgery: detects SSRF vulnerabilities
+- SqlInjection: detects SQL injection
+- XPathInjection: detects XPath injection
+
+Your goal is to trigger any of these sanitizer errors or a Java exception (like NullPointerException, ArrayIndexOutOfBoundsException, etc.) by crafting an input that exploits the vulnerability.
+```
+
+After checking the commit, harness code and other info, strategied are going to generate a python code that can output .bin files.
+
+Here is an example of gen_blob.py
+
+```python
+#!/usr/bin/env python3
+import struct
+import zlib
+import os
+
+def create_png_header():
+    """Create a basic PNG header"""
+    return b'\x89PNG\r\n\x1a\n'
+
+def create_ihdr_chunk(width, height, bit_depth=8, color_type=2):
+    """Create IHDR chunk with specified parameters"""
+    chunk_data = struct.pack('>IIBBBBB', width, height, bit_depth, color_type, 0, 0, 0)
+    chunk_len = struct.pack('>I', len(chunk_data))
+    chunk_type = b'IHDR'
+    crc = struct.pack('>I', zlib.crc32(chunk_type + chunk_data) & 0xffffffff)
+    return chunk_len + chunk_type + chunk_data + crc
+
+def create_iccp_chunk(name, profile_data):
+    """Create iCCP chunk with specified name and profile data"""
+    # Compression method 0 (deflate)
+    chunk_data = name + b'\0\0' + zlib.compress(profile_data)
+    chunk_len = struct.pack('>I', len(chunk_data))
+    chunk_type = b'iCCP'
+    crc = struct.pack('>I', zlib.crc32(chunk_type + chunk_data) & 0xffffffff)
+    return chunk_len + chunk_type + chunk_data + crc
+
+def create_iend_chunk():
+    """Create IEND chunk"""
+    chunk_len = struct.pack('>I', 0)
+    chunk_type = b'IEND'
+    crc = struct.pack('>I', zlib.crc32(chunk_type) & 0xffffffff)
+    return chunk_len + chunk_type + crc
+
+def create_minimal_icc_profile():
+    """Create a minimal valid ICC profile header"""
+    # Basic 132-byte ICC profile header
+    profile_size = 132 + 4  # Header + tag count
+    header = struct.pack('>I', profile_size)  # Profile size
+    header += b'acsp'  # Signature
+    header += struct.pack('>I', 0)  # Version
+    header += b'mntr'  # Device class
+    header += b'RGB '  # Color space
+    header += b'XYZ '  # Connection space
+    header += struct.pack('>IIIIIIIIIIII', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)  # Date, time, etc.
+    header += b'acsp'  # Platform signature
+    header += struct.pack('>IIIII', 0, 0, 0, 0, 0)  # Various flags and other fields
+    header += b'    '  # Device manufacturer
+    header += b'    '  # Device model
+    header += struct.pack('>IIII', 0, 0, 0, 0)  # Device attributes
+    header += struct.pack('>I', 0)  # Rendering intent
+    header += struct.pack('>III', 0, 0, 0)  # XYZ values
+    header += b'    '  # Creator signature
+    header += struct.pack('>I', 0)  # Tag count
+    return header
+
+# Create test files
+if not os.path.exists('x1.bin'):
+    print("Creating x1.bin: Testing iCCP with boundary keyword length (40 chars)")
+    with open('x1.bin', 'wb') as f:
+        png = create_png_header()
+        png += create_ihdr_chunk(16, 16)
+        # Create a keyword of exactly 40 characters (maximum allowed - 1)
+        keyword = b'A' * 40
+        profile = create_minimal_icc_profile()
+        png += create_iccp_chunk(keyword, profile)
+        png += create_iend_chunk()
+        f.write(png)
+
+print("All test files created!")
+
+```
+
+This file generates 1 pov (.bin file) at once to trigger the target vulnerability. It uses multi-round (depends on MAX_ITERATION) chat with LLM. With only fuzzer output as feedback if failed.
+
+
+```python
+# Seed corpus contribution
+seed_corpus_dir = os.path.join(project_dir, f"{fuzzer_name}_seed_corpus")
+timestamp = int(time.time())
+seed_file_path = os.path.join(seed_corpus_dir, f"seed_{model_name}_{iteration}_{timestamp}.bin")
+shutil.copy(blob_path, seed_file_path)
+
+# Contextual feedback generation
+if iteration == 1:
+    user_message = f"""
+Fuzzer output: {truncate_output(fuzzer_output, 200)}
+
+The test case did not trigger the vulnerability. Please analyze the fuzzer output and try again with an improved approach. Consider:
+1. Different input formats or values
+2. Edge cases that might trigger the vulnerability
+3. Focusing on the specific functions modified in the commit
+4. Pay attention to details
+5. Think step by step
+"""
+```
+
+If a successful POV is found (pretty good!), then the strategy will be asked to generate different pov to trigger the same vulnerability.
+
+```python
+user_message = f"""
+Great job! You've successfully triggered the vulnerability. 
+
+Now, let's try to find a different way to trigger a different vulnerability in the code.
+Can you create a different test case that might trigger the vulnerability through a different code path or with different input values?
+
+Focus on:
+1. Different input formats or values
+2. Alternative code paths that might reach the vulnerable function
+3. Edge cases that weren't covered by your previous solution
+4. Other potential vulnerabilities in the code
+"""
+```
+
+This may generate a pov that can trigger the same vulnerability with a differnt crash trace.
+
+If the strategy reaches the last attempt for a model, the prompt will add:
+
+```python
+if iteration == MAX_ITERATIONS-1:
+    user_message += "\nThis is your last attempt. This task is very very important to me. If you generate a successful blob, I will tip you 2000 dollars."
+```
+
+Coverage-guided POV generation is also used in this strategy. If some tries failed, the strategy attempts to run the current POV and generate a coverage report to obtain detailed execution path information.
+
+This information is then integrated into the LLM feedback to guide the generation of inputs that explore different code paths. When a generated input fails to trigger a vulnerability, the strategy collects runtime coverage data using language-specific mechanisms:
+
+```python
+if USE_CONTROL_FLOW and iteration < MAX_ITERATIONS:   
+    if is_c_project:
+        success, lcov_path, debugmsg = run_fuzzer_with_input_for_c_coverage(
+            log_file, fuzzer_path, project_dir, project_name, focus, blob_path)    
+        if success:
+            covered_control_flow = extract_control_flow_for_c(
+                log_file, lcov_path, project_src_dir, project_name)                
+    else:                                  
+        covered_control_flow = extract_control_flow_from_coverage_exec(
+            log_file, project_src_dir, project_jar, coverage_exec_dir)
+    
+    if covered_control_flow:
+        compressed_cf = compress_coverage_data(covered_control_flow, max_lines=200)
+        user_message += f"\n\nThe following shows the executed code path of the fuzzer with input x.bin. You should generate a new x.bin to execute a different code path\n{compressed_cf}"
+```
+
+Coverage-guided POV generation utilizes LLVM instrumentation-based code coverage analysis for C/C++ projects and JVM bytecode coverage analysis for Java projects.
+
+For more info, pls see **Dynamic Analysis Method**
+
+
+## as0.delta.py
+This is an advanced strategy for pov generation. For this section, only different parts from the basic strategy will be introduced:
+
+**Multi-File Generation Approach**:
+In the advanced POV strategy, each LLM conversation generates a Python file that creates 5 different binary files (x1.bin to x5.bin), providing 5 attempt opportunities per iteration instead of just one.
+
+**Integrated LibFuzzer Seed Collection**:
+Additionally, every successful execution (without runtime errors) saves the current blob as a seed in the corpus for LibFuzzer execution. The strategy runs LibFuzzer for 60 seconds to collect coverage information.
+This approach uses inputs that are very close to real POVs as extensions, reducing the randomness of fuzzing. The collected coverage information is also included in subsequent feedback.
+
+```python
+if iteration == 1:
+    user_message = f"""
+Fuzzer output: {truncate_output(fuzzer_output, 500)}
+
+Fuzzer coverage after running 60s with the blob files as seeds:
+{truncate_output(coverage_output, 2000)}
+
+The test cases did not trigger the vulnerability. Please analyze the fuzzer output and try again...
+"""
+```
+The failure feedback includes LibFuzzer coverage output and longer fuzzer output truncation (500 vs 200 characters).
+
+
+## xs0_full
+For full-scan tasks, CRS receives only the complete source code of a project and fuzzer harnesses, without specific vulnerability indicators like commit diffs. Therefore, static analysis (call graph analysis) must be performed to filter functions from the entire codebase.
+
+Brute-force enumeration of all functions is highly inefficient. Therefore, this strategy employs **CodeQL-based call graph analysis**, starting from the fuzzer's input function to identify all reachable functions and construct a comprehensive function call graph.
+
+Here is an example for java call path extraction:
+
+```codeql
+import java
+
+predicate callsMethod(Callable caller, Callable callee) {
+  exists(Call call |
+    call.getEnclosingCallable() = caller and
+    call.getCallee() = callee
+  )
+}
+
+predicate hasCallPathWithLocations(
+  Callable source, Callable target, 
+  string path, int depth, 
+  string locations
+) {
+  // Direct call
+  callsMethod(source, target) and
+  path = source.getDeclaringType().getQualifiedName() + "." + source.getName() + " -> " + 
+         target.getDeclaringType().getQualifiedName() + "." + target.getName() and
+  depth = 1
+  or
+  // Indirect call (recursive with depth limit)
+  depth <= 10 and
+  exists(Callable mid, string midPath, int midDepth, string midLocations |
+    callsMethod(source, mid) and
+    hasCallPathWithLocations(mid, target, midPath, midDepth, midLocations) and
+    depth = midDepth + 1
+  )
+}
+```
+
+Since all vulnerability targets must be reachable from fuzzer entry points, any vulnerable function must exist within this call graph. This drastically reduces the search space from potentially thousands of functions to a manageable subset.
+
+After extracting reachable functions, the strategy employs LLM-based scoring to identify the most promising vulnerability candidates:
+
+```python
+def find_most_likely_vulnerable_functions(log_file, reachable_funcs, language, model_name, top_k=10):
+    # Build function catalog with intelligent compression
+    func_catalog = []
+    for f in reachable_funcs:
+        name = f.get("name") or "<unknown>"
+        body = f.get("body") or ""
+        snippet = f"Function: {name}\n{body}"
+        func_catalog.append(snippet)
+    
+    catalog_text = "\n".join(func_catalog)
+    
+    # Adaptive filtering for large codebases
+    word_count = len(re.findall(r'\w+', catalog_text))
+    if word_count > 50_000:
+        # Filter out functions with >500 lines to manage context
+        func_catalog = [snippet for snippet in func_catalog 
+                       if snippet.count('\n') <= 500]
+
+```
+
+And here is the prompt for function ranking:
+
+```python
+
+prompt = f"""
+Context: you are a world-class vulnerability researcher.
+
+Below is the list of functions reachable from the fuzzer entry-point.
+For each function, decide whether it is a *likely* place for a bug that
+{vuln_bullets}
+
+Return **JSON only**, no markdown, in this exact schema:
+[
+  {{"name":"<funcName>", "score":<1-10>, "reason":"<short>"}},
+  ...
+]
+
+Provide at most {top_k} entries, sorted by descending score.
+
+Reachable functions:
+{catalog_text}
+
+"""
+
+vuln_bullets_c = """
+- complex loops / parsing
+- string or buffer manipulation
+- pointer arithmetic, malloc/free  
+- recursion, deep nesting
+- heavy use of user-controlled data
+
+Typical sanitizer-detectable bugs:
+- Buffer overflows (stack / heap / global)
+- Use-after-free, double-free, memory leaks
+- Integer over/under-flow, shift overflow
+- Uninitialized memory reads
+- NULL / mis-aligned pointer dereference
+"""
+
+vuln_bullets_java = """
+- Deserialization issues
+- Path traversal, Regex DoS
+- LDAP / SQL / XPath injection
+- Script engine injection, unsafe reflection
+- SSRF or RCE-style vulnerabilities
+- Unhandled runtime exceptions
+"""
+```
+
+After selecting the top-10 most vulnerable functions, the strategy constructs a comprehensive prompt that combines static analysis results with vulnerability insights:
+
+
+```python
+base_prompt = f"""
+You are an elite software-vulnerability researcher.
+The target binary is built with sanitizers; your goal is to craft **input(s)**
+that crash the program (ASan/MSan/UBSan/Jazzer, etc.).  The harness that feeds
+data into the target looks like:
+
+{language}
+{fuzzer_code}
+
+(Study how the input is read!)
+
+"""
+    entrypoint = "fuzzerTestOneInput"
+    if language.startswith('c'):
+        entrypoint = "LLVMFuzzerTestOneInput"
+
+    if reachable_funcs:
+        # reachable_funcs format: [{"Name": "...", "SourceCode": "..."} , …]
+        func_snippets = []
+        for f in reachable_funcs:
+            name = f.get("name") or f.get("Name") or "<unknown>"
+            body = (f.get("body") or f.get("Body") or
+                    f.get("sourceCode") or f.get("SourceCode") or "")
+            snippet = f"Function: {name}\n{body}"
+            func_snippets.append(snippet)
+
+        funcs_block = "\n\n".join(func_snippets) if func_snippets else "<call-graph unavailable>"
+
+        base_prompt += f"""
+We have pre-analysed the call-graph.  The entry point is `{entrypoint}`.
+The following reachable functions might be risky (full bodies included):
+
+{funcs_block}
+"""
+
+    if vulnerable_funcs:
+        vf_lines = []
+        for vf in vulnerable_funcs:
+            name   = vf.get("name") or vf.get("Name") or "<unknown>"
+            score  = vf.get("score", "?")
+            reason = vf.get("reason", "").strip()
+            vf_lines.append(f"• {name} - {reason}")
+        vf_block = "\n".join(vf_lines)
+
+        base_prompt += f"""
+Here are the reasons why these functions are risky, per static heuristics:
+
+{vf_block}
+"""
+
+    # ── sanitizer guidance (C/C++) ───────────────────────────────────────
+    if language.startswith('c'):
+        san_guide = {
+            "address": (
+                "AddressSanitizer reports buffer overflows, use-after-free, "
+                "double-free, etc.  Classic triggers:\n"
+                "• Oversized length fields\n"
+                "• Negative indices casted to large unsigned values\n"
+                "• String without null-terminator\n"
+            ),
+            "memory": (
+                "MemorySanitizer flags reads of uninitialised memory.  Classic "
+                "triggers:\n"
+                "• Partially initialised structs\n"
+                "• Checksum fields that skip bytes\n"
+            ),
+            "undefined": (
+                "UndefinedBehaviorSanitizer catches UB: integer overflow, "
+                "division by zero, invalid shift, mis-aligned pointer, etc.\n"
+                "Classic triggers: 0-byte allocations, INT_MAX+1 lengths, "
+                "null deref, etc.\n"
+            ),
+        }.get(sanitizer.lower(), "")
+        language_block = f"""
+### Sanitizer Focus  ({sanitizer})
+{san_guide}
+
+### Plan
+1. Map input bytes → parser structure (see harness).
+2. Choose a vulnerable target function.
+3. Devise an input to reach and corrupt it.
+4. Comment the reasoning before writing code.
+
+"""
+    else:  # Java / Jazzer
+        language_block = """
+### Jazzer Focus
+Try to trigger e.g. deserialization-based RCE, regex DoS, path traversal,
+reflection misuse, SQL/LDAP/XPath injection, or simply crash with an
+exception (NullPointerException, ArrayIndexOutOfBounds…).
+
+"""
+
+    ending = f"""
+### Deliverable
+• Produce a **single Python 3 script** that writes **x.bin** (binary mode).
+• If you have multiple candidate payloads, emit them all (x1.bin, x2.bin, ..., x5.bin, at most five).
+• Max size per blob: **{max_blob_mb} MiB**.
+• Put a short header comment explaining the vulnerability.
+
+Write nothing except the Python script (with embedded comments)."""
+
+"""
+```
+This full-scan approach transforms the challenge from "finding a needle in a haystack" to "systematically analyzing the most promising needles," combining the precision of static analysis with the intelligence of LLM-based vulnerability assessment.
+
