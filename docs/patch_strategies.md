@@ -1,6 +1,7 @@
 ---
 layout: docs
 title: Patch Strategies
+permalink: /docs/patch_strategies.html
 ---
 
 # Patch Strategies

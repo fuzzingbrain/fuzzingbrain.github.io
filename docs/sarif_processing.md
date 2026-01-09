@@ -1,6 +1,7 @@
 ---
 layout: docs
 title: SARIF Processing
+permalink: /docs/sarif_processing.html
 ---
 
 # SARIF PoV Strategy

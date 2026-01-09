@@ -1,6 +1,7 @@
 ---
 layout: docs
 title: Strategy Overview
+permalink: /docs/strategy_overview.html
 ---
 
 # CRS Strategy Overview: Framework and Models

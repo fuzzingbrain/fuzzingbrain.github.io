@@ -1,6 +1,7 @@
 ---
 layout: docs
 title: X Strategies
+permalink: /docs/x_strategies.html
 ---
 
 # X Strategies

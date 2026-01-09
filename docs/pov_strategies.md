@@ -1,6 +1,7 @@
 ---
 layout: docs
 title: POV Strategies
+permalink: /docs/pov_strategies.html
 ---
 
 # POV Strategies

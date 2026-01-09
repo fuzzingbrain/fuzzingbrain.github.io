@@ -1,6 +1,7 @@
 ---
 layout: docs
 title: Task Processing
+permalink: /docs/task_processing.html
 ---
 
 # Task Processing
