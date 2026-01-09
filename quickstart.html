@@ -6,10 +6,129 @@
     <title>Quickstart - All You Need Is A Fuzzing Brain</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .quickstart-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+            padding-top: 120px;
+        }
+        .quickstart-container h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .quickstart-container .subtitle {
+            color: #888;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+        .quickstart-container h2 {
+            font-size: 1.75rem;
+            margin-top: 3rem;
+            margin-bottom: 1rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #333;
+        }
+        .quickstart-container h3 {
+            font-size: 1.25rem;
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+        }
+        .quickstart-container h4 {
+            font-size: 1.1rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .quickstart-container p {
+            line-height: 1.7;
+            margin-bottom: 1rem;
+        }
+        .quickstart-container pre {
+            background-color: #1a1a2e;
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .quickstart-container code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+        .quickstart-container ul, .quickstart-container ol {
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+        }
+        .quickstart-container li {
+            margin-bottom: 0.5rem;
+            line-height: 1.6;
+        }
+        .quickstart-container table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        .quickstart-container th, .quickstart-container td {
+            padding: 0.75rem;
+            text-align: left;
+            border: 1px solid #333;
+        }
+        .quickstart-container th {
+            background-color: #1a1a2e;
+        }
+        .platform-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .platform-supported {
+            background-color: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border: 1px solid #22c55e;
+        }
+        .platform-partial {
+            background-color: rgba(234, 179, 8, 0.2);
+            color: #eab308;
+            border: 1px solid #eab308;
+        }
+        .platform-unsupported {
+            background-color: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid #ef4444;
+        }
+        .info-box {
+            background-color: #1a1a2e;
+            border-left: 4px solid #6366f1;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .warning-box {
+            background-color: rgba(234, 179, 8, 0.1);
+            border-left: 4px solid #eab308;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background-color: #6366f1;
+            color: #fff;
+            border-radius: 50%;
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-right: 0.5rem;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
         <header class="header">
             <div class="header-content">
                 <div class="logo">
@@ -31,27 +150,199 @@
             </div>
         </header>
 
-        <!-- Quickstart Header -->
-        <section class="blog-header">
-            <div class="section-content">
-                <h1 class="blog-title">Quickstart</h1>
-                <p class="blog-subtitle">Get up and running with FuzzingBrain</p>
-            </div>
-        </section>
+        <div class="quickstart-container">
+            <h1>Quickstart</h1>
+            <p class="subtitle">Get up and running with FuzzingBrain in minutes</p>
 
-        <!-- Installation Section -->
-        <section class="featured-post">
-            <div class="section-content">
-                <h2 id="installation">Installation</h2>
-                <!-- Installation content placeholder -->
-            </div>
-        </section>
+            <h2 id="installation">Installation</h2>
 
-        <!-- Footer -->
+            <h3>Platform Support</h3>
+            <div style="margin: 1rem 0;">
+                <span class="platform-badge platform-supported">Linux - Fully Supported</span>
+                <span class="platform-badge platform-partial">macOS - Partial Support</span>
+                <span class="platform-badge platform-unsupported">Windows - Not Supported</span>
+            </div>
+
+            <div class="warning-box">
+                <strong>Note for macOS users:</strong> Due to Docker virtualization layer limitations on macOS, OSS-Fuzz builds may fail with permission errors. We recommend using:
+                <ul style="margin-top: 0.5rem; margin-bottom: 0;">
+                    <li>Linux VM (UTM, VirtualBox, Parallels)</li>
+                    <li>Cloud Linux instance (AWS, GCP, Azure)</li>
+                    <li>GitHub Codespaces</li>
+                </ul>
+            </div>
+
+            <div class="warning-box">
+                <strong>Note for Windows users:</strong> Use WSL2 with a Linux distribution.
+            </div>
+
+            <h3>Prerequisites</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Requirement</th>
+                        <th>Version</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Docker</strong></td>
+                        <td>Latest</td>
+                        <td>Must be installed and running. <a href="https://docs.docker.com/get-docker/" target="_blank">Install Docker</a></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Go</strong></td>
+                        <td>>= 1.21</td>
+                        <td>Auto-installed if missing. <a href="https://go.dev/doc/install" target="_blank">Manual Install</a></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Git</strong></td>
+                        <td>Latest</td>
+                        <td>For cloning repositories</td>
+                    </tr>
+                    <tr>
+                        <td><strong>LLM API Key</strong></td>
+                        <td>-</td>
+                        <td>At least one: OpenAI, Anthropic, Google Gemini, or xAI</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="info-box">
+                FuzzingBrain will automatically check these requirements. If Go is not installed or the version is too old, you'll be prompted to install it automatically.
+            </div>
+
+            <h3>Configuration</h3>
+
+            <h4><span class="step-number">1</span> Clone Repository</h4>
+            <pre><code>git clone https://github.com/aixcc-sc/afc-crs-all-you-need-is-a-fuzzing-brain.git
+cd afc-crs-all-you-need-is-a-fuzzing-brain</code></pre>
+
+            <h4><span class="step-number">2</span> Create Configuration File</h4>
+            <pre><code>cd crs
+cp .env.example .env</code></pre>
+
+            <h4><span class="step-number">3</span> Add Your API Keys</h4>
+            <p>Edit <code>crs/.env</code> and add your API keys (at least one is required):</p>
+            <pre><code># AI Model API Keys - Add at least one
+OPENAI_API_KEY=sk-proj-your-actual-openai-key-here
+ANTHROPIC_API_KEY=sk-ant-your-actual-anthropic-key-here
+GEMINI_API_KEY=your-actual-gemini-key-here
+XAI_API_KEY=xai-your-actual-xai-key-here</code></pre>
+
+            <div class="info-box">
+                <strong>Note:</strong> If you skip this step, FuzzingBrain will prompt you interactively for API keys on first run.
+            </div>
+
+            <h4>Optional: Configure Backup Keys</h4>
+            <p>For higher rate limits and failover support:</p>
+            <pre><code># Backup keys (optional)
+OPENAI_API_KEY_R1=your-openai-backup-key
+ANTHROPIC_API_KEY_R1=your-anthropic-backup-key
+GEMINI_API_KEY_R1=your-gemini-backup-key</code></pre>
+
+            <h2 id="quickstart">Quick Start</h2>
+
+            <h3>Delta Scan</h3>
+            <p>Analyze changes between two specific commits to find vulnerabilities introduced by the change:</p>
+            <pre><code>./FuzzingBrain.sh -b bc841a89aea42b2a2de752171588ce94402b3949 -d 2c894c66108f0724331a9e5b4826e351bf2d094b https://github.com/OwenSanzas/libpng.git</code></pre>
+            <ul>
+                <li><code>-b</code>: Base commit (the earlier commit)</li>
+                <li><code>-d</code>: Delta commit (the later commit to compare against)</li>
+            </ul>
+
+            <h3>Full Scan</h3>
+            <p>Complete vulnerability analysis on entire repository:</p>
+            <pre><code>./FuzzingBrain.sh https://github.com/OwenSanzas/libpng.git</code></pre>
+
+            <p>You can also specify the OSS-Fuzz project name if auto-detection fails:</p>
+            <pre><code>./FuzzingBrain.sh --project libpng https://github.com/OwenSanzas/libpng.git</code></pre>
+
+            <h3>Running with Local Workspace</h3>
+            <p>If you have a local workspace with the following structure:</p>
+            <pre><code>&lt;workspace&gt;/
+├── repo/                    # Source code of your software
+├── fuzz-tooling/            # OSS-Fuzz fuzzing suite
+└── diff/                    # [Optional]
+    └── ref.diff             # Diff file for delta scan</code></pre>
+
+            <p>Run the analysis:</p>
+            <pre><code>./FuzzingBrain.sh /path/to/workspace</code></pre>
+
+            <div class="info-box">
+                <strong>Understanding <code>--in-place</code> flag:</strong><br>
+                By default, FuzzingBrain creates a copy of your workspace before running analysis. Use <code>--in-place</code> to skip copying and run directly on the workspace.
+            </div>
+
+            <h2 id="output">Output</h2>
+            <p>After running FuzzingBrain, outputs are organized as follows:</p>
+            <pre><code>.
+├── workspace/
+│   └── libpng_20251215_175412/       # Workspace for this run
+├── pov/
+│   └── libpng_20251215_175412/       # Generated POVs
+│       ├── pov_1_claude-sonnet-4_1/
+│       │   ├── pov.py
+│       │   ├── test_blob.bin
+│       │   ├── fuzzer_output.txt
+│       │   └── pov_metadata.json
+│       └── pov_2_gpt-4_1/
+└── patch/
+    └── libpng_20251215_175412/       # Generated patches
+        └── patch_claude-sonnet-4_1_1/
+            ├── patch.diff
+            └── patch_metadata.json</code></pre>
+
+            <h3>Completion Summary</h3>
+            <p>At the end of execution, you'll see a summary like:</p>
+            <pre><code>╔════════════════════════════════════════════════════════════════╗
+║                    TASK COMPLETION SUMMARY                     ║
+╠════════════════════════════════════════════════════════════════╣
+║ Status: SUCCESS
+║ POVs Found: 3
+║ Patches Found: 2
+╠════════════════════════════════════════════════════════════════╣
+║ Paths:
+║   Workspace:  /root/.../workspace/libpng_20251215_175412
+║   Log:        /root/.../workspace/libpng_20251215_175412/task.log
+║   POVs:       /root/.../pov/libpng_20251215_175412
+║   Patches:    /root/.../patch/libpng_20251215_175412
+╚════════════════════════════════════════════════════════════════╝</code></pre>
+
+            <h2 id="troubleshooting">Troubleshooting</h2>
+
+            <h3>macOS: Docker Permission Issues</h3>
+            <p>If you see errors like <code>mkdir: cannot create directory '/work/libfuzzer': Permission denied</code>:</p>
+            <ol>
+                <li><strong>Enable File Sharing in Docker Desktop:</strong>
+                    <ul>
+                        <li>Open Docker Desktop → Settings → Resources → File Sharing</li>
+                        <li>Add your workspace directory</li>
+                        <li>Click "Apply & Restart"</li>
+                    </ul>
+                </li>
+                <li><strong>Check Docker Desktop Settings:</strong>
+                    <ul>
+                        <li>Ensure "Use gRPC FUSE for file sharing" is disabled in Settings → General</li>
+                    </ul>
+                </li>
+                <li><strong>Alternative:</strong> Use a workspace location in your home directory</li>
+            </ol>
+
+            <h3>Go Installation Issues</h3>
+            <p>If automatic Go installation fails, install manually from <a href="https://go.dev/dl/" target="_blank">go.dev/dl</a> and add to PATH:</p>
+            <pre><code>export PATH=$PATH:/usr/local/go/bin</code></pre>
+
+            <div style="text-align: center; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #333;">
+                <p>Need more details? Check out our <a href="documentation.html">Documentation</a> for comprehensive guides.</p>
+            </div>
+        </div>
+
         <footer class="footer">
             <div class="footer-content">
                 <div class="footer-text">
-                    <p>© 2025 All You Need Is A Fuzzing Brain Research Team</p>
+                    <p>&copy; 2025 All You Need Is A Fuzzing Brain Research Team</p>
                     <p>Advancing autonomous vulnerability discovery through AI</p>
                 </div>
                 <div class="footer-links">
