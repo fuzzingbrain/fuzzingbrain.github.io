@@ -12,6 +12,7 @@
             max-width: 1400px;
             margin: 0 auto;
             padding: 2rem;
+            padding-top: 120px;
             gap: 2rem;
         }
         .docs-sidebar {
@@ -182,7 +183,7 @@
 
             <!-- Content -->
             <main class="docs-content">
-                <h1>CRS Document</h1>
+                <h1>CRS Overview</h1>
                 <p><em>Made By Team All_you_need_is_a_fuzzing_brain</em></p>
 
                 <div class="docs-intro">
@@ -252,7 +253,118 @@
 READ of size 2 at 0x7ffe7e032b52 thread T0
 ....</code></pre>
 
-                <p>For the complete case study walkthrough, please refer to the <a href="quickstart.html">Quickstart Guide</a>.</p>
+                <p>This stack trace indicates a 2-byte read operation occurring at an invalid memory address within the <code>png_handle_iCCP</code> function, specifically at line 1447 of <code>pngrutil.c</code>.</p>
+
+                <p>The following sections detail how CRS processes this vulnerability through its automated detection and patching pipeline:</p>
+
+                <h3>Step 1: Repository Setup</h3>
+                <p>First, clone the CRS repository from the official source:</p>
+<pre><code>git clone git@github.com:aixcc-finals/afc-crs-all-you-need-is-a-fuzzing-brain.git</code></pre>
+
+                <h3>Step 2: Service Deployment</h3>
+                <p>For this demonstration, we deploy all four CRS services locally. In production environments, these services can be distributed across multiple nodes for enhanced scalability and performance.</p>
+
+                <h4>Task & Worker Service</h4>
+                <p>In local testing mode, the Task Service and Worker Service can operate as a unified service:</p>
+<pre><code>cd crs
+LOCAL_TEST=1 go run cmd/server/main.go</code></pre>
+
+                <p>Upon successful initialization, the service produces the following output:</p>
+<pre><code>Logs will be saved to: logs/20250727/run.log
+2025/07/27 18:22:30 Worker configuration: 24 nodes starting at port 9081
+[GIN-debug] Listening and serving HTTP on :1324</code></pre>
+
+                <h4>Submission Service</h4>
+                <p>Launch the submission service for managing POV and patch submissions:</p>
+<pre><code>cd competition-api
+LOCAL_TEST=1 go run cmd/server/main.go</code></pre>
+
+                <h4>Static Analysis Service</h4>
+                <p>Initialize the static analysis service for code analysis and metadata extraction:</p>
+<pre><code>cd static-analysis
+go run cmd/server/main.go</code></pre>
+
+                <h3>Send Task To CRS</h3>
+                <p>Now we submit the libpng vulnerability detection task to CRS. For this demonstration, we'll perform a delta scan task to identify vulnerabilities introduced by a specific commit.</p>
+
+                <h4>Task Metadata</h4>
+                <p>The following metadata is required for task submission:</p>
+                <ul>
+                    <li><strong>Repository URL</strong>: The target project repository</li>
+                    <li><strong>Base Reference</strong>: The code version before the target commit</li>
+                    <li><strong>Head Reference</strong>: The new version after introducing the commit</li>
+                    <li><strong>Fuzz Tooling Repository</strong>: The fuzzing infrastructure codebase</li>
+                    <li><strong>Duration (Optional)</strong>: Time limit for analysis in seconds</li>
+                </ul>
+
+                <h4>Method 1: Using AIxCC Competition Infrastructure</h4>
+                <p>If using the official AIxCC competition infrastructure, tasks can be submitted through the competition webhook:</p>
+<pre><code>curl -X 'POST' 'http://localhost:1323/webhook/trigger_task' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "challenge_repo_url": "git@github.com:aixcc-finals/example-libpng.git",
+    "challenge_repo_head_ref": "fdacd5a1dcff42175117d674b0fda9f8a005ae88",
+    "fuzz_tooling_url": "https://github.com/aixcc-finals/oss-fuzz-aixcc.git",
+    "fuzz_tooling_ref": "d5fbd68fca66e6fa4f05899170d24e572b01853d",
+    "fuzz_tooling_project_name": "libpng",
+    "duration": 3600
+  }'</code></pre>
+
+                <h4>Method 2: Direct CRS API Submission</h4>
+                <p>Users can also submit tasks directly to the CRS Task Service using the processed format:</p>
+<pre><code>curl -s -X POST "http://localhost:1324/v1/task/" \
+  -H "Content-Type: application/json" \
+  --user "api_key_id:api_key_token" \
+  -d '{
+    "message_id": "0d2ab7cd-766c-49f2-86f6-926fbdb96546",
+    "tasks": [{ "task_id": "...", "type": "delta", ... }]
+  }'</code></pre>
+
+                <h3>Task Processing</h3>
+                <p>Upon successful submission, the CRS Task Service will:</p>
+                <ol>
+                    <li>Parse the task metadata and validate all required components</li>
+                    <li>Download source materials from the provided URLs</li>
+                    <li>Initialize workspace for the specific task</li>
+                    <li>Construct appropriate fuzzers and sanitizers based on the project configuration</li>
+                    <li>Distribute subtasks to available Worker Services for parallel processing</li>
+                </ol>
+
+                <p>CRS downloads the source materials and begins constructing the analysis environment within Docker containers:</p>
+<pre><code>2025/07/27 19:52:07 Building fuzzers with --sanitizer=coverage
+2025/07/27 19:52:07 Building fuzzers with --sanitizer=address
+2025/07/27 19:52:07 Building fuzzers with --sanitizer=memory
+2025/07/27 19:52:07 Created sanitizer-specific project directory: /crs-workdir/.../example-libpng-address</code></pre>
+
+                <p>CRS successfully reproduces the dynamic stack buffer overflow vulnerability:</p>
+<pre><code>2025/07/27 19:54:16 [basic xs0_delta.py stdout] Running: /out/x_d42d2c5a.bin
+2025/07/27 19:54:16 [basic xs0_delta.py stdout] =================================================================
+2025/07/27 19:54:16 [basic xs0_delta.py stdout] ==1==ERROR: AddressSanitizer: dynamic-stack-buffer-overflow
+2025/07/27 19:54:16 [basic xs0_delta.py stdout] READ of size 2 at 0x7ffc49c40372 thread T0
+2025/07/27 19:54:16 [basic xs0_delta.py stdout] Fuzzer crashed with exit code 1 - potential vulnerability triggered!</code></pre>
+
+                <p>Then this POV will be formatted into a JSON file that will be used by the patching phase:</p>
+<pre><code>{
+  "conversation": "conversation_95629d9b_claude-3-7-sonnet-latest_1.json",
+  "fuzzer_output": "fuzzer_output_95629d9b_claude-3-7-sonnet-latest_1.txt",
+  "blob_file": "test_blob_95629d9b_claude-3-7-sonnet-latest_1.bin",
+  "fuzzer_name": "libpng_read_fuzzer",
+  "sanitizer": "address",
+  "project_name": "libpng",
+  "pov_signature": "libpng_read_fuzzer-OSS_FUZZ_png_handle_iCCP /src/libpng/pngrutil.c:1447"
+}</code></pre>
+
+                <p>Then CRS will try to patch this vulnerability. For each generated patch, CRS attempts to reproduce the vulnerability using the POV. If the reproduction fails, it indicates that the vulnerability has been mitigated.</p>
+
+                <p>Once a suitable patch is found, the task is considered complete:</p>
+<pre><code>2025/07/27 20:21:13 [Round 1][basic patch0_delta.py stdout] PATCH SUCCESS! Vulnerability patched on iteration 1
+2025/07/27 20:21:13 [Round 1] Patch success detected for patch0_delta.py! Cancelling other strategies in this round.
+2025/07/27 20:21:13 [Round 1] patch3_delta.py canceled early (context canceled)
+2025/07/27 20:21:13 [Round 1] patch2_delta.py canceled early (context canceled)</code></pre>
+
+                <p>At this point, we have successfully discovered a bug hidden in the libpng codebase and generated an effective patch to fix it.</p>
+
+                <p>Of course, you can test with various OSS-Fuzz-based projects - you might find unexpected discoveries!</p>
             </main>
         </div>
 
