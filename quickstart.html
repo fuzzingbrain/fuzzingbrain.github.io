@@ -213,7 +213,31 @@
                 FuzzingBrain will automatically check these requirements. If Go is not installed or the version is too old, you'll be prompted to install it automatically.
             </div>
 
-            <h3>Configuration</h3>
+            <h3>Option A: Using Docker (Recommended)</h3>
+            <p>The easiest way to get started is using our pre-built Docker image:</p>
+            <pre><code># Pull the image
+docker pull ghcr.io/o2lab/fuzzingbrain:latest
+
+# Run FuzzingBrain
+docker run -it --rm \
+  -e OPENAI_API_KEY=your-key-here \
+  -e ANTHROPIC_API_KEY=your-key-here \
+  -v $(pwd)/output:/app/output \
+  ghcr.io/o2lab/fuzzingbrain:latest \
+  &lt;repo_url&gt;</code></pre>
+
+            <p><strong>Docker Run Options:</strong></p>
+            <ul>
+                <li><code>-e</code>: Set API keys as environment variables (at least one required)</li>
+                <li><code>-v</code>: Mount a local directory to save scan results</li>
+                <li>Add <code>-b &lt;base_commit&gt; -d &lt;delta_commit&gt;</code> for delta scans</li>
+            </ul>
+
+            <div class="info-box">
+                Using Docker skips all local installation requirements - just pull and run!
+            </div>
+
+            <h3>Option B: Install from Source</h3>
 
             <h4><span class="step-number">1</span> Clone Repository</h4>
             <pre><code>git clone https://github.com/aixcc-sc/afc-crs-all-you-need-is-a-fuzzing-brain.git
