@@ -301,6 +301,26 @@ img {
     transform: scaleX(1) !important;
 }
 
+/* Nav CTA pill button (e.g. GitHub link) */
+.nav-cta {
+    background: var(--primary);
+    color: #fff !important;
+    padding: 0.4rem 1.1rem !important;
+    border-radius: 999px;
+    font-weight: 600;
+    transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.nav-cta:hover {
+    background: var(--primary-dark, #4f46e5);
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+    transform: translateY(-1px);
+}
+
+.nav-cta::after {
+    display: none !important;
+}
+
 /* Mobile menu button */
 .mobile-menu-btn {
     display: none;
@@ -1454,7 +1474,7 @@ img {
    Results Hero (zero-day post)
    ============================================ */
 .results-hero {
-    margin: var(--spacing-xl) 0;
+    margin: 0 0 var(--spacing-xl);
 }
 
 .results-banner {
@@ -2565,6 +2585,17 @@ img {
     .nav a:hover {
         background: rgba(99, 102, 241, 0.08);
         border-left: 3px solid var(--primary);
+    }
+
+    .nav .nav-cta {
+        margin: var(--spacing-sm) var(--spacing-lg);
+        border-radius: var(--radius-md);
+        text-align: center;
+        border-bottom: none;
+    }
+
+    .nav .nav-cta:hover {
+        border-left: none;
     }
 
     /* Layout */
