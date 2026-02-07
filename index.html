@@ -40,21 +40,20 @@
             <div class="hero-content">
                 <div class="hero-text">
                     <h2 class="hero-title">LLM-Powered Vulnerability Detection and Patching</h2>
-                    <p class="hero-subtitle">An autonomous system that discovered 28 security vulnerabilities including 6 zero-days, and patched 14 of them, placing 4th in DARPA's AI Cyber Challenge</p>
+                    <p class="hero-subtitle">From 4th place at DARPA's AI Cyber Challenge to discovering 62 zero-day vulnerabilities across 26 major open source projects — with 36 already patched upstream.</p>
                     <div class="hero-stats">
                         <div class="stat">
-                            <span class="stat-number">28</span>
+                            <span class="stat-number">62</span>
                             <span class="stat-label">Vulnerabilities Found</span>
                         </div>
                         <div class="stat">
-                            <span class="stat-number">6</span>
-                            <span class="stat-label">Zero-Days</span>
+                            <span class="stat-number">26</span>
+                            <span class="stat-label">Projects Targeted</span>
                         </div>
                         <div class="stat">
-                            <span class="stat-number">14</span>
-                            <span class="stat-label">Patches Applied</span>
+                            <span class="stat-number">36</span>
+                            <span class="stat-label">Patches Merged</span>
                         </div>
-
                     </div>
                     <div class="hero-buttons">
                         <a href="https://github.com/o2lab/afc-crs-all-you-need-is-a-fuzzing-brain" class="btn btn-primary">
@@ -169,8 +168,8 @@
         <!-- Results Section -->
         <section id="results" class="results">
             <div class="section-content">
-                <h2 class="section-title">Competition Results</h2>
-                
+                <h2 class="section-title">Results</h2>
+
                 <div class="results-summary">
                     <div class="competition-badge">
                         <div class="badge-content">
@@ -179,31 +178,46 @@
                             <span class="badge-teams">out of 7 finalists</span>
                         </div>
                     </div>
-                    
+
                     <div class="results-grid">
                         <div class="result-card highlight-card">
-                            <div class="result-number">28</div>
+                            <div class="result-number">62</div>
                             <div class="result-label">Total Vulnerabilities</div>
-                            <div class="result-detail">Discovered across real-world C and Java projects</div>
+                            <div class="result-detail">Across 26 open source projects</div>
                         </div>
-                        
+
                         <div class="result-card highlight-card">
-                            <div class="result-number">6</div>
-                            <div class="result-label">Zero-Day Discoveries</div>
-                            <div class="result-detail">Previously unknown vulnerabilities</div>
+                            <div class="result-number">43</div>
+                            <div class="result-label">Confirmed</div>
+                            <div class="result-detail">Acknowledged by maintainers</div>
                         </div>
-                        
+
                         <div class="result-card">
-                            <div class="result-number">14</div>
-                            <div class="result-label">Successful Patches</div>
-                            <div class="result-detail">Validated fixes that preserve functionality</div>
+                            <div class="result-number">36</div>
+                            <div class="result-label">Patches Merged</div>
+                            <div class="result-detail">Fixed in upstream releases</div>
                         </div>
-                        
+
                         <div class="result-card">
-                            <div class="result-number">60</div>
-                            <div class="result-label">Total Challenges</div>
-                            <div class="result-detail">Final competition round</div>
+                            <div class="result-number">&lt;5%</div>
+                            <div class="result-label">False Positive Rate</div>
+                            <div class="result-detail">Rigorous 4-principle verification</div>
                         </div>
+                    </div>
+
+                    <div class="strategy-types" style="justify-content: center; margin-top: 1.5rem; gap: 0.5rem; flex-wrap: wrap;">
+                        <span class="strategy-tag">CUPS</span>
+                        <span class="strategy-tag">Ghidra</span>
+                        <span class="strategy-tag">OpenLDAP</span>
+                        <span class="strategy-tag">Apache Avro</span>
+                        <span class="strategy-tag">ImageMagick</span>
+                        <span class="strategy-tag">simdutf</span>
+                        <span class="strategy-tag">UPX</span>
+                        <span class="strategy-tag">BlueZ</span>
+                    </div>
+
+                    <div style="text-align: center; margin-top: 1.5rem;">
+                        <a href="posts/zero-day-vulnerability-discoveries.html" class="resource-link">Read the full report →</a>
                     </div>
                 </div>
 
@@ -212,15 +226,15 @@
                     <div class="insight-grid">
                         <div class="insight">
                             <h4>⏱️ Speed</h4>
-                            <p>Most vulnerabilities detected within the first 30 minutes of analysis</p>
+                            <p>Sub-5-minute first findings on multiple targets</p>
                         </div>
                         <div class="insight">
                             <h4>🎯 Effectiveness</h4>
-                            <p>LLM-based strategies discovered nearly all POVs, vastly outperforming traditional fuzzing</p>
+                            <p>AI-generated harnesses found bugs in 26 of 26 targeted projects</p>
                         </div>
                         <div class="insight">
                             <h4>🏗️ Scalability</h4>
-                            <p>Successfully processed 50+ fuzzers per project across multiple sanitizer configurations</p>
+                            <p>Campaign scaled from competition VMs to continuous open source fuzzing</p>
                         </div>
                     </div>
                 </div>
@@ -300,7 +314,7 @@
         <footer class="footer">
             <div class="footer-content">
                 <div class="footer-text">
-                    <p>© 2025 All You Need Is A Fuzzing Brain Research Team</p>
+                    <p>© 2026 All You Need Is A Fuzzing Brain Research Team</p>
                     <p>Open source research advancing automated vulnerability discovery</p>
                 </div>
                 <div class="footer-links">
