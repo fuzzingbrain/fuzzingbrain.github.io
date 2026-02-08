@@ -1,6 +1,6 @@
-title: "All You Need Is A Fuzzing Brain"
+title: "FuzzingBrain"
 description: "LLM-Powered System for Automated Vulnerability Detection and Patching - 4th Place DARPA AIxCC"
-url: "https://all-you-need-is-a-fuzzing-brain.github.io"
+url: "https://fuzzingbrain.github.io"
 baseurl: ""
 
 # GitHub Pages settings
@@ -11,14 +11,14 @@ plugins:
   - jekyll-seo-tag
 
 # SEO and social
-author: "All You Need Is A Fuzzing Brain Research Team"
+author: "FuzzingBrain Research Team"
 twitter:
   username: # add your twitter handle
   card: summary_large_image
 
 # Social links
-github_username: all-you-need-is-a-fuzzing-brain
-repository: "all-you-need-is-a-fuzzing-brain/all-you-need-is-a-fuzzing-brain.github.io"
+github_username: fuzzingbrain
+repository: "fuzzingbrain/fuzzingbrain.github.io"
 
 # Build settings
 markdown: kramdown
@@ -48,4 +48,4 @@ defaults:
       type: "posts"
     values:
       layout: "post"
-      author: "All You Need Is A Fuzzing Brain Team"
+      author: "FuzzingBrain Team"

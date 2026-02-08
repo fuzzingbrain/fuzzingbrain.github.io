@@ -144,7 +144,7 @@ Complete system implementation with all 23 strategies:
 
 ### LLM Vulnerability Detection Leaderboard  
 Benchmarking framework for comparing LLMs on security tasks:
-**[o2lab.github.io/FuzzingBrain-Leaderboard](https://o2lab.github.io/FuzzingBrain-Leaderboard)**
+**[fuzzingbrain.github.io/FuzzingBrain-Leaderboard](https://fuzzingbrain.github.io/FuzzingBrain-Leaderboard)**
 
 ## Research Team
 
