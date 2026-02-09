@@ -12,7 +12,7 @@
 <p align="center">
   <a href="https://fuzzingbrain.github.io">Website</a> &middot;
   <a href="https://github.com/o2lab/afc-crs-all-you-need-is-a-fuzzing-brain">Source Code</a> &middot;
-  <a href="https://fuzzingbrain.github.io/FuzzingBrain-Leaderboard">LLM Leaderboard</a> &middot;
+  <a href="https://fuzzingbrain.github.io/FuzzingBrain-Leaderboard/">LLM Leaderboard</a> &middot;
   <a href="https://fuzzingbrain.github.io/blog.html">Blog</a>
 </p>
 

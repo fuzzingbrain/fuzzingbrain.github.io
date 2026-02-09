@@ -100,17 +100,18 @@
             <pre><code># Pull the image
 docker pull ghcr.io/o2lab/fuzzingbrain:latest
 
+# Create workspace directory
+sudo mkdir -p /app/workspace
+
 # Run FuzzingBrain
 docker run -it --rm \
-  -e OPENAI_API_KEY=your-key-here \
-  -e ANTHROPIC_API_KEY=your-key-here \
-  -v $(pwd)/output:/app/output \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v /app/workspace:/app/workspace \
   ghcr.io/o2lab/fuzzingbrain:latest \
   &lt;repo_url&gt;</code></pre>
 
             <p><strong>Docker Run Options:</strong></p>
             <ul>
-                <li><code>-e</code>: Set API keys as environment variables (at least one required)</li>
                 <li><code>-v</code>: Mount a local directory to save scan results</li>
                 <li>Add <code>-b &lt;base_commit&gt; -d &lt;delta_commit&gt;</code> for delta scans</li>
             </ul>
