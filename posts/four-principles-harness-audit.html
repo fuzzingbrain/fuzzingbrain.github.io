@@ -147,18 +147,13 @@
 
                         <h3>P2 — API Protocol Compliance:harness 必须遵守库的契约</h3>
                         <p>
-                            库的每个 API 都有自己的"使用协议":什么时候 init、什么时候 destroy、参数允许哪些范围、返回值需不需要检查。LLM 生成的 harness 经常违反这些协议,因为它无法从单个函数签名看出整个状态机。
+                            库的每个 API 都有自己的使用协议:什么时候 init、什么时候 destroy、参数允许哪些范围、返回值需不需要检查、哪些调用必须配对。LLM 生成的 harness 经常违反这些协议,因为它无法从单个函数签名看出整个状态机。具体的 8 条 P2 子检查在下文 P1.1–P2.8 清单里列全;这里只举一个最有代表性的真实案例。
                         </p>
-                        <ul>
-                            <li>API 按"init → setup → use → destroy"的正确顺序调用</li>
-                            <li>参数类型、宽度、合法值范围与头文件 / 文档一致</li>
-                            <li>库文档明示有意义的返回值要被检查(成功码、NULL on failure)</li>
-                            <li>对象只在 alive 期间使用 —— 不在 free / close / destroy 之后再碰</li>
-                            <li>不调用本版本不存在的 API(注意 C 类依赖里的 header drift)</li>
-                            <li>"transform / set-option" 类调用如果会被后续"identity"调用清空,就不能再用 —— 否则 fuzzer 等于啥都没测(libpng 的 <code>PNG_TRANSFORM_IDENTITY</code> 是经典案例)</li>
-                        </ul>
                         <p>
-                            <strong>P2 违反 ⇒ 这个 crash 是 API 误用,不是库漏洞。</strong>上游会让你回家。
+                            libpng 经典 case:harness 一开头就调 <code>png_set_interlace_handling()</code> 之类的"set-option / set-transform"打开各种解码 transform,后面再调一句 <code>png_set_transform(PNG_TRANSFORM_IDENTITY)</code> —— 这一句会把前面所有 transform 全部清掉。结果 fuzzer 看起来跑得很 happy,coverage 涨得很好,实际上整条 transform 路径上的内存安全代码完全没被测。这是典型的 P2.7(Co-call constraints)违规 —— 配对约束没遵守,协议被破坏。
+                        </p>
+                        <p>
+                            <strong>P2 违反 ⇒ 这个 crash 是 API 误用,不是库漏洞。</strong>更糟的是像上面这样,fuzzer 表面跑得"好",其实整条目标路径都是空的 —— 你不是没找到 bug,你是根本没在测。
                         </p>
 
                         <h3>P3 — Security Boundary Respect:鼓励走公开 API</h3>
