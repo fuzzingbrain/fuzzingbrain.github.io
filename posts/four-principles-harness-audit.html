@@ -190,6 +190,39 @@
                             <strong>P4 违反 ⇒ 这个 fuzzer 即使一直跑下去也不会找到有用的 bug。</strong>
                         </p>
 
+                        <h3>P1.1–P2.8:16 条可勾选的子检查</h3>
+                        <p>
+                            把 P1 和 P2 落到工程上,我们各拆成 8 个具体的子检查。审计 / 生成 / verify 三个阶段都用同一套清单,这样三个阶段的判定才能互相对照。
+                        </p>
+
+                        <h4>P1 — Logic Correctness 的 8 条子检查</h4>
+                        <ul>
+                            <li><strong>P1.1 Resource leaks</strong> —— 每条退出路径都释放掉所有 <code>alloc</code> / fd / lock / handle</li>
+                            <li><strong>P1.2 Use-after-free</strong> —— 释放之后不再读取或传递该指针</li>
+                            <li><strong>P1.3 Stale state</strong> —— <code>LLVMFuzzerTestOneInput</code> 多次调用之间不携带 static / global 状态</li>
+                            <li><strong>P1.4 Input flow</strong> —— fuzz 字节真的流到目标 API 的参数里(call 不是被常量驱动的)</li>
+                            <li><strong>P1.5 Buffer safety</strong> —— fuzz buffer 读取有上界、C 字符串带 <code>\0</code>、索引带长度检查</li>
+                            <li><strong>P1.6 Size checks</strong> —— 输入小于 API 最小值时早返回</li>
+                            <li><strong>P1.7 Undefined behaviour</strong> —— 没有 OOB / null-deref / 有符号溢出 / 未对齐 cast</li>
+                            <li><strong>P1.8 No reimplementation</strong> —— 调真的库代码,不是 harness 里 inline 的本地复制</li>
+                        </ul>
+
+                        <h4>P2 — API Protocol Compliance 的 8 条子检查</h4>
+                        <ul>
+                            <li><strong>P2.1 Init sequence</strong> —— 调用目标前所有必需的前置 API 都按顺序到位</li>
+                            <li><strong>P2.2 Parameter construction</strong> —— 每个参数的类型 / 范围 / owner / 生命周期都对</li>
+                            <li><strong>P2.3 Object lifecycle</strong> —— opaque 对象走完 create → configure → use → destroy</li>
+                            <li><strong>P2.4 Return value handling</strong> —— 检查 return code、走 error branch、对失败 gated 的输出不再使用</li>
+                            <li><strong>P2.5 Cleanup sequence</strong> —— 所有退出路径上,资源按 API 文档要求的顺序释放</li>
+                            <li><strong>P2.6 API existence</strong> —— 调到的每个函数在 pinned build 的库里真的导出</li>
+                            <li><strong>P2.7 Co-call constraints</strong> —— 配对 API 共现;互斥 API 不并用</li>
+                            <li><strong>P2.8 Prerequisite state</strong> —— 外部状态(fd / socket / env / thread)在调目标前就位、之后回收</li>
+                        </ul>
+
+                        <p>
+                            实际跑的时候,每条子检查都对应一个或一组探针 —— 有些是 LLM 读源码 + cite <code>file:line</code>,有些是 GDB 在目标 API 下断点看是否命中,有些是 ASan / LSan 在对抗输入下抛出 sanitizer trace。具体每条用什么探针、对应什么 fault oracle,在论文 Table 8 里有完整的对照表。三个 stage 的不同主要在于<em>探针的输入</em>:审计阶段用真实生产语料,生成阶段用 adversarial prober 主动构造,verify 阶段用具体的 crash input 重放。规则本身是同一套,所以判定才是稳定的。
+                        </p>
+
                         <h3>为什么是这四条 —— 而不是三条或五条</h3>
                         <p>
                             四原则是<strong>层层递进</strong>的:P1 只关心 harness 自身;P2 关心 harness 和库之间的交互;P3 把视野扩大到"哪些路径在真实威胁模型里";P4 回到最现实的问题"这个目标值得测吗"。每加一条,审视的范围就大一层,最后一条覆盖了"是否真的找到了 bug"以外所有可能让 harness 失效的方式。
