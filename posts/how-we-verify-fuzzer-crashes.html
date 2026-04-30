@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How We Verify Fuzzer Crashes: Four Principles, Two Reproductions, and Security Proxies - FuzzingBrain</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
+</head>
+<body>
+    <a href="#main-content" class="skip-to-content">Skip to main content</a>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="../index.html" class="logo-link">
+                        <img src="../assets/images/fuzzbrain.jpg" alt="FuzzingBrain Logo" class="brain-logo">
+                        <h1>FuzzingBrain</h1>
+                    </a>
+                </div>
+                <button class="mobile-menu-btn" aria-label="Toggle navigation menu">
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                </button>
+                <nav class="nav" aria-label="Main navigation">
+                    <a href="../documentation.html">Docs</a>
+                    <a href="../quickstart.html">Quickstart</a>
+                    <a href="../blog.html" class="nav-active">Blog</a>
+                    <a href="../index.html#results">Results</a>
+                    <a href="https://github.com/o2lab/afc-crs-all-you-need-is-a-fuzzing-brain" class="nav-cta" target="_blank" rel="noopener noreferrer">GitHub</a>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Article Header -->
+        <article class="blog-post" id="main-content">
+            <div class="post-header">
+                <div class="section-content">
+                    <nav class="breadcrumb"><a href="../index.html">Home</a><span class="separator">/</span><a href="../blog.html">Blog</a><span class="separator">/</span><span class="current">Verifying Fuzzer Crashes</span></nav>
+                    <div class="post-meta">
+                        <span class="post-date">April 30, 2026</span>
+                        <span class="post-category">Verification</span>
+                        <span class="post-readtime">12 min read</span>
+                    </div>
+                    <h1 class="post-title-main">How We Verify Fuzzer Crashes: Four Principles, Two Reproductions, and Security Proxies</h1>
+                    <p class="post-subtitle">A fuzzer can produce 24,000 crashes overnight and almost none of them deserve to be filed. We hold every candidate behind three gates. A four-principles re-audit on the crash path, two independent reproductions, and per-library Security Proxies aligned with the maintainer's threat model. Together they keep our false-positive rate under 5% and keep every report we send genuinely useful to the maintainer.</p>
+                </div>
+            </div>
+
+            <!-- Post Content -->
+            <div class="post-content">
+                <div class="section-content">
+
+                    <!-- Hero Stats -->
+                    <section class="results-hero">
+                        <div class="results-banner">
+                            <h2>Three Gates Before We File</h2>
+                            <div class="results-stats">
+                                <div class="result-stat">
+                                    <div class="stat-icon">P1–P4</div>
+                                    <div class="stat-value">Four-Principles Re-Audit</div>
+                                    <div class="stat-label">scoped to the crash path</div>
+                                </div>
+                                <div class="result-stat">
+                                    <div class="stat-icon">2×</div>
+                                    <div class="stat-value">Independent Reproductions</div>
+                                    <div class="stat-label">harness replay and production path</div>
+                                </div>
+                                <div class="result-stat">
+                                    <div class="stat-icon">Proxies</div>
+                                    <div class="stat-value">Security Proxies</div>
+                                    <div class="stat-label">every rule cites a DOC</div>
+                                </div>
+                                <div class="result-stat">
+                                    <div class="stat-icon">&lt;5%</div>
+                                    <div class="stat-value">FP Rate</div>
+                                    <div class="stat-label">across all submissions</div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Problem -->
+                    <section>
+                        <h2>Most Fuzzer Crashes Are Not Worth Filing</h2>
+                        <p>
+                            Anyone who fuzzes for a living has seen this picture. You leave a harness running overnight, and ASan greets you in the morning with 24,000 crashing inputs. The vast majority are cluster siblings of the same root cause. Maybe a few dozen represent <em>independent signatures</em>, and of those, only a small fraction are <strong>real bugs the upstream maintainer will accept</strong>.
+                        </p>
+                        <p>
+                            Get this step wrong and you become a wholesale supplier of automated report noise. So even though the LG plus reverse four-principles work from <a href="logic-groups-and-reverse-four-principles.html">Part 2</a> already filters most errors at generation time, <strong>every crash a fuzzer produces still has to be verified</strong>. Verification is the last gate before upstream.
+                        </p>
+                        <p>
+                            Our verification has three layers, ordered from cheap to expensive. The first is a four-principles re-audit on the specific crash path; reading source costs almost nothing, and any P-violation drops the crash on the spot. The second is two independent reproductions, which catches crashes that only occur inside the harness. The third is Security Proxies matched against the maintainer's threat model. Cognitive cost is highest here, but missing this layer is expensive when the maintainer fires back.
+                        </p>
+                    </section>
+
+                    <!-- Step 1 -->
+                    <section>
+                        <h2>Gate One. Four Principles on the Crash Path</h2>
+                        <p>
+                            If the generation pipeline already runs the four principles once, why audit them again at verify time? <strong>Because harness generation is not a deterministic process.</strong> On a project with mature static analysis, the call graph, the LGs, and the API protocol all extract precisely, and harness quality stays steady. On a project where static analysis is thin, the pipeline falls back to letting an LLM do the semantic reasoning, and that step introduces randomness. Harness quality varies project by project. The reverse four-principles work in generation catches most source-level mistakes, but it does not catch all of them. So once a fuzzer produces a crash, we run the four principles a second time over the specific trace that produced it.
+                        </p>
+                        <p>
+                            The key word for this gate is <strong>specific path</strong>. In <a href="four-principles-harness-audit.html">Part 1</a> we framed the four principles as a whole-harness correctness condition. At verify time we narrow the scope. We no longer audit the whole harness, only <strong>the call path that produced this crash</strong>.
+                        </p>
+                        <p>
+                            Operationally, the sanitizer trace is the starting point. We read the stack from <code>LLVMFuzzerTestOneInput</code> downward and ask, frame by frame, four questions.
+                        </p>
+                        <ul>
+                            <li><strong>P1, the harness itself.</strong> Does the harness code on this path use an uninitialized variable, hold a use-after-free pointer, or forget to free a resource? Did the fuzz bytes actually reach the crash site, or did harness-internal logic overwrite them first?</li>
+                            <li><strong>P2, the API contract.</strong> Are the library APIs on this path called in the right order, on objects in the right state, with arguments in the legal range? No <code>set_params</code> running before <code>init_ex</code>, no classic ordering inversion?</li>
+                            <li><strong>P3, the security boundary.</strong> Does this path reach a <code>static</code> function pulled out via <code>extern</code>, or skip the validation that a real entry point would have run? The test is not whether the harness uses internal symbols (we recommend public APIs but do not forbid internal ones). The test is whether the same crash can be reproduced from a harness that only calls public APIs. If yes, P3 passes. If no, the crash sits on a code path no real attacker can reach.</li>
+                            <li><strong>P4, the attack surface.</strong> Is the fuzz entry on this path part of the library's <em>current</em> public attack surface, or is it a deprecated demo entry that no longer ships?</li>
+                        </ul>
+                        <p>
+                            Fail any one of the four and the crash is a harness artifact. We drop it. No P-violation crash is allowed to reach the next gate. Crashes that fail here are recorded in <code>dropped_crashes</code> with their reason and closed out.
+                        </p>
+                        <p>
+                            This gate is cheap; it is mostly source reading. Its job is to catch the obvious harness-bug crashes early so the next two gates do not waste effort on noise.
+                        </p>
+                    </section>
+
+                    <!-- Step 2 -->
+                    <section>
+                        <h2>Gate Two. Two Independent Reproductions</h2>
+                        <p>
+                            Passing P1 through P4 only tells us the <em>harness code looks correct</em>. It does not tell us the crash would ever appear in real-world usage. A crash that reproduces only inside the harness, but never under any normal calling pattern, is at best an academic curiosity. It is not a vulnerability.
+                        </p>
+                        <p>
+                            So we require <strong>two independent reproductions that do not rely on each other</strong>.
+                        </p>
+
+                        <h3>Harness Replay</h3>
+                        <p>
+                            Feed the crashing input back into the original harness and run it under ASan multiple times. Every run must crash with <strong>the same top stack frames</strong>. This rules out two kinds of noise.
+                        </p>
+                        <ul>
+                            <li><strong>Flaky crashes.</strong> Non-deterministic failures triggered by scheduling, randomness, or whatever happens to live in uninitialized memory at the moment. The stack varies from run to run, so we drop them.</li>
+                            <li><strong>Non-deterministic paths.</strong> Global state inside the harness sends the same input down different execution paths each run. An unstable stack is an unstable fuzz signal, and we will not file it.</li>
+                        </ul>
+                        <p>
+                            This step is simple but it solves a real integrity problem. A crash we file has to reproduce on the maintainer's machine. If our own replay is flaky, the maintainer's will definitely fail.
+                        </p>
+
+                        <h3>Production Path</h3>
+                        <p>
+                            This is where the real filtering happens. Replay only confirms the fuzz output is stable. It does not rule out the harness pushing the library into a shape no real caller would ever produce. So we require the crash to fire <strong>once more, outside the harness, using a real calling pattern</strong>. Either of two routes works.
+                        </p>
+                        <ul>
+                            <li><strong>Route A. The library's own CLI, rebuilt with ASan.</strong> Many libraries ship official CLIs (<code>dwebp</code>, <code>flatc</code>, <code>vpxdec</code>, <code>xmllint</code>, <code>upx</code>, and so on), and those CLIs are the library's production mode. If the PoC crashes the CLI too, that is the gold standard. The CLI <em>is</em> production.</li>
+                            <li><strong>Route B. A minimal C or C++ program, around 30 lines, using only the library's public headers.</strong> No harness-private logic, no internal symbols, just an honest imitation of how a normal library user would call the API. If the minimal program also crashes, real consumers would crash too.</li>
+                        </ul>
+                        <p>
+                            This is the most important FP killer. Most of the crashes that <em>look</em> real but were really the harness pushing the library into a strange shape do not survive this step. If neither route reproduces the crash, it is harness-only and we drop it.
+                        </p>
+                        <p>
+                            Every issue we file ships with a <strong>self-contained <code>repro/</code> package</strong> containing <code>build.sh</code>, <code>run.sh</code>, <code>generate_poc.py</code>, the source of the 30-line reproducer, and the ASan log. The maintainer can rebuild from that package alone, with no pointers back into our repository. It looks like a small thing, but it reduces the maintainer's reproduction cost to nearly zero, and that is the heart of being friendly to upstream.
+                        </p>
+                    </section>
+
+                    <!-- Step 3 - Security Proxies -->
+                    <section>
+                        <h2>Gate Three. The Security Proxies</h2>
+                        <p>
+                            A crash that survives the first two gates is technically real. The harness is clean, replay is stable, the production path also crashes. <strong>That still does not make it a vulnerability.</strong> Every library has its own security contract. Under that contract, some scary-looking crashes are simply "things the caller is supposed to defend against," and filing them gets the issue closed.
+                        </p>
+                        <p>
+                            This third gate handles the <strong>security-contract</strong> judgement that the previous two gates cannot. The four principles cover source-level correctness; reproduction covers fuzzer-only artifacts. Neither catches the FP that happens because the maintainer simply does not consider this class of bug a vulnerability.
+                        </p>
+
+                        <h3>One Security Proxy per Library</h3>
+                        <p>
+                            For every library we fuzz, we maintain a <code>security_proxy.yaml</code> that records, in one place,
+                        </p>
+                        <ul>
+                            <li>which input paths the maintainer treats as <em>trusted</em> and which are <em>attacker-controlled</em>,</li>
+                            <li>which APIs are part of the public attack surface (in-scope) and which are caller-internal only (out-of-scope),</li>
+                            <li>which crash classes the maintainer has historically <strong>refused</strong> to treat as vulnerabilities,</li>
+                            <li>and the caller-contract assumptions the maintainer has already published in <code>SECURITY.md</code>.</li>
+                        </ul>
+                        <p>
+                            The hard rule. <strong>Every entry must cite an upstream document.</strong> The form is <code>source: DOC:&lt;path&gt;</code>, and the path has to point at a specific file in the upstream repository. That means <code>SECURITY.md</code>, comments in a public header, the official README, or an explicit statement from the maintainer in the issue tracker.
+                        </p>
+                        <p>
+                            <strong>No interpretations of our own.</strong> If we want to add a rule but cannot find an upstream DOC for it, the rule does not go in. This conservative posture, requiring a citation for every claim, is what keeps us from quietly defining real bugs out of scope.
+                        </p>
+                        <div class="proxy-card" style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--spacing-lg); margin: var(--spacing-md) 0 var(--spacing-lg); box-shadow: var(--shadow-md);">
+
+                            <!-- Card Header -->
+                            <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: var(--spacing-md); padding-bottom: var(--spacing-sm); border-bottom: 1px solid var(--border); margin-bottom: var(--spacing-md); flex-wrap: wrap;">
+                                <div>
+                                    <div style="font-family: var(--font-mono); font-size: var(--font-size-xs); color: var(--text-faint); letter-spacing: 0.08em;">SECURITY PROXY</div>
+                                    <div style="font-size: var(--font-size-xl); font-weight: 700; color: var(--text-primary); margin-top: 2px;">flatbuffers</div>
+                                </div>
+                                <div style="text-align: right; font-family: var(--font-mono); font-size: var(--font-size-xs); color: var(--text-muted); line-height: 1.55;">
+                                    <div>v2 · last_reviewed 2026-04-26</div>
+                                    <div style="color: var(--text-faint);">github.com/google/flatbuffers</div>
+                                </div>
+                            </div>
+
+                            <!-- Legend -->
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px 14px; padding: 12px 14px; background: rgba(0,0,0,0.22); border-radius: var(--radius-sm); margin-bottom: var(--spacing-md); font-size: var(--font-size-xs); color: var(--text-secondary); line-height: 1.5;">
+                                <div style="font-family: var(--font-mono); font-size: var(--font-size-xs); color: var(--text-faint); letter-spacing: 0.08em; grid-column: 1 / -1;">HOW TO READ THIS CARD</div>
+                                <div><span style="display: inline-block; font-family: var(--font-mono); font-size: 0.65rem; padding: 2px 6px; background: var(--emerald-500); color: white; border-radius: 3px; font-weight: 700; vertical-align: 1px;">IN-SCOPE</span> &nbsp;maintainer treats this as a real vuln, so <strong>file the crash</strong></div>
+                                <div><span style="display: inline-block; font-family: var(--font-mono); font-size: 0.65rem; padding: 2px 6px; background: var(--red-500); color: white; border-radius: 3px; font-weight: 700; vertical-align: 1px;">OUT-OF-SCOPE</span> &nbsp;caller-contract or unsupported, so <strong>drop the crash</strong></div>
+                                <div><code>↳ DOC:&lt;path&gt;</code> &nbsp;mandatory upstream citation. No DOC, no rule.</div>
+                                <div><code>feeds_into TB-N</code> &nbsp;maintainer's reply hardened rule TB-N</div>
+                                <div><span style="display: inline-block; font-family: var(--font-mono); font-size: 0.65rem; padding: 2px 6px; background: var(--slate-700); color: var(--red-400); border-radius: 3px; font-weight: 700; vertical-align: 1px;">WONTFIX</span> &nbsp;crash class the maintainer has historically rejected</div>
+                                <div style="grid-column: 1 / -1; color: var(--text-muted); font-style: italic;">When a candidate crash matches an OUT-OF-SCOPE rule, the gate at the bottom drops it before filing.</div>
+                            </div>
+
+                            <!-- Threat Model -->
+                            <div style="margin-bottom: var(--spacing-md);">
+                                <div style="display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 8px;">
+                                    <span style="display: inline-block; font-family: var(--font-mono); font-size: var(--font-size-xs); font-weight: 600; padding: 3px 10px; border-radius: 999px; background: rgba(99, 102, 241, 0.18); color: var(--primary-light); letter-spacing: 0.05em;">THREAT MODEL</span>
+                                    <span style="color: var(--text-muted); font-size: var(--font-size-xs); font-style: italic;">how the maintainer treats untrusted input, in one paragraph</span>
+                                </div>
+                                <p style="color: var(--text-secondary); margin: 0; line-height: 1.55;">Accessors do not bounds-check. Callers MUST run the Verifier on untrusted bytes before any <code>GetRoot&lt;T&gt;</code> / <code>Get*</code> / <code>operator[]</code> access. Reflection paths assume schemas come from the project itself.</p>
+                                <div style="margin-top: 8px; font-family: var(--font-mono); font-size: var(--font-size-xs); color: var(--text-faint);">↳ DOC:docs/source/CppUsage.md#L120</div>
+                            </div>
+
+                            <!-- Trust Boundaries -->
+                            <div style="margin-bottom: var(--spacing-md);">
+                                <div style="display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 8px;">
+                                    <span style="display: inline-block; font-family: var(--font-mono); font-size: var(--font-size-xs); font-weight: 600; padding: 3px 10px; border-radius: 999px; background: rgba(99, 102, 241, 0.18); color: var(--primary-light); letter-spacing: 0.05em;">TRUST BOUNDARIES</span>
+                                    <span style="color: var(--text-muted); font-size: var(--font-size-xs); font-style: italic;">case-by-case rules that decide whether a crash on a given path is filed or dropped</span>
+                                </div>
+
+                                <div style="display: grid; gap: 8px;">
+                                    <!-- TB-1 OUT -->
+                                    <div style="padding: 10px 14px; background: rgba(239, 68, 68, 0.08); border-left: 3px solid var(--red-500); border-radius: var(--radius-sm);">
+                                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+                                            <span style="font-family: var(--font-mono); font-size: var(--font-size-xs); color: var(--red-400); font-weight: 700;">TB-1</span>
+                                            <span style="font-family: var(--font-mono); font-size: 0.7rem; padding: 2px 8px; background: var(--red-500); color: white; border-radius: 4px; font-weight: 700; letter-spacing: 0.08em;">OUT-OF-SCOPE</span>
+                                        </div>
+                                        <div style="color: var(--text-primary); line-height: 1.5;">Bytes passed to <code>GetRoot&lt;T&gt;</code> without a prior <code>VerifyBuffer</code> are caller-trusted.</div>
+                                        <div style="font-family: var(--font-mono); font-size: var(--font-size-xs); color: var(--text-faint); margin-top: 4px;">↳ DOC:docs/source/CppUsage.md#L120-L142</div>
+                                    </div>
+
+                                    <!-- TB-2 OUT -->
+                                    <div style="padding: 10px 14px; background: rgba(239, 68, 68, 0.08); border-left: 3px solid var(--red-500); border-radius: var(--radius-sm);">
+                                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+                                            <span style="font-family: var(--font-mono); font-size: var(--font-size-xs); color: var(--red-400); font-weight: 700;">TB-2</span>
+                                            <span style="font-family: var(--font-mono); font-size: 0.7rem; padding: 2px 8px; background: var(--red-500); color: white; border-radius: 4px; font-weight: 700; letter-spacing: 0.08em;">OUT-OF-SCOPE</span>
+                                        </div>
+                                        <div style="color: var(--text-primary); line-height: 1.5;">Schema reflection assumes the <code>.bfbs</code> schema is project-controlled, not attacker input.</div>
+                                        <div style="font-family: var(--font-mono); font-size: var(--font-size-xs); color: var(--text-faint); margin-top: 4px;">↳ DOC:include/flatbuffers/reflection.h#L45-L78</div>
+                                    </div>
+
+                                    <!-- TB-3 IN -->
+                                    <div style="padding: 10px 14px; background: rgba(16, 185, 129, 0.08); border-left: 3px solid var(--emerald-500); border-radius: var(--radius-sm);">
+                                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+                                            <span style="font-family: var(--font-mono); font-size: var(--font-size-xs); color: var(--emerald-400); font-weight: 700;">TB-3</span>
+                                            <span style="font-family: var(--font-mono); font-size: 0.7rem; padding: 2px 8px; background: var(--emerald-500); color: white; border-radius: 4px; font-weight: 700; letter-spacing: 0.08em;">IN-SCOPE</span>
+                                        </div>
+                                        <div style="color: var(--text-primary); line-height: 1.5;">Crash on a buffer that <em>passed</em> Verify is a real bug. The Verifier is incomplete.</div>
+                                        <div style="font-family: var(--font-mono); font-size: var(--font-size-xs); color: var(--text-faint); margin-top: 4px;">↳ DOC:docs/source/Tutorial.md#L312</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- API Scope -->
+                            <div style="margin-bottom: var(--spacing-md);">
+                                <div style="display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 8px;">
+                                    <span style="display: inline-block; font-family: var(--font-mono); font-size: var(--font-size-xs); font-weight: 600; padding: 3px 10px; border-radius: 999px; background: rgba(99, 102, 241, 0.18); color: var(--primary-light); letter-spacing: 0.05em;">API SCOPE</span>
+                                    <span style="color: var(--text-muted); font-size: var(--font-size-xs); font-style: italic;">which APIs we treat as the real attack surface, vs. caller-internal helpers</span>
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                    <div style="padding: 12px; background: rgba(16, 185, 129, 0.06); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: var(--radius-sm);">
+                                        <div style="font-family: var(--font-mono); font-size: var(--font-size-xs); color: var(--emerald-400); font-weight: 700; margin-bottom: 6px; letter-spacing: 0.05em;">✓ IN-SCOPE</div>
+                                        <ul style="margin: 0; padding-left: 18px; color: var(--text-secondary); font-family: var(--font-mono); font-size: var(--font-size-xs); line-height: 1.8;">
+                                            <li><code>Verifier::Verify*</code></li>
+                                            <li><code>GetRoot&lt;T&gt;</code> after Verify</li>
+                                            <li><code>flatc</code> CLI input</li>
+                                        </ul>
+                                    </div>
+                                    <div style="padding: 12px; background: rgba(239, 68, 68, 0.06); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: var(--radius-sm);">
+                                        <div style="font-family: var(--font-mono); font-size: var(--font-size-xs); color: var(--red-400); font-weight: 700; margin-bottom: 6px; letter-spacing: 0.05em;">✗ OUT-OF-SCOPE</div>
+                                        <ul style="margin: 0; padding-left: 18px; color: var(--text-secondary); font-family: var(--font-mono); font-size: var(--font-size-xs); line-height: 1.8;">
+                                            <li><code>reflection::*</code> &nbsp;<span style="color: var(--text-faint);">(TB-2)</span></li>
+                                            <li><code>test/*</code> harness helpers</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Crash Class Policy -->
+                            <div style="margin-bottom: var(--spacing-md);">
+                                <div style="display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 8px;">
+                                    <span style="display: inline-block; font-family: var(--font-mono); font-size: var(--font-size-xs); font-weight: 600; padding: 3px 10px; border-radius: 999px; background: rgba(99, 102, 241, 0.18); color: var(--primary-light); letter-spacing: 0.05em;">CRASH-CLASS POLICY</span>
+                                    <span style="color: var(--text-muted); font-size: var(--font-size-xs); font-style: italic;">crash categories the maintainer has historically rejected as not-a-vuln</span>
+                                </div>
+                                <div style="display: grid; gap: 6px;">
+                                    <div style="display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; padding: 8px 14px; background: rgba(0,0,0,0.18); border-radius: var(--radius-sm);">
+                                        <span style="font-family: var(--font-mono); font-size: 0.7rem; padding: 2px 8px; background: var(--slate-700); color: var(--red-400); border-radius: 4px; font-weight: 700;">WONTFIX</span>
+                                        <span style="color: var(--text-secondary);">OOM on adversarial schema</span>
+                                        <span style="font-family: var(--font-mono); font-size: var(--font-size-xs); color: var(--text-faint);">DOC:SECURITY.md#L24</span>
+                                    </div>
+                                    <div style="display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; padding: 8px 14px; background: rgba(0,0,0,0.18); border-radius: var(--radius-sm);">
+                                        <span style="font-family: var(--font-mono); font-size: 0.7rem; padding: 2px 8px; background: var(--slate-700); color: var(--red-400); border-radius: 4px; font-weight: 700;">WONTFIX</span>
+                                        <span style="color: var(--text-secondary);">Stack-overflow from unbounded recursion in unverified buffer</span>
+                                        <span style="font-family: var(--font-mono); font-size: var(--font-size-xs); color: var(--text-faint);">DOC:CppUsage.md#L155</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Observed Replies -->
+                            <div style="margin-bottom: var(--spacing-md);">
+                                <div style="display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 8px;">
+                                    <span style="display: inline-block; font-family: var(--font-mono); font-size: var(--font-size-xs); font-weight: 600; padding: 3px 10px; border-radius: 999px; background: rgba(99, 102, 241, 0.18); color: var(--primary-light); letter-spacing: 0.05em;">OBSERVED REPLIES</span>
+                                    <span style="color: var(--text-muted); font-size: var(--font-size-xs); font-style: italic;">real maintainer verdicts. Each one feeds back to harden a rule above.</span>
+                                </div>
+                                <div style="display: grid; gap: 8px;">
+                                    <!-- Real case 1: #9008 — Verifier-passed crash, accepted (validates TB-3) -->
+                                    <div style="padding: 10px 14px; background: rgba(0,0,0,0.18); border-left: 3px solid var(--emerald-500); border-radius: var(--radius-sm);">
+                                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px;">
+                                            <a href="https://github.com/google/flatbuffers/issues/9008" style="font-family: var(--font-mono); font-size: var(--font-size-xs); color: var(--primary-light); text-decoration: none;">flatbuffers#9008</a>
+                                            <span style="font-family: var(--font-mono); font-size: 0.7rem; padding: 2px 8px; background: var(--emerald-500); color: white; border-radius: 4px; font-weight: 700;">ACCEPTED</span>
+                                            <span style="font-family: var(--font-mono); font-size: var(--font-size-xs); color: var(--text-secondary);">heap-overflow · FlexBuffers ToString</span>
+                                            <span style="font-family: var(--font-mono); font-size: var(--font-size-xs); color: var(--text-faint);">→ feeds_into TB-3</span>
+                                        </div>
+                                        <div style="color: var(--text-secondary); font-size: var(--font-size-sm); line-height: 1.5;">PoC called <code>VerifyBuffer</code> first; <code>ToString</code> still read past a 4-byte heap allocation. Maintainer <code>steadytao</code> confirmed in 3 days and opened <a href="https://github.com/google/flatbuffers/pull/9011" style="color: var(--primary-light); text-decoration: none;">PR #9011</a> "Reject unterminated FlexBuffers keys during verification".</div>
+                                        <div style="font-family: var(--font-mono); font-size: var(--font-size-xs); color: var(--text-faint); margin-top: 4px;">filed 2026-03-30 · confirmed 2026-04-03 · pov_called_verifier true</div>
+                                    </div>
+                                    <!-- Real case 2: #9040 — reflection path, NO_VULNERABILITY (validates TB-2 even though fixed) -->
+                                    <div style="padding: 10px 14px; background: rgba(0,0,0,0.18); border-left: 3px solid var(--red-500); border-radius: var(--radius-sm);">
+                                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px;">
+                                            <a href="https://github.com/google/flatbuffers/issues/9040" style="font-family: var(--font-mono); font-size: var(--font-size-xs); color: var(--primary-light); text-decoration: none;">flatbuffers#9040</a>
+                                            <span style="font-family: var(--font-mono); font-size: 0.7rem; padding: 2px 8px; background: var(--red-500); color: white; border-radius: 4px; font-weight: 700;">NO_VULNERABILITY</span>
+                                            <span style="font-family: var(--font-mono); font-size: var(--font-size-xs); color: var(--text-secondary);">heap-overflow · Reflection VerifyObject</span>
+                                            <span style="font-family: var(--font-mono); font-size: var(--font-size-xs); color: var(--text-faint);">→ feeds_into TB-2</span>
+                                        </div>
+                                        <div style="color: var(--text-secondary); font-style: italic; font-size: var(--font-size-sm); line-height: 1.5;">"A similar HBO was reported before with <a href="https://github.com/google/flatbuffers/issues/8567" style="color: var(--primary-light); text-decoration: none; font-style: normal;">#8567</a>. The vulnerability assessment resulted in NO_VULNERABILITY, because the user has to ensure that the data is from a trusted source and has integrity. The finding still got fixed."</div>
+                                        <div style="font-family: var(--font-mono); font-size: var(--font-size-xs); color: var(--text-faint); margin-top: 4px;">— <code>kendegemaro</code>, 2026-04-13 · filed 2026-04-11 · cites prior verdict <a href="https://github.com/google/flatbuffers/issues/8567" style="color: var(--text-muted); text-decoration: none;">#8567</a></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Gate -->
+                            <div>
+                                <div style="display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 8px;">
+                                    <span style="display: inline-block; font-family: var(--font-mono); font-size: var(--font-size-xs); font-weight: 600; padding: 3px 10px; border-radius: 999px; background: rgba(245, 158, 11, 0.18); color: var(--amber-500); letter-spacing: 0.05em;">GATE</span>
+                                    <span style="color: var(--text-muted); font-size: var(--font-size-xs); font-style: italic;">hard rule rather than advisory. An OUT-OF-SCOPE match must be dropped, not filed.</span>
+                                </div>
+                                <div style="padding: 12px 14px; background: rgba(245, 158, 11, 0.06); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: var(--font-size-xs); color: var(--text-secondary); line-height: 1.7;">
+                                    <div><span style="color: var(--amber-500);">on_match_out_of_scope</span> <strong style="color: var(--text-primary);">drop</strong> &nbsp;→&nbsp; <span style="color: var(--text-faint);">log to dropped_crashes/&lt;batch_id&gt;.yaml</span></div>
+                                    <div style="margin-top: 4px;"><span style="color: var(--amber-500);">must_record</span> trust_boundary_id · source_doc_line · sanitizer_top_frames</div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <h3>Three Real Cases Where the Proxy Saves You</h3>
+
+                        <h4>Case 1. flatbuffers, where any crash without Verifier does not count</h4>
+                        <p>
+                            The flatbuffers maintainers repeat the same instruction across their documentation and the <code>CppUsage</code> guide. Your code must call <code>VerifyBuffer</code> before it touches the data. If you skip Verifier and go straight to <code>GetRoot&lt;T&gt;</code> and read fields, that is a caller-contract violation, and any crash that follows is not a library bug.
+                        </p>
+                        <p>
+                            That is why every LG we fuzz on flatbuffers gets a proxy lookup first. Does this LG run the Verifier? If not, an OOB-looking crash from the fuzzer is not fileable. Among the 8 flatbuffers findings from this campaign, several candidate crashes were identified at the proxy layer as "needs Verify first." We only filed the ones that still crashed after we added <code>VerifyBuffer</code> in front.
+                        </p>
+
+                        <h4>Case 2. libxml2 does not pretend to trust its input</h4>
+                        <p>
+                            libxml2's stance in <code>SECURITY.md</code> is unusually direct. The library <strong>unconditionally trusts</strong> the XML it parses. "Don't feed it untrusted input" is the official guidance. Many parser-path crashes, including OOM and unbounded recursion, are simply "you fed it garbage" in the maintainer's eyes. They are not vulnerabilities.
+                        </p>
+                        <p>
+                            Without a proxy, the easy mistake is to see ASan throw an OOM and file it on the spot, only to be closed with a single "WONTFIX, see SECURITY.md." That kind of technically-correct-but-useless report slowly erodes your account's reputation. The proxy lets us check the citation first. If the root cause sits on this trust boundary, the crash goes to <code>dropped</code> with the reason recorded cleanly.
+                        </p>
+
+                        <h4>Case 3. Dawn (WebGPU), where the BlobCache is not a trust boundary</h4>
+                        <p>
+                            Dawn's runtime API is a strong trust boundary. The browser layer validates inputs, and the parser revalidates internally. The on-disk BlobCache, however, is not. Dawn's design document <strong>explicitly states</strong> that BlobCache is an integrity check, meant to catch accidental corruption, and not an authenticity check that would catch malicious tampering.
+                        </p>
+                        <p>
+                            Which means, if your fuzz path can only trigger a crash by modifying the BlobCache file on disk, the Dawn maintainers will mark it WontFix. An attacker who can write to that file already has more direct ways to compromise the machine. We encode this in the proxy so we never bring that kind of crash to their inbox.
+                        </p>
+
+                        <h3>What It Costs to Skip the Proxy</h3>
+                        <p>
+                            In this campaign we hit one boundary the proxy did not yet cover. V8's <code>uaf-v8-deserializer-unresolved-external-reference</code> was a real UAF technically, P1 through P4 were clean, and both replay and production reproduction passed. But the V8 team's <a href="https://chromium.googlesource.com/v8/v8/+/HEAD/docs/security/triaging.md#relying-on-broken-snapshots-to-craft-vulnerabilities">security triaging policy</a> explicitly lists "vulnerabilities that rely on an attacker-controlled snapshot blob" as out of scope. We filed it, the issue came back Won't Fix, and it became one of three FPs in this round.
+                        </p>
+                        <p>
+                            If the proxy had encoded V8's policy before we filed (we did not have a V8 proxy at the time), that report would have been dropped before submission. Losing a round on something like that made us more confident in the proxy's engineering value. <strong>Its purpose is not to find fewer bugs. Its purpose is to not waste the maintainer's time.</strong>
+                        </p>
+                    </section>
+
+                    <!-- The cost of FPs -->
+                    <section>
+                        <h2>Why This Is Worth Doing</h2>
+                        <p>
+                            On pure throughput, the verify flow adds 5 to 60 minutes per crash. Across an overnight fuzz that produces tens of thousands of crashes, that is a massive efficiency hit. But <strong>what we lose is not real bugs, only noise.</strong> Each of the three gates exists to cut that noise earlier and earlier.
+                        </p>
+                        <p>
+                            The payoff is slow but real. The first time a maintainer encounters you, they see a report with a root cause, a public-API reproducer, and a fix patch. The second time, they ack on their own. After three or five rounds, they start adopting your harnesses directly into their OSS-Fuzz integration. That is the OpenSSL <code>quic_server</code> and fwupd story from <a href="four-principles-harness-audit.html">Part 1</a>, where four maintainer teams picked up our work.
+                        </p>
+                        <p>
+                            The cost of skipping is also delayed. You will not immediately see "reputation loss," but slowly your GitHub handle gets muted by certain maintainers, your issues default to low priority, your PRs sit unreviewed. That is the psychological debt LLM-driven fuzz work leaves behind for the whole ecosystem.
+                        </p>
+                        <p>
+                            There is another subtle payoff to running all three gates. You <strong>know which crashes you did not file and why.</strong> When a maintainer asks "Why didn't you report X?", we can pull up the <code>dropped_crashes</code> log and show the reason on the spot. That kind of transparency is also part of ecosystem trust.
+                        </p>
+                    </section>
+
+                    <!-- Open questions -->
+                    <section>
+                        <h2>Open Questions We're Still Working On</h2>
+                        <p>
+                            This flow is not the end of the story. These are the questions we care most about right now.
+                        </p>
+                        <ul>
+                            <li><strong>Automatically generating the proxy.</strong> Hand-writing a <code>security_proxy.yaml</code> for every new library is real work. We are extracting rules automatically from <code>SECURITY.md</code>, public headers, and README files, but a human still has to review whether each extraction is correct and whether the citation lands on the right line.</li>
+                            <li><strong>Proxy decay.</strong> The upstream threat model shifts over time as new sandboxes and new trusted boundaries get added, and the proxy has no staleness signal. We need a way to actively invalidate proxy entries when maintainers update their docs.</li>
+                            <li><strong>Libraries with no proxy.</strong> Many projects publish no threat model at all. Our default for those is the strictest possible posture, where we only file unambiguous memory-safety bugs. That is a bet, and we are probably missing edge cases the maintainer would have been happy to fix.</li>
+                            <li><strong>Second-order effects.</strong> The failure mode that worries us most is not FP spam. It is <strong>real bugs getting auto-closed by maintainers</strong> who have seen too many low-quality LLM reports and now treat anything automated as low-quality by default. That is an ecosystem-wide trust slide, and no single team's verify flow can catch it. This is the topic we most want to discuss with the OpenSSF working group.</li>
+                        </ul>
+                    </section>
+
+                    <!-- Recap -->
+                    <section>
+                        <h2>Three Posts End to End, From Harness Audit to Bug Report</h2>
+                        <p>
+                            Across these three posts, we have applied the <strong>four principles</strong> three different ways.
+                        </p>
+                        <ul>
+                            <li><a href="four-principles-harness-audit.html"><strong>Part 1</strong></a>. The four principles as an <em>audit</em> tool. Applied to existing OSS-Fuzz harnesses, the audit prevented 14 FPs from ever reaching upstream, produced 53 fix PRs, and surfaced an OpenSSL bug that had been latent for 25 years.</li>
+                            <li><a href="logic-groups-and-reverse-four-principles.html"><strong>Part 2</strong></a>. The four principles as a <em>generation</em> tool, applied in reverse (P4 first, P1 last) with Logic Group decomposition. In two weeks we deployed 472 harnesses across Chromium and its dependencies, filed 30 reports upstream (16 acked so far, 9 confirmed plus 7 fixed), and dropped 52 candidates at our own audit stage.</li>
+                            <li><strong>This post</strong>. The four principles as a <em>verification</em> tool, on the specific crash path, combined with two independent reproductions and per-library Security Proxies. The result is that every issue we file is genuinely useful to the maintainer.</li>
+                        </ul>
+                        <p>
+                            That a single rule set works in audit, generation, and verification suggests we picked the right level of abstraction. Source-level correctness definitions hold up, while post-hoc filtering on fuzz output does not. That is the headline of this series. <strong>Harness quality is the bottleneck for fuzz effectiveness, and the way to fix it is to internalize source-level checks at generation time rather than rely on verify-time triage to save the day.</strong>
+                        </p>
+                    </section>
+
+                    <!-- What's next -->
+                    <section class="future-section">
+                        <h2>Open to a Conversation</h2>
+                        <p>
+                            If you build LLM-driven fuzz harness generators, if you've been on the receiving end of low-quality automated reports on OSS-Fuzz, or if any of the four principles, Logic Groups, or Security Proxies work interests you, we'd be glad to talk.
+                        </p>
+                        <div class="next-steps">
+                            <div class="next-step">
+                                <h4>OpenSSF working group</h4>
+                                <p>What worries us most is not FP spam. It is real bugs getting auto-routed to low priority. We would like to discuss this with the LLM-generated bug-report triage working group.</p>
+                            </div>
+                            <div class="next-step">
+                                <h4>Open source</h4>
+                                <p>The four-principles sub-check list, the LG schema, and the verify-flow SKILL are all available on <a href="https://github.com/o2lab/afc-crs-all-you-need-is-a-fuzzing-brain">o2lab GitHub</a>. Reuse them freely.</p>
+                            </div>
+                            <div class="next-step">
+                                <h4>Chrome production data</h4>
+                                <p>All 472 harnesses, 30 filed reports, and 52 audit-dropped candidates from Part 2 are public on the chrome-maint dashboard.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <p style="text-align: right; margin-top: 3rem; color: #888; font-style: italic;">
+                        — Ze Sheng, O2 Security Team (TAMU)
+                    </p>
+
+                </div>
+            </div>
+        </article>
+
+        <!-- Footer -->
+        <nav class="post-navigation">
+            <a href="logic-groups-and-reverse-four-principles.html" class="post-nav-link prev"><span class="nav-label">Previous</span><span class="nav-title">← Adversarial Harness Generation</span></a>
+        </nav>
+
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-text">
+                    <p>&copy; 2026 All You Need Is A Fuzzing Brain Research Team</p>
+                    <p>Advancing autonomous vulnerability discovery through AI</p>
+                </div>
+                <div class="footer-links">
+                    <a href="https://github.com/fuzzingbrain"><img src="../assets/images/fuzzbrain.jpg" alt="GitHub" class="footer-logo"> GitHub</a>
+                    <a href="https://aicyberchallenge.com/">DARPA AIxCC</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="../script.js"></script>
+</body>
+</html>
