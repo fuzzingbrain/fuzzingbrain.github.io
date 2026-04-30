@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring 2026 Campaign Update: 103 Zero-Days, 56 Projects, Three Methodology Posts - FuzzingBrain</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
+</head>
+<body>
+    <a href="#main-content" class="skip-to-content">Skip to main content</a>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="../index.html" class="logo-link">
+                        <img src="../assets/images/fuzzbrain.jpg" alt="FuzzingBrain Logo" class="brain-logo">
+                        <h1>FuzzingBrain</h1>
+                    </a>
+                </div>
+                <button class="mobile-menu-btn" aria-label="Toggle navigation menu">
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                </button>
+                <nav class="nav" aria-label="Main navigation">
+                    <a href="../documentation.html">Docs</a>
+                    <a href="../quickstart.html">Quickstart</a>
+                    <a href="../blog.html" class="nav-active">Blog</a>
+                    <a href="../index.html#results">Results</a>
+                    <a href="https://github.com/o2lab/afc-crs-all-you-need-is-a-fuzzing-brain" class="nav-cta" target="_blank" rel="noopener noreferrer">GitHub</a>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Article Header -->
+        <article class="blog-post" id="main-content">
+            <div class="post-header">
+                <div class="section-content">
+                    <nav class="breadcrumb"><a href="../index.html">Home</a><span class="separator">/</span><a href="../blog.html">Blog</a><span class="separator">/</span><span class="current">Spring 2026 Campaign Update</span></nav>
+                    <div class="post-meta">
+                        <span class="post-date">April 30, 2026</span>
+                        <span class="post-category">Campaign Update</span>
+                        <span class="post-readtime">6 min read</span>
+                    </div>
+                    <h1 class="post-title-main">Spring 2026 Campaign Update: 103 Zero-Days, 56 Projects, Three Methodology Posts</h1>
+                    <p class="post-subtitle">A short stage report. We are proud to announce the latest numbers from our open-source security campaign. <strong>103 vulnerabilities filed upstream across 56 projects, with 58 already patched and 12 confirmed.</strong> Most of this period went into harness quality. We are publishing three methodology posts alongside this update that explain, in order, how we did it.</p>
+                </div>
+            </div>
+
+            <!-- Post Content -->
+            <div class="post-content">
+                <div class="section-content">
+
+                    <!-- Hero Stats -->
+                    <section class="results-hero">
+                        <div class="results-banner">
+                            <h2>Headline Numbers</h2>
+                            <div class="results-stats">
+                                <div class="result-stat">
+                                    <div class="stat-icon">103</div>
+                                    <div class="stat-value">Filed Upstream</div>
+                                    <div class="stat-label">Across 56 open-source projects</div>
+                                </div>
+                                <div class="result-stat">
+                                    <div class="stat-icon">58</div>
+                                    <div class="stat-value">Patched</div>
+                                    <div class="stat-label">Fix landed in upstream releases</div>
+                                </div>
+                                <div class="result-stat">
+                                    <div class="stat-icon">12</div>
+                                    <div class="stat-value">Confirmed</div>
+                                    <div class="stat-label">Acknowledged, fix in queue</div>
+                                </div>
+                                <div class="result-stat">
+                                    <div class="stat-icon">&lt;5%</div>
+                                    <div class="stat-value">FP Rate</div>
+                                    <div class="stat-label">Across all live filings</div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- What we did in this period -->
+                    <section>
+                        <h2>This Period: We Spent It on the Harness Layer</h2>
+                        <p>
+                            Stepping back, the question that drove this campaign was simple. If you want an LLM to find real bugs in mainstream open-source code, the bottleneck is rarely the LLM. The bottleneck is the harness, the small program that bridges fuzz bytes and library APIs. A bad harness produces convincing-looking false-positive crashes, drowns the maintainer in noise, and trains the ecosystem to mistrust automated reports. A good harness narrows the LLM's freedom to fail in ways that matter and points the fuzzer at the code paths that actually exist on a real attack surface.
+                        </p>
+                        <p>
+                            So we spent this period on harness quality. Three methodology posts, all published today, document what we did in the order we did it. The cards below link to each one.
+                        </p>
+                    </section>
+
+                    <!-- Step 1: Blog 1 -->
+                    <section>
+                        <h2>Step 1. Define a "Correct Harness", Then Audit Existing Ones</h2>
+                        <p>
+                            Before we could generate good harnesses, we needed a checkable definition of "good". We propose the <strong>Four Principles</strong> (P1 Logic Correctness, P2 API Protocol Compliance, P3 Security Boundary Respect, P4 Entry Point Adequacy) as a source-level checklist, expanded into 16 mechanizable sub-checks. Then we validated the criteria by auditing 586 production OSS-Fuzz harnesses across 70 projects, treating them as if they were a first-round LLM output and seeing whether the principles flag the actual problems maintainers care about. They did. 53 fix PRs filed, 45 verified or merged by maintainers, 14 false-positive crash reports caught at audit before they could reach upstream, and two real upstream library bugs surfaced when broken harnesses were repaired (including a stack-buffer over-read that had been latent in OpenSSL DES for 25 years).
+                        </p>
+                        <article class="post-preview published" style="margin: 1.5rem 0;">
+                            <div class="post-meta">
+                                <span class="post-date">April 30, 2026</span>
+                                <span class="post-category">Methodology · Part 1</span>
+                            </div>
+                            <h3 class="post-title">
+                                <a href="four-principles-harness-audit.html">Harnesses Have Bugs Too: A Four-Principles Audit of 586 OSS-Fuzz Harnesses</a>
+                            </h3>
+                            <p class="post-excerpt">
+                                Before generating "good" fuzz harnesses, we need a checkable definition of "good". This post offers the Four Principles, then validates them by auditing 586 production OSS-Fuzz harnesses across 70 projects. 53 fix PRs filed, 45 verified or merged, 14 false positives caught at audit, two real upstream bugs surfaced when broken harnesses were repaired.
+                            </p>
+                            <div class="published-label">Read Part 1 →</div>
+                        </article>
+                    </section>
+
+                    <!-- Step 2: Blog 2 -->
+                    <section>
+                        <h2>Step 2. Point the Same Principles at Google Chromium</h2>
+                        <p>
+                            With the criteria validated as an audit tool, we flipped the direction and applied them to <em>generating</em> harnesses for one of the most security-critical pieces of software in deployment: <strong>Google Chromium and its vendor stack</strong>. The reverse pipeline starts at P4 (which attack surface is worth fuzzing), then P3 (does it sit on a public boundary), then P2 (the API protocol), and only at the end runs P1 (write the code). Logic Group does the semantic-unit slicing per library. In two weeks we generated 472 harnesses across 58 Chromium-stack libraries (libvpx, libwebp, libaom, openscreen, dawn, pdfium, sqlite, v8, and friends), and filed 30 vulnerabilities upstream so far.
+                        </p>
+                        <article class="post-preview published" style="margin: 1.5rem 0;">
+                            <div class="post-meta">
+                                <span class="post-date">April 30, 2026</span>
+                                <span class="post-category">Methodology · Part 2</span>
+                            </div>
+                            <h3 class="post-title">
+                                <a href="logic-groups-and-reverse-four-principles.html">Two Weeks Inside Chromium: 472 Harnesses, 30 Vulnerabilities Filed Upstream</a>
+                            </h3>
+                            <p class="post-excerpt">
+                                Point the four principles at Google Chromium and its vendor stack. Flip the principles into a generation criterion, pair with Logic Group as the semantic-unit slicer, every harness goes through Stage-4 adversarial probing. Two weeks: 472 harnesses, 30 vulnerabilities filed upstream, and 52 candidates dropped before any could reach a maintainer.
+                            </p>
+                            <div class="published-label">Read Part 2 →</div>
+                        </article>
+                    </section>
+
+                    <!-- Step 3: Blog 3 -->
+                    <section>
+                        <h2>Step 3. Filing Quality, Not Just Filing Count</h2>
+                        <p>
+                            Volume is only useful if quality holds. We are equally proud of the third number, <strong>under 5% FP across everything we file</strong>. The third post documents how we drop FP candidates before they reach upstream. Three gates: re-run the four principles on the specific crash trace, reproduce the crash twice independently (once through the harness, once through a public-API path), then align the result with a per-library <strong>Security Proxy</strong> that encodes the maintainer's documented threat model. We also keep a record of the candidates we did <em>not</em> file and why.
+                        </p>
+                        <article class="post-preview published" style="margin: 1.5rem 0;">
+                            <div class="post-meta">
+                                <span class="post-date">April 30, 2026</span>
+                                <span class="post-category">Methodology · Part 3</span>
+                            </div>
+                            <h3 class="post-title">
+                                <a href="how-we-verify-fuzzer-crashes.html">How We Verify Fuzzer Crashes: Four Principles, Two Reproductions, and Security Proxies</a>
+                            </h3>
+                            <p class="post-excerpt">
+                                A fuzzer can produce 24,000 crashes overnight and almost none deserve to be filed. We hold every candidate behind three gates: a four-principles re-audit on the crash path, two independent reproductions, and per-library Security Proxies aligned with the maintainer's threat model. Together they keep our false-positive rate under 5% and keep every report genuinely useful.
+                            </p>
+                            <div class="published-label">Read Part 3 →</div>
+                        </article>
+                    </section>
+
+                    <!-- What's next -->
+                    <section class="future-section">
+                        <h2>What Comes Next</h2>
+                        <p>
+                            The 33 still-in-flight submissions are being chased through the same Security Proxies. The 12 acknowledged-but-not-yet-merged are waiting on upstream maintainer time, not on us. The next batch of harness generation widens the Chromium dependency graph (mojo IPC and Skia are next on the list) and extends the same Four Principles framework to a few network-stack libraries beyond Chrome.
+                        </p>
+                        <p>
+                            We are also continuing to publish the underlying dataset. The audit results, the Logic Group definitions per library, the Security Proxy YAMLs, and the harness sources are all in the public repo. If you build LLM-driven fuzz harness generation, sit on the receiving side of OSS-Fuzz reports as a maintainer, or just want to compare notes on harness quality, we would like to hear from you.
+                        </p>
+                    </section>
+
+                    <p style="text-align: right; margin-top: 3rem; color: #888; font-style: italic;">
+                        — Ze Sheng · Team FuzzingBrain
+                    </p>
+
+                </div>
+            </div>
+        </article>
+
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-text">
+                    <p>&copy; 2026 All You Need Is A Fuzzing Brain Research Team</p>
+                    <p>Advancing autonomous vulnerability discovery through AI</p>
+                </div>
+                <div class="footer-links">
+                    <a href="https://github.com/fuzzingbrain"><img src="../assets/images/fuzzbrain.jpg" alt="GitHub" class="footer-logo"> GitHub</a>
+                    <a href="https://aicyberchallenge.com/">DARPA AIxCC</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="../script.js"></script>
+</body>
+</html>
