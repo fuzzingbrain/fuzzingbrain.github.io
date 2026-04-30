@@ -171,18 +171,60 @@
                             库的每个 API 都有自己的使用协议:什么时候 init、什么时候 destroy、参数允许哪些范围、返回值需不需要检查、哪些调用必须配对。LLM 生成的 harness 经常违反这些协议,因为它无法从单个函数签名看出整个状态机。具体的 8 条 P2 子检查在下文 P1.1–P2.8 清单里列全。
                         </p>
                         <p>
-                            举一个真碰到的例子。OSS-Fuzz 上的 <code>libyaml_emitter_fuzzer</code> 在喂 emitter 之前要先用一个本地 helper <code>copy_event()</code> 把解析出的 event 拷进 ring buffer。helper 沿用 libyaml 的约定:<strong>成功返回 1,失败返回 0</strong>。harness 里的判定却长这样:
+                            举一个真碰到的例子。OSS-Fuzz 上的 <code>libyaml_emitter_fuzzer</code> 想做一件"<em>round-trip 验证</em>"的事:把 fuzz 输入解析成 YAML event,送进 emitter 重新序列化,然后再 parse 一遍序列化结果,看 event 序列是否一致。harness 主控制流(精简后)长这样:
                         </p>
-<pre><code class="language-c">if (copy_event(&events[event_number++], &event)) {
-    yaml_event_delete(&event);
-    goto delete_parser;     // ← 错误处理入口
+<pre><code class="language-c">int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
+    yaml_parser_t parser;
+    yaml_emitter_t emitter;
+    yaml_event_t event;
+    yaml_event_t events[MAX_EVENTS];
+    size_t event_number = 0;
+
+    yaml_parser_initialize(&parser);
+    yaml_parser_set_input_string(&parser, data, size);
+    yaml_emitter_initialize(&emitter);
+
+    yaml_output_buffer_t out = { NULL, 0, 1000 };
+    yaml_emitter_set_output(&emitter, yaml_write_handler, &out);
+
+    /* ---- Loop 1: parse → save event → emit ---- */
+    bool done = false;
+    while (!done) {
+        if (!yaml_parser_parse(&parser, &event)) goto delete_parser;
+        done = (event.type == YAML_STREAM_END_EVENT);
+
+        if (copy_event(&events[event_number++], &event)) {  // ← BUG
+            yaml_event_delete(&event);                       //   返回 1 = 成功,
+            goto delete_parser;                              //   harness 当作失败跳走
+        }
+
+        yaml_emitter_emit(&emitter, &event);   // 实际从未跑到
+    }
+
+    /* ---- Loop 2: re-parse 输出,逐 event 比对一致性 ---- */
+    /* (整段也是死代码,因为 Loop 1 永远从 BUG 处退出) */
+    yaml_parser_set_input_string(&parser, out.buf, out.size);
+    int count = 0;
+    while (!done) {
+        if (!yaml_parser_parse(&parser, &event)) break;
+        if (events_equal(events + count, &event)) break;
+        yaml_event_delete(&event);
+        count++;
+    }
+
+delete_parser:
+    yaml_parser_delete(&parser);
+    yaml_emitter_delete(&emitter);
+    for (int k = 0; k &lt; event_number; k++) yaml_event_delete(events + k);
+    free(out.buf);
+    return 0;
 }
 </code></pre>
                         <p>
-                            <strong>哪错了:</strong>条件反了。<code>copy_event</code> 返回 1 是成功,但 harness 把 1 当成了"失败",一旦拷成功就直接跳进错误清理。
+                            <strong>哪错了:</strong>第 21 行那一句 <code>if (copy_event(...))</code> 把判断反了。helper <code>copy_event()</code> 沿用 libyaml 的约定:<strong>成功返回 1,失败返回 0</strong>。harness 把 1 当成了"失败",每次拷成功就直接跳进错误清理。
                         </p>
                         <p>
-                            <strong>为什么错:</strong>对任何合法 YAML 输入,fuzzer 都会在第一个 event 上短路退出。后面整个 emitter pipeline(<code>yaml_emitter_emit</code>)、第二轮 re-parser、event 等价比较 —— 全是死代码。整个 harness 大概 <strong>50% 的逻辑从来没被执行过</strong>,但它编译能过、运行不崩、还能涨 coverage(涨在那 50% 还在跑的部分),所以在 OSS-Fuzz 上稳稳跑了多年没人发现。
+                            <strong>为什么错:</strong>对任何合法 YAML 输入,fuzzer 都在第一个 event 上短路退出。Loop 1 里的 <code>yaml_emitter_emit</code> 永远不跑,Loop 2 整段(re-parse + <code>events_equal</code> 一致性比对)也永远跑不到。<strong>大约 50% 的 harness 逻辑从来没被执行过</strong>,但它编译能过、运行不崩、coverage 还在涨(涨在剩下 50% 还在跑的部分),所以在 OSS-Fuzz 上稳稳跑了多年没人发现。
                         </p>
                         <p>
                             修法只有一个字:加感叹号。<code>if (copy_event(...))</code> → <code>if (!copy_event(...))</code>。修完之后 fuzzer 的 edge coverage 从 166 涨到 2479,<strong>+1393%</strong>(约 15 倍)。这是典型的 <strong>P2.4(Return value handling)</strong> 违规 —— 返回值含义弄反,误把成功当失败。完整修复 PR:<a href="https://github.com/google/oss-fuzz/pull/15096">google/oss-fuzz#15096</a>,已合并。
