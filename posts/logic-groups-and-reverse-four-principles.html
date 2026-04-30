@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adversarial Harness Generation on the Four Principles: 472 Harnesses × 30 Vulns × 2 Weeks - FuzzingBrain</title>
+    <title>Two Weeks Inside Chromium: 472 Harnesses, 30 Vulnerabilities Filed Upstream - FuzzingBrain</title>
     <link rel="stylesheet" href="../styles.css">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
@@ -39,14 +39,14 @@
         <article class="blog-post" id="main-content">
             <div class="post-header">
                 <div class="section-content">
-                    <nav class="breadcrumb"><a href="../index.html">Home</a><span class="separator">/</span><a href="../blog.html">Blog</a><span class="separator">/</span><span class="current">Adversarial Harness Generation</span></nav>
+                    <nav class="breadcrumb"><a href="../index.html">Home</a><span class="separator">/</span><a href="../blog.html">Blog</a><span class="separator">/</span><span class="current">Two Weeks Inside Chromium</span></nav>
                     <div class="post-meta">
                         <span class="post-date">April 30, 2026</span>
                         <span class="post-category">Vulnerability Discovery</span>
                         <span class="post-readtime">15 min read</span>
                     </div>
-                    <h1 class="post-title-main">Adversarial Harness Generation on the Four Principles: 472 Harnesses × 30 Vulns × 2 Weeks</h1>
-                    <p class="post-subtitle">Part 1 used the four principles as an <em>audit</em> criterion, catching existing OSS-Fuzz harnesses after the fact. This post flips the direction. The principles become a <em>generation</em> criterion. Start at P4 by picking the attack surface, combine that with Logic Group as a semantic-unit slicer, then put every harness through Stage-4 adversarial probing as a built-in QA gate. Two weeks, <strong>472 harnesses across Chromium and its upstream dependencies</strong>, <strong>30 vulnerabilities filed upstream</strong> (16 acked so far with 9 confirmed and 7 fixed, 3 returned as FP, and 11 still awaiting review including 3 just-filed submissions), and <strong>52 candidate findings dropped by our pre-filing verify gate</strong> before any of them could reach a maintainer.</p>
+                    <h1 class="post-title-main">Two Weeks Inside Chromium: 472 Harnesses, 30 Vulnerabilities Filed Upstream</h1>
+                    <p class="post-subtitle">Part 1 used the four principles as an <em>audit</em> criterion, catching existing OSS-Fuzz harnesses after the fact. This post flips the direction and points the same principles at <strong>Google Chromium and its vendor stack</strong>. The principles become a <em>generation</em> criterion. Start at P4 by picking the attack surface inside the Chrome dependency graph, combine that with Logic Group as a semantic-unit slicer, then put every harness through Stage-4 adversarial probing as a built-in QA gate. Two weeks of pipeline output: <strong>472 harnesses across Chromium and its upstream dependencies</strong> (libvpx, libwebp, libaom, openscreen, dawn, pdfium, sqlite, v8, and friends), <strong>30 vulnerabilities filed upstream</strong> (16 acked so far with 9 confirmed and 7 fixed, 3 returned as FP, and 11 still awaiting review including 3 just-filed submissions), and <strong>52 candidate findings dropped by our pre-filing verify gate</strong> before any of them could reach a maintainer.</p>
                 </div>
             </div>
 
