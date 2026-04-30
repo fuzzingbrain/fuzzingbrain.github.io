@@ -323,14 +323,6 @@ delete_parser:
                             Implementation details (which sub-checks use LLM-read source with <code>file:line</code> citations, which use GDB breakpoints on the target API, which read ASan / LSan sanitizer traces) and how prober inputs differ across the three stages are covered in the <a href="logic-groups-and-reverse-four-principles.html">next post</a> on the reverse pipeline. This section just lays down the criteria themselves.
                         </p>
 
-                        <h3>为什么是这四条 —— 而不是三条或五条</h3>
-                        <p>
-                            四原则是<strong>层层递进</strong>的:P1 只关心 harness 自身;P2 关心 harness 和库之间的交互;P3 把视野扩大到"哪些路径在真实威胁模型里";P4 回到最现实的问题"这个目标值得测吗"。每加一条,审视的范围就大一层,最后一条覆盖了"是否真的找到了 bug"以外所有可能让 harness 失效的方式。
-                        </p>
-                        <p>
-                            少一条会有缺口 —— 例如砍掉 P3,LLM 生成的 harness 经常会"为了让 fuzzer 更快进入有趣代码"而<em>有意</em>跳过公开入口的校验,这是和真实攻击模型最违和的一种 cheating;砍掉 P4,你就没法解释为什么明明覆盖率涨了上游却不感兴趣。多一条则会让审计成本不再可承受 —— 我们试过加"P5: Reproducibility"和"P6: Coverage Non-Regression",发现都可以归并到 P1/P2 的子检查里,没有新增信息量。
-                        </p>
-
                     </section>
 
                     <!-- Audit Run -->
