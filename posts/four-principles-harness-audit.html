@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Harness 也会有 bug:基于四原则的 OSS-Fuzz Harness 审计 - FuzzingBrain</title>
+    <title>Harnesses Have Bugs Too: A Four-Principles Audit of 586 OSS-Fuzz Harnesses - FuzzingBrain</title>
     <link rel="stylesheet" href="../styles.css">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
@@ -45,8 +45,8 @@
                         <span class="post-category">Methodology</span>
                         <span class="post-readtime">14 min read</span>
                     </div>
-                    <h1 class="post-title-main">Harness 也会有 bug:基于四原则的 OSS-Fuzz Harness 审计</h1>
-                    <p class="post-subtitle">想让 LLM 自动生成"好"的 fuzz harness,先得回答一个更基础的问题:什么样的 harness 才算好,有没有一套准则?这篇提出我们的回答 —— 四原则。要验证它真的对,办法是看它能不能在生产代码上识别坏 harness:我们在 70 个 OSS-Fuzz 项目的 586 个 harness 上跑了一遍,拦下 14 个本会被错报的 FP,提了 53 个修复 PR,顺带把两个被失效 harness 长期掩盖的真上游 bug 暴露出来,其中一个在 OpenSSL DES 实现里潜伏了 25 年以上。</p>
+                    <h1 class="post-title-main">Harnesses Have Bugs Too: A Four-Principles Audit of 586 OSS-Fuzz Harnesses</h1>
+                    <p class="post-subtitle">Before we can ask an LLM to generate "good" fuzz harnesses, we need to answer a more basic question: what makes a harness good, and is there a checkable definition? This post offers our answer — the Four Principles — and validates it by applying the criteria to 586 production OSS-Fuzz harnesses across 70 projects. The audit prevented 14 false-positive crash reports from ever reaching upstream, produced 53 harness-fix PRs of which 45 (85%) were verified or merged by maintainers, and surfaced two real upstream bugs that broken harnesses had been masking for years — including one latent in OpenSSL's DES implementation for over 25 years.</p>
                 </div>
             </div>
 
