@@ -161,7 +161,7 @@
                             <li>API 调用里传的 buffer 大小和 harness 里声明的一致</li>
                         </ul>
                         <p>
-                            <strong>P1 违反 ⇒ 这个 crash 跟库无关,纯粹是 harness 自己崩。</strong>报上去就是噪声。
+                            <strong>P1 违反 ⇒ 根因是 harness 自身,但 sanitizer trace 不一定停在 harness 里。</strong>最常见的反而是 harness 把错误的状态(超长 buffer、NULL 指针、未初始化的 struct、被 free 过的对象等)传给库,然后<em>是库的代码</em>在 ASan / LSan 下崩 —— trace 看着像是库 bug,实则是 caller 一侧违反协议。这正是 P1 类 FP 最具迷惑性的地方。无论 trace 落在哪一侧,只要 P1 不通过,这个报告就是噪声。
                         </p>
 
                         <h3>P2 — API Protocol Compliance:harness 必须遵守库的契约</h3>
