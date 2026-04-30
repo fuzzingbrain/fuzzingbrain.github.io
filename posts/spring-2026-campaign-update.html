@@ -121,24 +121,39 @@
                             The pivot above came out of three connected milestones. First we needed a checkable definition of what makes a harness "good". Then we used that definition to generate new harnesses and find new bugs, with Chromium as the showcase target. Finally we put each candidate crash through a verify pipeline so the FP rate stays low. Each milestone gets its own post; the cards below link straight through.
                         </p>
 
-                        <div class="next-steps">
-                            <a href="four-principles-harness-audit.html" class="next-step" style="display: block; color: inherit; text-decoration: none; cursor: pointer;">
-                                <h4>Milestone 1 · Define what a "good" harness is</h4>
-                                <p style="margin: 0.5rem 0;"><strong>Harnesses Have Bugs Too: A Four-Principles Audit of 586 OSS-Fuzz Harnesses</strong></p>
-                                <p>The Four Principles checklist (P1 Logic Correctness, P2 API Protocol Compliance, P3 Security Boundary Respect, P4 Entry Point Adequacy), validated by auditing 586 production OSS-Fuzz harnesses. 53 fix PRs filed, 45 verified or merged. 14 false positives caught at audit. Two upstream library bugs unmasked when broken harnesses were repaired (including a 25-year-old OpenSSL DES over-read).</p>
-                                <p style="color: #6366f1; margin-top: 0.5rem;">Read Milestone 1 →</p>
+                        <div class="posts-grid" style="margin-top: var(--spacing-lg);">
+                            <a href="four-principles-harness-audit.html" style="display: block; text-decoration: none; color: var(--text-primary);">
+                                <article class="post-preview published" style="height: 100%;">
+                                    <div class="post-meta">
+                                        <span class="post-date">April 30, 2026</span>
+                                        <span class="post-category">Methodology · Milestone 1</span>
+                                    </div>
+                                    <h3 class="post-title" style="color: var(--text-primary);">Define what a "good" harness is</h3>
+                                    <p class="post-excerpt"><strong>Harnesses Have Bugs Too: A Four-Principles Audit of 586 OSS-Fuzz Harnesses.</strong> The Four Principles checklist (P1 Logic Correctness, P2 API Protocol Compliance, P3 Security Boundary Respect, P4 Entry Point Adequacy), validated by auditing 586 production OSS-Fuzz harnesses. 53 fix PRs filed, 45 verified or merged, 14 false positives caught at audit, two upstream bugs unmasked (including a 25-year-old OpenSSL DES over-read).</p>
+                                    <div class="published-label">Read Milestone 1 →</div>
+                                </article>
                             </a>
-                            <a href="logic-groups-and-reverse-four-principles.html" class="next-step" style="display: block; color: inherit; text-decoration: none; cursor: pointer;">
-                                <h4>Milestone 2 · Generate good harnesses on Chromium and find new bugs</h4>
-                                <p style="margin: 0.5rem 0;"><strong>Two Weeks Inside Chromium: 472 Harnesses, 30 Vulnerabilities Filed Upstream</strong></p>
-                                <p>The four principles flipped into a generation criterion (P4 → P1) and combined with Logic Group as a semantic-unit slicer. 472 harnesses generated across 58 Chromium-stack libraries (libvpx, libwebp, libaom, openscreen, dawn, pdfium, sqlite, v8 …). 30 vulnerabilities filed upstream. 52 candidates dropped at the verify gate.</p>
-                                <p style="color: #6366f1; margin-top: 0.5rem;">Read Milestone 2 →</p>
+                            <a href="logic-groups-and-reverse-four-principles.html" style="display: block; text-decoration: none; color: var(--text-primary);">
+                                <article class="post-preview published" style="height: 100%;">
+                                    <div class="post-meta">
+                                        <span class="post-date">April 30, 2026</span>
+                                        <span class="post-category">Methodology · Milestone 2</span>
+                                    </div>
+                                    <h3 class="post-title" style="color: var(--text-primary);">Generate good harnesses on Chromium, find new bugs</h3>
+                                    <p class="post-excerpt"><strong>Two Weeks Inside Chromium: 472 Harnesses, 30 Vulnerabilities Filed Upstream.</strong> The four principles flipped into a generation criterion (P4 → P1) and combined with Logic Group as a semantic-unit slicer. 472 harnesses across 58 Chromium-stack libraries (libvpx, libwebp, libaom, openscreen, dawn, pdfium, sqlite, v8 …). 30 vulnerabilities filed upstream. 52 candidates dropped at the verify gate.</p>
+                                    <div class="published-label">Read Milestone 2 →</div>
+                                </article>
                             </a>
-                            <a href="how-we-verify-fuzzer-crashes.html" class="next-step" style="display: block; color: inherit; text-decoration: none; cursor: pointer;">
-                                <h4>Milestone 3 · Verify each crash before we file it</h4>
-                                <p style="margin: 0.5rem 0;"><strong>How We Verify Fuzzer Crashes: Four Principles, Two Reproductions, and Security Proxies</strong></p>
-                                <p>The verify pipeline that keeps live FP under 5%. Three gates: re-run the four principles on the specific crash trace, two independent reproductions (harness replay plus public-API repro), and per-library Security Proxies that encode the maintainer's documented threat model.</p>
-                                <p style="color: #6366f1; margin-top: 0.5rem;">Read Milestone 3 →</p>
+                            <a href="how-we-verify-fuzzer-crashes.html" style="display: block; text-decoration: none; color: var(--text-primary);">
+                                <article class="post-preview published" style="height: 100%;">
+                                    <div class="post-meta">
+                                        <span class="post-date">April 30, 2026</span>
+                                        <span class="post-category">Methodology · Milestone 3</span>
+                                    </div>
+                                    <h3 class="post-title" style="color: var(--text-primary);">Verify each crash before we file it</h3>
+                                    <p class="post-excerpt"><strong>How We Verify Fuzzer Crashes: Four Principles, Two Reproductions, and Security Proxies.</strong> The verify pipeline that keeps live FP under 5%. Three gates: re-run the four principles on the specific crash trace, two independent reproductions (harness replay plus public-API repro), and per-library Security Proxies that encode the maintainer's documented threat model.</p>
+                                    <div class="published-label">Read Milestone 3 →</div>
+                                </article>
                             </a>
                         </div>
                     </section>
