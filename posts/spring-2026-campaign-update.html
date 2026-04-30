@@ -51,24 +51,29 @@
             <div class="post-content">
                 <div class="section-content">
 
-                    <!-- Hero Stats: all-time -->
+                    <!-- Hero Stats: all-time + delta vs last campaign -->
                     <section class="results-hero">
                         <div class="results-banner">
-                            <h2>All-Time Numbers</h2>
+                            <h2>Impact at a Glance</h2>
                             <div class="results-stats">
                                 <div class="result-stat">
                                     <div class="stat-icon">103</div>
-                                    <div class="stat-value">Filed Upstream</div>
-                                    <div class="stat-label">Across 56 open-source projects</div>
+                                    <div class="stat-value">Vulnerabilities</div>
+                                    <div class="stat-label">Discovered · <strong style="color: #10b981;">+41 since Feb</strong></div>
+                                </div>
+                                <div class="result-stat">
+                                    <div class="stat-icon">56</div>
+                                    <div class="stat-value">Projects</div>
+                                    <div class="stat-label">C / C++ ecosystem · <strong style="color: #10b981;">+30 since Feb</strong></div>
                                 </div>
                                 <div class="result-stat">
                                     <div class="stat-icon">70</div>
-                                    <div class="stat-value">Acknowledged by Maintainers</div>
-                                    <div class="stat-label">68% · 58 patched + 12 confirmed</div>
+                                    <div class="stat-value">Confirmed or Fixed</div>
+                                    <div class="stat-label">By maintainers · <strong style="color: #10b981;">+27 since Feb</strong></div>
                                 </div>
                                 <div class="result-stat">
                                     <div class="stat-icon">&lt;5%</div>
-                                    <div class="stat-value">FP Rate</div>
+                                    <div class="stat-value">False Positive Rate</div>
                                     <div class="stat-label">Across all live filings</div>
                                 </div>
                             </div>
@@ -79,32 +84,32 @@
                     <section>
                         <h2>What Changed Since the Last Campaign</h2>
                         <p>
-                            <a href="zero-day-vulnerability-discoveries.html">Our previous update</a>, in February, reported <strong>62 vulnerabilities across 26 projects</strong>. Most of those came from auditing existing OSS-Fuzz harnesses across the general open-source ecosystem. The work done since has been deliberately different. The focus shifted to <strong>generating new harnesses</strong> for projects that did not have good fuzz coverage to begin with, and the target list moved one tier deeper into security-critical software.
+                            <a href="zero-day-vulnerability-discoveries.html">Our previous update</a>, in February, reported 62 vulnerabilities across 26 projects. Most of those came from auditing existing OSS-Fuzz harnesses on the general open-source ecosystem. The work done since has been deliberately different. The focus shifted to <strong>generating new harnesses</strong> for projects that did not have good fuzz coverage to begin with, and the target list moved one tier deeper into security-critical software.
                         </p>
                         <p>
-                            The numbers reflect that pivot.
+                            Two numbers worth highlighting that the hero stats above do not show. They both come from the new generation pipeline.
                         </p>
 
                         <div class="performance-stats">
                             <div class="stat-box">
-                                <div class="stat-number">+41</div>
-                                <div class="stat-label">New Vulnerabilities</div>
-                                <div class="stat-detail">Filed upstream since February</div>
+                                <div class="stat-number">472</div>
+                                <div class="stat-label">Harnesses Generated</div>
+                                <div class="stat-detail">In two weeks across the Chrome dependency graph</div>
                             </div>
                             <div class="stat-box">
-                                <div class="stat-number">+24</div>
-                                <div class="stat-label">New Projects</div>
-                                <div class="stat-detail">Not present in the previous campaign</div>
+                                <div class="stat-number">52</div>
+                                <div class="stat-label">Candidates Dropped</div>
+                                <div class="stat-detail">Filtered by the verify gate before any could reach upstream</div>
                             </div>
                             <div class="stat-box">
                                 <div class="stat-number">59%</div>
-                                <div class="stat-label">Acknowledged</div>
-                                <div class="stat-detail">24 of 41 acked (15 fixed + 9 confirmed)</div>
+                                <div class="stat-label">Acked Within the Period</div>
+                                <div class="stat-detail">24 of the 41 new findings already acknowledged or merged</div>
                             </div>
                             <div class="stat-box">
-                                <div class="stat-number">472</div>
-                                <div class="stat-label">Harnesses Generated</div>
-                                <div class="stat-detail">In two weeks across the Chrome stack</div>
+                                <div class="stat-number">2</div>
+                                <div class="stat-label">Latent Bugs Surfaced</div>
+                                <div class="stat-detail">Real upstream bugs that broken harnesses had been hiding</div>
                             </div>
                         </div>
                     </section>
