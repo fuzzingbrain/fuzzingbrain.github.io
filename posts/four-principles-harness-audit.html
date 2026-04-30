@@ -172,7 +172,7 @@
                             Every library API comes with its own usage contract. The contract covers when to init, when to destroy, what parameter ranges are valid, which return values must be checked, and which calls must be paired. LLM-generated harnesses violate these contracts a lot, because the LLM cannot infer a full state machine from a single function signature. The eight P2 sub-checks are listed in the P1.1–P2.8 checklist below.
                         </p>
                         <p>
-                            举一个真碰到的例子。OSS-Fuzz 上的 <code>libyaml_emitter_fuzzer</code> 想做一件"<em>round-trip 验证</em>"的事:把 fuzz 输入解析成 YAML event,送进 emitter 重新序列化,然后再 parse 一遍序列化结果,看 event 序列是否一致。harness 主控制流(精简后)长这样:
+                            Here is a real example. The <code>libyaml_emitter_fuzzer</code> on OSS-Fuzz is meant to do a <em>round-trip check</em>. Parse the fuzz input into a sequence of YAML events, push them through the emitter to get a serialized output, then parse that output back and confirm the event sequence matches. The simplified main control flow looks like this.
                         </p>
 <pre class="line-numbers"><code class="language-c">int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     yaml_parser_t parser;
@@ -188,22 +188,22 @@
     yaml_output_buffer_t out = { NULL, 0, 1000 };
     yaml_emitter_set_output(&emitter, yaml_write_handler, &out);
 
-    /* ---- Loop 1: parse → save event → emit ---- */
+    /* ---- Loop 1: parse, save event, emit ---- */
     bool done = false;
     while (!done) {
         if (!yaml_parser_parse(&parser, &event)) goto delete_parser;
         done = (event.type == YAML_STREAM_END_EVENT);
 
-        if (copy_event(&events[event_number++], &event)) {  // ← BUG
-            yaml_event_delete(&event);                       //   返回 1 = 成功,
-            goto delete_parser;                              //   harness 当作失败跳走
+        if (copy_event(&events[event_number++], &event)) {  // BUG
+            yaml_event_delete(&event);                       //   returns 1 = success,
+            goto delete_parser;                              //   harness reads it as failure
         }
 
-        yaml_emitter_emit(&emitter, &event);   // 实际从未跑到
+        yaml_emitter_emit(&emitter, &event);   // never actually reached
     }
 
-    /* ---- Loop 2: re-parse 输出,逐 event 比对一致性 ---- */
-    /* (整段也是死代码,因为 Loop 1 永远从 BUG 处退出) */
+    /* ---- Loop 2: re-parse the output and compare events ---- */
+    /* (entire loop is dead code: Loop 1 always exits at BUG) */
     yaml_parser_set_input_string(&parser, out.buf, out.size);
     int count = 0;
     while (!done) {
@@ -222,16 +222,16 @@ delete_parser:
 }
 </code></pre>
                         <p>
-                            <strong>哪错了:</strong>第 21 行那一句 <code>if (copy_event(...))</code> 把判断反了。helper <code>copy_event()</code> 沿用 libyaml 的约定:<strong>成功返回 1,失败返回 0</strong>。harness 把 1 当成了"失败",每次拷成功就直接跳进错误清理。
+                            <strong>What's wrong:</strong> line 21 inverts the check. The helper <code>copy_event()</code> follows the libyaml convention of returning 1 on success and 0 on failure. The harness reads 1 as failure, so every successful copy jumps straight into the error-cleanup <code>goto</code>.
                         </p>
                         <p>
-                            <strong>为什么错:</strong>对任何合法 YAML 输入,fuzzer 都在第一个 event 上短路退出。Loop 1 里的 <code>yaml_emitter_emit</code> 永远不跑,Loop 2 整段(re-parse + <code>events_equal</code> 一致性比对)也永远跑不到。<strong>大约 50% 的 harness 逻辑从来没被执行过</strong>,但它编译能过、运行不崩、coverage 还在涨(涨在剩下 50% 还在跑的部分),所以在 OSS-Fuzz 上稳稳跑了多年没人发现。
+                            <strong>Why it's wrong:</strong> for any valid YAML input the fuzzer short-circuits on the very first event. The <code>yaml_emitter_emit</code> call inside Loop 1 never runs. All of Loop 2 (re-parse plus the <code>events_equal</code> consistency check) is unreachable. Roughly <strong>50% of the harness logic has never been executed</strong>. The harness still compiles, still runs without crashing, and coverage still climbs (in the 50% that does run), which is why it sat on OSS-Fuzz for years without anyone noticing.
                         </p>
                         <p>
-                            修法只有一个字:加感叹号。<code>if (copy_event(...))</code> → <code>if (!copy_event(...))</code>。修完之后 fuzzer 的 edge coverage 从 166 涨到 2479,<strong>+1393%</strong>(约 15 倍)。这是典型的 <strong>P2.4(Return value handling)</strong> 违规 —— 返回值含义弄反,误把成功当失败。完整修复 PR:<a href="https://github.com/google/oss-fuzz/pull/15096">google/oss-fuzz#15096</a>,已合并。
+                            <strong>The fix is one character:</strong> add a <code>!</code>. <code>if (copy_event(...))</code> becomes <code>if (!copy_event(...))</code>. After the patch landed, edge coverage jumped from 166 to 2479, a <strong>+1393%</strong> gain (about 15×). This is a textbook <strong>P2.4 (Return value handling)</strong> violation, with the harness mistaking success for failure. The full fix PR is at <a href="https://github.com/google/oss-fuzz/pull/15096">google/oss-fuzz#15096</a>, merged.
                         </p>
                         <p>
-                            <strong>P2 违反 ⇒ 这个 crash 是 API 误用,不是库漏洞。</strong>但 P2 还有一种比"上报 FP"更隐蔽的失败模式 —— 就是上面这种,harness 编译过、跑起来、coverage 还在涨,可是某个错误的判定已经把后面那条目标路径悄悄清空了。fuzzer 看起来在工作,实际上目标的内存安全代码一帧都没走到。你不是没找到 bug,你是根本没在测。这种 case 在 sanitizer 层面没有任何 crash 信号,却让整个 fuzz 周期产物为零,比 FP 还白干。
+                            <strong>A P2 violation means the crash is API misuse, not a library vulnerability.</strong> But P2 has a stealthier failure mode than just filing FPs, and the example above is exactly it. The harness compiles, runs, and gains coverage, but a wrong check has silently cleared the target path. The fuzzer looks busy. None of the sanitizer-relevant code on the actual target ever runs. You aren't failing to find bugs. You aren't testing in the first place. The sanitizer reports no crash, just a fuzz cycle that produces zero output. Worse than an FP.
                         </p>
 
                         <h3>P3 — Security Boundary Respect:鼓励走公开 API</h3>
