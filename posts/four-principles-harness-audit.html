@@ -484,12 +484,12 @@ delete_parser:
                     <section class="future-section">
                         <h2>Next: turning the principles around</h2>
                         <p>
-                            This post used the four principles for <strong>audit</strong>. Catch an existing harness, find the violations, ship a fix. The next post flips the direction. Use the principles for <strong>generation</strong>. Given a fresh library, walk P4 down to P1 (start with the attack surface, end at the code), combine that with Logic Group as the semantic-unit slicer, and in two weeks deploy 470 fuzzers across Chromium and its upstream dependencies. 40+ real vulnerabilities filed, only 3 false positives.
+                            This post used the four principles for <strong>audit</strong>. Catch an existing harness, find the violations, ship a fix. The next post flips the direction. Use the principles for <strong>generation</strong>. Given a fresh library, walk P4 down to P1 (start with the attack surface, end at the code), combine that with Logic Group as the semantic-unit slicer, then put every harness through Stage-4 adversarial validation before fuzzing. In two weeks: 481 harnesses across Chromium and its upstream dependencies, ~30 maintainer-acknowledged real vulnerabilities (7 fixed + 9 confirmed + 12 submitted), only 2 dropped.
                         </p>
                         <div class="next-steps">
                             <div class="next-step">
-                                <h4>Blog 2 — The principles, in reverse</h4>
-                                <p>Logic Group plus the reverse-direction four principles. The engineering pipeline that produced 470 fuzzers across the Chromium and Google-vendor stack.</p>
+                                <h4>Blog 2 — Adversarial harness generation, on the four principles</h4>
+                                <p>Reverse-direction four principles + Logic Group + Stage-4 adversarial probes. The engineering pipeline that produced 481 harnesses across the Chromium and Google-vendor stack.</p>
                             </div>
                             <div class="next-step">
                                 <h4>Blog 3 — After the crash</h4>
@@ -528,7 +528,7 @@ delete_parser:
 
         <!-- Footer -->
         <nav class="post-navigation">
-            <a href="logic-groups-and-reverse-four-principles.html" class="post-nav-link next"><span class="nav-label">Next</span><span class="nav-title">The principles, in reverse →</span></a>
+            <a href="logic-groups-and-reverse-four-principles.html" class="post-nav-link next"><span class="nav-label">Next</span><span class="nav-title">Adversarial harness generation →</span></a>
         </nav>
 
         <footer class="footer">
