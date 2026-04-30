@@ -201,16 +201,33 @@
                                 </div>
                             </div>
 
+                            <!-- Legend -->
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px 14px; padding: 12px 14px; background: rgba(0,0,0,0.22); border-radius: var(--radius-sm); margin-bottom: var(--spacing-md); font-size: var(--font-size-xs); color: var(--text-secondary); line-height: 1.5;">
+                                <div style="font-family: var(--font-mono); font-size: var(--font-size-xs); color: var(--text-faint); letter-spacing: 0.08em; grid-column: 1 / -1;">HOW TO READ THIS CARD</div>
+                                <div><span style="display: inline-block; font-family: var(--font-mono); font-size: 0.65rem; padding: 2px 6px; background: var(--emerald-500); color: white; border-radius: 3px; font-weight: 700; vertical-align: 1px;">IN-SCOPE</span> &nbsp;maintainer treats this as a real vuln &mdash; <strong>file the crash</strong></div>
+                                <div><span style="display: inline-block; font-family: var(--font-mono); font-size: 0.65rem; padding: 2px 6px; background: var(--red-500); color: white; border-radius: 3px; font-weight: 700; vertical-align: 1px;">OUT-OF-SCOPE</span> &nbsp;caller-contract or unsupported &mdash; <strong>drop the crash</strong></div>
+                                <div><code>↳ DOC:&lt;path&gt;</code> &nbsp;mandatory upstream citation; no DOC, no rule</div>
+                                <div><code>feeds_into TB-N</code> &nbsp;maintainer's reply hardened rule TB-N</div>
+                                <div><span style="display: inline-block; font-family: var(--font-mono); font-size: 0.65rem; padding: 2px 6px; background: var(--slate-700); color: var(--red-400); border-radius: 3px; font-weight: 700; vertical-align: 1px;">WONTFIX</span> &nbsp;maintainer has historically rejected this crash class</div>
+                                <div style="grid-column: 1 / -1; color: var(--text-muted); font-style: italic;">When a candidate crash matches an OUT-OF-SCOPE rule the gate at the bottom drops it before filing.</div>
+                            </div>
+
                             <!-- Threat Model -->
                             <div style="margin-bottom: var(--spacing-md);">
-                                <div style="display: inline-block; font-family: var(--font-mono); font-size: var(--font-size-xs); font-weight: 600; padding: 3px 10px; border-radius: 999px; background: rgba(99, 102, 241, 0.18); color: var(--primary-light); margin-bottom: 8px; letter-spacing: 0.05em;">THREAT MODEL</div>
+                                <div style="display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 8px;">
+                                    <span style="display: inline-block; font-family: var(--font-mono); font-size: var(--font-size-xs); font-weight: 600; padding: 3px 10px; border-radius: 999px; background: rgba(99, 102, 241, 0.18); color: var(--primary-light); letter-spacing: 0.05em;">THREAT MODEL</span>
+                                    <span style="color: var(--text-muted); font-size: var(--font-size-xs); font-style: italic;">one-paragraph summary of how the maintainer treats untrusted input</span>
+                                </div>
                                 <p style="color: var(--text-secondary); margin: 0; line-height: 1.55;">Accessors do not bounds-check. Callers MUST run the Verifier on untrusted bytes before any <code>GetRoot&lt;T&gt;</code> / <code>Get*</code> / <code>operator[]</code> access. Reflection paths assume schemas come from the project itself.</p>
                                 <div style="margin-top: 8px; font-family: var(--font-mono); font-size: var(--font-size-xs); color: var(--text-faint);">↳ DOC:docs/source/CppUsage.md#L120</div>
                             </div>
 
                             <!-- Trust Boundaries -->
                             <div style="margin-bottom: var(--spacing-md);">
-                                <div style="display: inline-block; font-family: var(--font-mono); font-size: var(--font-size-xs); font-weight: 600; padding: 3px 10px; border-radius: 999px; background: rgba(99, 102, 241, 0.18); color: var(--primary-light); margin-bottom: 8px; letter-spacing: 0.05em;">TRUST BOUNDARIES</div>
+                                <div style="display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 8px;">
+                                    <span style="display: inline-block; font-family: var(--font-mono); font-size: var(--font-size-xs); font-weight: 600; padding: 3px 10px; border-radius: 999px; background: rgba(99, 102, 241, 0.18); color: var(--primary-light); letter-spacing: 0.05em;">TRUST BOUNDARIES</span>
+                                    <span style="color: var(--text-muted); font-size: var(--font-size-xs); font-style: italic;">case-by-case rules: each says "crash on this path → file" or "→ drop"</span>
+                                </div>
 
                                 <div style="display: grid; gap: 8px;">
                                     <!-- TB-1 OUT -->
@@ -247,7 +264,10 @@
 
                             <!-- API Scope -->
                             <div style="margin-bottom: var(--spacing-md);">
-                                <div style="display: inline-block; font-family: var(--font-mono); font-size: var(--font-size-xs); font-weight: 600; padding: 3px 10px; border-radius: 999px; background: rgba(99, 102, 241, 0.18); color: var(--primary-light); margin-bottom: 8px; letter-spacing: 0.05em;">API SCOPE</div>
+                                <div style="display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 8px;">
+                                    <span style="display: inline-block; font-family: var(--font-mono); font-size: var(--font-size-xs); font-weight: 600; padding: 3px 10px; border-radius: 999px; background: rgba(99, 102, 241, 0.18); color: var(--primary-light); letter-spacing: 0.05em;">API SCOPE</span>
+                                    <span style="color: var(--text-muted); font-size: var(--font-size-xs); font-style: italic;">which APIs we treat as the real attack surface, vs. caller-internal helpers</span>
+                                </div>
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                                     <div style="padding: 12px; background: rgba(16, 185, 129, 0.06); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: var(--radius-sm);">
                                         <div style="font-family: var(--font-mono); font-size: var(--font-size-xs); color: var(--emerald-400); font-weight: 700; margin-bottom: 6px; letter-spacing: 0.05em;">✓ IN-SCOPE</div>
@@ -269,7 +289,10 @@
 
                             <!-- Crash Class Policy -->
                             <div style="margin-bottom: var(--spacing-md);">
-                                <div style="display: inline-block; font-family: var(--font-mono); font-size: var(--font-size-xs); font-weight: 600; padding: 3px 10px; border-radius: 999px; background: rgba(99, 102, 241, 0.18); color: var(--primary-light); margin-bottom: 8px; letter-spacing: 0.05em;">CRASH-CLASS POLICY</div>
+                                <div style="display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 8px;">
+                                    <span style="display: inline-block; font-family: var(--font-mono); font-size: var(--font-size-xs); font-weight: 600; padding: 3px 10px; border-radius: 999px; background: rgba(99, 102, 241, 0.18); color: var(--primary-light); letter-spacing: 0.05em;">CRASH-CLASS POLICY</span>
+                                    <span style="color: var(--text-muted); font-size: var(--font-size-xs); font-style: italic;">crash categories the maintainer has historically rejected as not-a-vuln</span>
+                                </div>
                                 <div style="display: grid; gap: 6px;">
                                     <div style="display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; padding: 8px 14px; background: rgba(0,0,0,0.18); border-radius: var(--radius-sm);">
                                         <span style="font-family: var(--font-mono); font-size: 0.7rem; padding: 2px 8px; background: var(--slate-700); color: var(--red-400); border-radius: 4px; font-weight: 700;">WONTFIX</span>
@@ -286,7 +309,10 @@
 
                             <!-- Observed Replies -->
                             <div style="margin-bottom: var(--spacing-md);">
-                                <div style="display: inline-block; font-family: var(--font-mono); font-size: var(--font-size-xs); font-weight: 600; padding: 3px 10px; border-radius: 999px; background: rgba(99, 102, 241, 0.18); color: var(--primary-light); margin-bottom: 8px; letter-spacing: 0.05em;">OBSERVED REPLIES <span style="color: var(--text-faint); font-weight: 400;">— proxy refines from these</span></div>
+                                <div style="display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 8px;">
+                                    <span style="display: inline-block; font-family: var(--font-mono); font-size: var(--font-size-xs); font-weight: 600; padding: 3px 10px; border-radius: 999px; background: rgba(99, 102, 241, 0.18); color: var(--primary-light); letter-spacing: 0.05em;">OBSERVED REPLIES</span>
+                                    <span style="color: var(--text-muted); font-size: var(--font-size-xs); font-style: italic;">real maintainer verdicts; each one feeds back to harden a rule above</span>
+                                </div>
                                 <div style="display: grid; gap: 8px;">
                                     <div style="padding: 10px 14px; background: rgba(0,0,0,0.18); border-left: 3px solid var(--red-500); border-radius: var(--radius-sm);">
                                         <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px;">
@@ -311,7 +337,10 @@
 
                             <!-- Gate -->
                             <div>
-                                <div style="display: inline-block; font-family: var(--font-mono); font-size: var(--font-size-xs); font-weight: 600; padding: 3px 10px; border-radius: 999px; background: rgba(245, 158, 11, 0.18); color: var(--amber-500); margin-bottom: 8px; letter-spacing: 0.05em;">GATE <span style="color: var(--text-faint); font-weight: 400;">— hard, not advisory</span></div>
+                                <div style="display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 8px;">
+                                    <span style="display: inline-block; font-family: var(--font-mono); font-size: var(--font-size-xs); font-weight: 600; padding: 3px 10px; border-radius: 999px; background: rgba(245, 158, 11, 0.18); color: var(--amber-500); letter-spacing: 0.05em;">GATE</span>
+                                    <span style="color: var(--text-muted); font-size: var(--font-size-xs); font-style: italic;">hard rule, not advisory: an OUT-OF-SCOPE match must be dropped, not filed</span>
+                                </div>
                                 <div style="padding: 12px 14px; background: rgba(245, 158, 11, 0.06); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: var(--font-size-xs); color: var(--text-secondary); line-height: 1.7;">
                                     <div><span style="color: var(--amber-500);">on_match_out_of_scope:</span> <strong style="color: var(--text-primary);">drop</strong> &nbsp;→&nbsp; <span style="color: var(--text-faint);">log to dropped_crashes/&lt;batch_id&gt;.yaml</span></div>
                                     <div style="margin-top: 4px;"><span style="color: var(--amber-500);">must_record:</span> trust_boundary_id · source_doc_line · sanitizer_top_frames</div>
@@ -319,10 +348,6 @@
                             </div>
 
                         </div>
-
-                        <p style="color: var(--text-muted); font-size: var(--font-size-sm); font-style: italic; margin-top: -8px;">
-                            读这张卡时盯四件事 —— ① 每条规则都挂着 <code>↳ DOC:&lt;file&gt;:&lt;line&gt;</code>(<strong>没 DOC 的条款不进 proxy</strong>);② trust boundaries 同时给 OUT 和 IN 两侧(<em>TB-3 是反向规则</em>,防止 proxy 退化成"什么都 drop"的护身符);③ observed_replies 用 <code>feeds_into</code> 把维护者每次回复反向加固到具体 TB 上,proxy 越用越准;④ gate 是<strong>硬阻断</strong>,不是 advisory。
-                        </p>
 
                         <h3>三个真实例子,看 proxy 怎么救你</h3>
 
