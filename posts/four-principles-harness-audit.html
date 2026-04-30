@@ -347,7 +347,7 @@ delete_parser:
 
                         <h3>53 个 violation,跨 28 个项目</h3>
                         <p>
-                            我们一共找到 <strong>53 个 P1/P2 violation</strong>,占 586 个 harness 的 9.0%,分布在 28 个项目里。剩下的 42 个项目完全干净 —— 这是个好消息,说明四原则不是"扫所有 harness 都报警"的过度敏感工具,它能在成熟项目上保持沉默。
+                            我们一共找到 <strong>53 个 P1/P2 violation</strong>,占 586 个 harness 的 9.0%,分布在 28 个项目里。剩下的 42 个项目,这一轮我们没找出违规。需要说明的是,四原则不是确定性的判定 —— "没扫出问题"不等于"项目一定干净",只能说在我们这次审计中,这些项目的 harness 没触发任何子检查。这一点边界,值得提醒一下。
                         </p>
                         <p>
                             53 个全部以 PR / issue 形式提交给了对应上游。截至发稿:
@@ -370,15 +370,12 @@ delete_parser:
                                 <div class="stat-label">66% 上线 OSS-Fuzz</div>
                             </div>
                             <div class="result-stat">
-                                <div class="stat-icon">4</div>
-                                <div class="stat-value">维护者团队</div>
-                                <div class="stat-label">主动复用我们的 artifact</div>
+                                <div class="stat-icon">1</div>
+                                <div class="stat-value">显式拒绝</div>
+                                <div class="stat-label">维护者真在逐条 review</div>
                             </div>
                         </div>
 
-                        <p>
-                            <strong>85% 的 confirm 率</strong>对于自动化提交的 PR 是个不寻常的数字 —— 它说明维护者并没有因为"机器写的"就先打折,而是基于内容判断。每个 PR 都是<strong>对维护者真正友好</strong>的:不是甩一堆 sanitizer trace 让他们自己想哪些是噪声,而是把根因 + 修复 + 不降覆盖率的证据一起给到。
-                        </p>
                     </section>
 
                     <!-- 14 FPs -->
