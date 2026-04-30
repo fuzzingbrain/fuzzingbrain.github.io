@@ -46,7 +46,7 @@
                         <span class="post-readtime">15 min read</span>
                     </div>
                     <h1 class="post-title-main">Adversarial Harness Generation on the Four Principles: 470 Harnesses × 30 Vulns × 2 Weeks</h1>
-                    <p class="post-subtitle">Part 1 used the four principles as an <em>audit</em> criterion, catching existing OSS-Fuzz harnesses after the fact. This post flips the direction. The principles become a <em>generation</em> criterion: start at P4 by picking the attack surface, combine that with Logic Group as a semantic-unit slicer, then put every harness through Stage-4 adversarial probing as a built-in QA gate. Two weeks, <strong>481 harnesses across Chromium and its upstream dependencies</strong> (the headline rounds to 470), <strong>30 vulnerabilities filed upstream</strong> (16 maintainer-acknowledged so far — 9 confirmed and 7 fixed — plus 3 returned as FP and 3 newly filed in flight), and <strong>52 candidate findings dropped during our internal audit</strong> before any of them could reach a maintainer.</p>
+                    <p class="post-subtitle">Part 1 used the four principles as an <em>audit</em> criterion, catching existing OSS-Fuzz harnesses after the fact. This post flips the direction. The principles become a <em>generation</em> criterion: start at P4 by picking the attack surface, combine that with Logic Group as a semantic-unit slicer, then put every harness through Stage-4 adversarial probing as a built-in QA gate. Two weeks, <strong>472 harnesses across Chromium and its upstream dependencies</strong> (the headline rounds to 470), <strong>30 vulnerabilities filed upstream</strong> (16 maintainer-acknowledged so far — 9 confirmed and 7 fixed — plus 3 returned as FP and 3 newly filed in flight), and <strong>52 candidate findings dropped during our internal audit</strong> before any of them could reach a maintainer.</p>
                 </div>
             </div>
 
@@ -60,7 +60,7 @@
                             <h2>Two-Week Numbers</h2>
                             <div class="results-stats">
                                 <div class="result-stat">
-                                    <div class="stat-icon">481</div>
+                                    <div class="stat-icon">472</div>
                                     <div class="stat-value">Harnesses</div>
                                     <div class="stat-label">Generated, validated, fuzzed in two weeks</div>
                                 </div>
@@ -90,7 +90,7 @@
                             <a href="four-principles-harness-audit.html">Part 1</a> used the four principles (P1 Logic Correctness / P2 API Protocol Compliance / P3 Security Boundary Respect / P4 Entry Point Adequacy) as an <strong>audit</strong> tool. The harness was already running on OSS-Fuzz; we read it back and checked whether it was correct. The result was 53 fix PRs across 586 harnesses, 14 false positives prevented, and one OpenSSL stack over-read latent for 25 years. The source-level definition of the principles and the 16 sub-checks (P1.1–P1.8 / P2.1–P2.8) all live in that post and are not repeated here.
                         </p>
                         <p>
-                            But the same four rules can also be used <em>before</em> the harness exists — to internalize "what counts as a good harness" inside the generation pipeline rather than catch it post-hoc. That is what this post is about: <strong>flip the four principles around</strong> (P4 → P3 → P2 → P1), pair them with a tool that slices a library into independently fuzzable semantic units — <strong>Logic Group</strong> — and in two weeks generate, deploy, and fuzz <strong>481 harnesses</strong> across Chromium and its upstream dependencies (the title's 470 is a rounded headline; the precise count is 481).
+                            But the same four rules can also be used <em>before</em> the harness exists — to internalize "what counts as a good harness" inside the generation pipeline rather than catch it post-hoc. That is what this post is about: <strong>flip the four principles around</strong> (P4 → P3 → P2 → P1), pair them with a tool that slices a library into independently fuzzable semantic units — <strong>Logic Group</strong> — and in two weeks generate, deploy, and fuzz <strong>472 harnesses</strong> across Chromium and its upstream dependencies (the title's 470 is a rounded headline; the precise count is 472).
                         </p>
                     </section>
 
@@ -116,7 +116,7 @@
                         </p>
 
                         <p>
-                            One engineering boundary worth calling out: <strong>P3 / P4 are never delegated to an LLM as the sole decider.</strong> "Is this internal usage legitimate" and "is this entry on the real attack surface" are project-context-heavy judgements — a senior reviewer who has read the project's <code>SECURITY.md</code> and written similar harnesses can answer them; <strong>a third-party general-purpose LLM with no project context cannot</strong>. So Stage 1 (P4 / P3) of the reverse pipeline is a hybrid: LLM enumerates candidates, a static call graph supplies reachability, and a senior reviewer signs off on borderline cases. The LLM is a tool here, not the judge. That boundary is what makes 481 harnesses humanly accountable for quality.
+                            One engineering boundary worth calling out: <strong>P3 / P4 are never delegated to an LLM as the sole decider.</strong> "Is this internal usage legitimate" and "is this entry on the real attack surface" are project-context-heavy judgements — a senior reviewer who has read the project's <code>SECURITY.md</code> and written similar harnesses can answer them; <strong>a third-party general-purpose LLM with no project context cannot</strong>. So Stage 1 (P4 / P3) of the reverse pipeline is a hybrid: LLM enumerates candidates, a static call graph supplies reachability, and a senior reviewer signs off on borderline cases. The LLM is a tool here, not the judge. That boundary is what makes 472 harnesses humanly accountable for quality.
                         </p>
                     </section>
 
@@ -228,9 +228,9 @@
 
                     <!-- Numbers -->
                     <section>
-                        <h2>What Two Weeks of 481 Harnesses Across 58 Libraries Produced</h2>
+                        <h2>What Two Weeks of 472 Harnesses Across 58 Libraries Produced</h2>
                         <p>
-                            We started running this pipeline against Chromium and its upstream dependencies in mid-April 2026. About two weeks later, the count of harnesses generated, built, and put through adversarial validation was <strong>481</strong>, spread across <strong>58 libraries</strong>. The pipeline produced findings in two distinct buckets:
+                            We started running this pipeline against Chromium and its upstream dependencies in mid-April 2026. About two weeks later, the count of harnesses generated, built, and put through adversarial validation was <strong>472</strong>, spread across <strong>58 libraries</strong>. The pipeline produced findings in two distinct buckets:
                         </p>
                         <ul>
                             <li><strong>30 filed upstream</strong> (the headline number). Maintainer-side state: 16 acknowledged (9 confirmed + 7 fixed), 3 returned as FP, 3 newly filed and awaiting first response, and the rest still in active maintainer review.</li>
@@ -336,15 +336,15 @@
 
                     <!-- Why this scale matters -->
                     <section>
-                        <h2>Why "Two Weeks, 481 Harnesses" Is the Number That Matters</h2>
+                        <h2>Why "Two Weeks, 472 Harnesses" Is the Number That Matters</h2>
                         <p>
-                            Neither half of the headline is impressive on its own — two weeks is not particularly fast, and 481 is not particularly large. The two together are the number that matters: <strong>this is throughput under quality control</strong>. Every one of the 481 cleared P1–P4 at the source level, mapped to a single meaningful LG, and passed reach-probe + run-probe before being fuzzed. That is the throughput definition LLM-driven harness generation should be working toward — not "5,000 harnesses generated overnight" of the garbage-in-garbage-out variety, but throughput where every unit can be filed upstream on its own merits.
+                            Neither half of the headline is impressive on its own — two weeks is not particularly fast, and 472 is not particularly large. The two together are the number that matters: <strong>this is throughput under quality control</strong>. Every one of the 472 cleared P1–P4 at the source level, mapped to a single meaningful LG, and passed reach-probe + run-probe before being fuzzed. That is the throughput definition LLM-driven harness generation should be working toward — not "5,000 harnesses generated overnight" of the garbage-in-garbage-out variety, but throughput where every unit can be filed upstream on its own merits.
                         </p>
                         <p>
                             Versus a hand-driven workflow:
                         </p>
                         <ul>
-                            <li>A hand-written harness averages 1–2 days — pick the entry, read the protocol, write the code, validate. 481 by hand ≈ 1.5 person-years.</li>
+                            <li>A hand-written harness averages 1–2 days — pick the entry, read the protocol, write the code, validate. 472 by hand ≈ 1.5 person-years.</li>
                             <li>Our pipeline averages roughly 30 minutes per LG end-to-end (LG discovery 5 min + protocol 5 min + build/fix 10 min + adversarial validation 10 min) and runs across many concurrent workers. Two weeks total.</li>
                             <li>Source-level FP rate is essentially zero — the 3 maintainer-FP findings all classify as threat-model rather than source-level mistakes. P1–P4 hard gates absorbed every "looks like a bug but is actually a harness mistake" case in the 52-drop bucket.</li>
                         </ul>
@@ -371,7 +371,7 @@
                             </div>
                             <div class="next-step">
                                 <h4>Chrome Data Open</h4>
-                                <p>Metadata for all 481 harnesses (LG specs, harness sources, fuzz_runs, findings) is published on the chrome-maint dashboard.</p>
+                                <p>Metadata for all 472 harnesses (LG specs, harness sources, fuzz_runs, findings) is published on the chrome-maint dashboard.</p>
                             </div>
                         </div>
                     </section>
@@ -379,7 +379,7 @@
                     <!-- CTA -->
                     <section class="cta-section">
                         <div class="cta-content">
-                            <h2>See the 481-Harness Live Dataset</h2>
+                            <h2>See the 472-Harness Live Dataset</h2>
                             <p>Every LG, every harness source, every fuzz run, every finding is public on chrome-maint.</p>
                             <div class="cta-buttons">
                                 <a href="https://github.com/o2lab/afc-crs-all-you-need-is-a-fuzzing-brain" class="btn btn-primary">
