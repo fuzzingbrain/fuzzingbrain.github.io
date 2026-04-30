@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -40,7 +40,7 @@
         <article class="blog-post" id="main-content">
             <div class="post-header">
                 <div class="section-content">
-                    <nav class="breadcrumb"><a href="../index.html">Home</a><span class="separator">/</span><a href="../blog.html">Blog</a><span class="separator">/</span><span class="current">基于四原则的 Harness 审计</span></nav>
+                    <nav class="breadcrumb"><a href="../index.html">Home</a><span class="separator">/</span><a href="../blog.html">Blog</a><span class="separator">/</span><span class="current">Four-Principles Harness Audit</span></nav>
                     <div class="post-meta">
                         <span class="post-date">April 30, 2026</span>
                         <span class="post-category">Methodology</span>
@@ -86,7 +86,7 @@
 
                     <!-- Introduction -->
                     <section>
-                        <h2>从一个被绕开的问题说起</h2>
+                        <h2>The question everyone skipped</h2>
                         <p>
                             <strong>"I want an LLM to generate fuzz harnesses for me"</strong> — this goal has been getting heavy attention from both academia and industry over the past couple of years. But look one layer deeper and it rests on a premise almost everyone skips over: <em>what makes a harness "good"?</em> Without that definition, the only way to score what an LLM produces is "does it build" and "does it survive 60 seconds without crashing" — both necessary, neither sufficient. Prior work has measured FP rates as high as <strong>94%</strong>.
                         </p>
@@ -234,43 +234,43 @@ delete_parser:
                             <strong>A P2 violation means the crash is API misuse, not a library vulnerability.</strong> But P2 has a stealthier failure mode than just filing FPs, and the example above is exactly it. The harness compiles, runs, and gains coverage, but a wrong check has silently cleared the target path. The fuzzer looks busy. None of the sanitizer-relevant code on the actual target ever runs. You aren't failing to find bugs. You aren't testing in the first place. The sanitizer reports no crash, just a fuzz cycle that produces zero output. Worse than an FP.
                         </p>
 
-                        <h3>P3 — Security Boundary Respect:鼓励走公开 API</h3>
+                        <h3>P3 — Security Boundary Respect: prefer public APIs</h3>
                         <p>
-                            真实攻击者通常只能从公开导出的 API 进。我们<strong>鼓励 harness 也尊重这条边界</strong> —— 通过 <code>extern</code> 把 <code>static</code> 函数拽出来直接调,或者跳过公开入口的输入校验直接喂内部 chunk handler,会让 fuzzer 进到没人能从外面到达的代码路径,产生的 crash 难以对应到真实威胁模型。
+                            A real attacker can only enter the library through its public exported API. We <strong>encourage the harness to respect that same boundary</strong>. Pulling a <code>static</code> function out via <code>extern</code>, or feeding bytes straight into an internal chunk handler past the public-entry validation, drives the fuzzer into code that no external caller can ever reach. Whatever crash that produces is hard to map back to a real threat model.
                         </p>
                         <p>
-                            P3 不是一刀切的"禁止用内部符号"。如果你 <strong>100% 确认</strong>这个内部用法是合理的(例如该内部状态机的输入语义和某个公开 API 的中间状态完全等价),或者能<strong>证明同样的 crash 也可以从公开 API 复现</strong>,这种 case 是允许的。判断标准是:能不能用一个只调公开 API 的 harness 把同一个 crash 重现出来 —— 能,P3 通过;不能,P3 失败。
+                            P3 is not an absolute ban on internal symbols. If you are <strong>100% certain</strong> the internal use is legitimate, for example the internal state machine's input semantics are equivalent to some public API's intermediate state, or if you can <strong>prove the same crash reproduces through a purely-public-API harness</strong>, the harness is allowed. The acceptance criterion is reproducibility from the public side. If a public-API-only harness can reach the same crash, P3 passes. If not, P3 fails.
                         </p>
                         <ul>
-                            <li><strong>鼓励的写法</strong>:调公开头文件里声明的函数,不绕过公开入口的输入校验 —— 校验本身是库交付物的一部分</li>
-                            <li><strong>谨慎使用内部符号</strong>:若 harness 必须用 <code>static</code> / friend / 内部 chunk handler,需要在 PR 里明确说明合理性,并附上"同样行为能在公开侧复现"的证据</li>
-                            <li><strong>反例</strong>:直接调 <code>png_handle_IHDR</code> 触发 crash,但任何 PNG 文件都构造不出对应内部状态 —— 这是 P3 失败,因为公开侧无法复现</li>
+                            <li><strong>Encouraged.</strong> Call functions declared in public headers, and do not skip the public entry-point validation. That validation is part of what the library ships.</li>
+                            <li><strong>Use internals carefully.</strong> If a harness needs <code>static</code> functions, friend access, or internal chunk handlers, the PR has to spell out the justification and attach evidence that the same behaviour reproduces from the public side.</li>
+                            <li><strong>Counter-example.</strong> Calling <code>png_handle_IHDR</code> directly to trigger a crash where no actual PNG file can produce the corresponding internal state. That is a P3 failure, because the public side cannot reproduce it.</li>
                         </ul>
                         <br>
                         <p>
-                            P3 是判断题,不是机械题。"某个 static 函数能不能合理拉出来用 / 同一个 crash 公开侧能不能复现"这种问题要靠项目语境 —— 资深 reviewer 读过库的 <code>SECURITY.md</code>、写过类似 fuzzer、了解项目历史,凭经验就能判;<strong>对没有项目上下文的第三方通用 LLM 来说不行</strong>,它没读过 <code>SECURITY.md</code>、每次给的理由都不一样,容易"看着像内部符号"就一律否掉合理用法。所以 P3(以及下面的 P4)在我们的流水线里都不让 LLM 单点拍板:LLM 列候选,静态调用图给可达性,引用必须落到 <code>file:line</code>,资深 reviewer review borderline。LLM 在这里是工具,不是裁判。
+                            P3 is a judgement call, not a mechanical check. Questions like "is this <code>static</code> function fair to use" or "can the same crash be reached from the public side" need project context. A senior reviewer who has read the library's <code>SECURITY.md</code>, written similar fuzzers, and knows the project history can answer them confidently. <strong>A third-party general-purpose LLM with no project context cannot.</strong> The LLM has not read the <code>SECURITY.md</code>, gives a different rationale each run, and tends to reject any internal-looking symbol on sight. So P3 (and P4 below) is not something our pipeline lets an LLM decide alone. The LLM proposes candidates, the static call graph supplies reachability, every citation has to land on <code>file:line</code>, and a senior reviewer signs off on borderline cases. The LLM is a tool here, not the judge.
                         </p>
                         <p>
-                            <strong>P3 违反 ⇒ 这个 crash 在没人能从公开侧到达的代码路径上。</strong>哪怕真崩了也很难修 —— 上游通常会标 NOT_REPRODUCIBLE_FROM_PUBLIC_API。
+                            <strong>A P3 violation means the crash sits on a code path no one can reach from the public side.</strong> Even if the crash itself is real, the fix is hard to land. Upstream will usually close it as NOT_REPRODUCIBLE_FROM_PUBLIC_API.
                         </p>
 
-                        <h3>P4 — Entry Point Adequacy:目标必须在真实攻击面上</h3>
+                        <h3>P4 — Entry Point Adequacy: the target has to sit on a real attack surface</h3>
                         <p>
-                            P4 决定的是:你选的这个 fuzz 入口,值不值得被 fuzz?一个把所有 fuzz 字节喂给某个 logging helper 或者 trivial accessor 的 harness 即使 P1–P3 全过,也是浪费 CPU。
+                            P4 answers a different question. Is this fuzz entry point worth fuzzing in the first place? A harness that pipes every fuzz byte into a logging helper or a trivial accessor will pass P1 through P3 cleanly and still waste every CPU second it gets.
                         </p>
                         <ul>
-                            <li>入口必须真的能 reach 到目标核心实现 —— 不是被早期 return 掉</li>
-                            <li>入口的可达闭包里必须存在内存安全相关的操作(<code>memcpy</code>、<code>malloc</code>、<code>free</code>、<code>strcpy</code>、<code>sprintf</code> 等),否则即使触发也无害</li>
-                            <li>目标本身在库的当前公开攻击面上,不是被 deprecated 的 demo 函数</li>
+                            <li>The entry point has to actually reach the target core implementation, not bail out early on validation.</li>
+                            <li>The reachable closure from the entry point has to contain memory-safety-relevant operations (<code>memcpy</code>, <code>malloc</code>, <code>free</code>, <code>strcpy</code>, <code>sprintf</code>, etc.). Otherwise even a successful exploit would be harmless.</li>
+                            <li>The target sits on the library's current public attack surface, not on some deprecated demo function.</li>
                         </ul>
                         <br>
                         <p>
-                            <strong>P4 违反 ⇒ 这个 fuzzer 即使一直跑下去也不会找到有用的 bug。</strong>
+                            <strong>A P4 violation means the fuzzer can run forever and still find nothing useful.</strong>
                         </p>
 
-                        <h3>P1.1–P2.8:16 条可勾选的子检查</h3>
+                        <h3>P1.1–P2.8: the 16-item checklist</h3>
                         <p>
-                            把 P1 和 P2 落到工程上,我们各拆成 8 个具体的子检查。审计 / 生成 / verify 三个阶段都用同一套清单,这样三个阶段的判定才能互相对照。
+                            To make P1 and P2 actually engineering-checkable we split each into eight concrete sub-checks. The same checklist drives all three stages (audit, generation, verify), so verdicts from any one stage line up with the others.
                         </p>
 
                         <h4>P1 — Logic Correctness · 8 sub-checks</h4>
@@ -327,55 +327,55 @@ delete_parser:
 
                     <!-- Audit Run -->
                     <section>
-                        <h2>审计:70 个项目 × 586 个 harness</h2>
+                        <h2>The audit: 70 projects, 586 harnesses</h2>
                         <p>
-                            我们的真正目标是用四原则<strong>生成</strong>正确的 harness。但要相信它能用在生成阶段,得先证明一件更基础的事:四原则到底能不能识别出 harness 的问题、并指导修复?这一节是这个证明实验。
+                            Our actual goal is to use the four principles to <strong>generate</strong> correct harnesses. Before trusting that, we need to prove something more basic. Can the principles reliably identify harness defects, and can they drive a fix that holds up upstream? This section is that proof experiment.
                         </p>
                         <p>
-                            实验设计是这样:<strong>把现有的生产 harness 当作"第一轮 LLM 生成的输出"</strong> —— LLM 给一个候选 harness,我们用四原则去审,把找到的问题反馈给 LLM 让它继续改,直到通过。这个 audit-and-refine 的循环,就是把"生成"的中间环节单独拎出来跑给我们看。如果它能在真实生产代码上稳定地挑出问题、提出能被维护者接受的修复,那放回完整生成流水线里也站得住。
+                            The experiment design is straightforward. <strong>We treat each existing production harness as if it were a "first-round LLM output".</strong> The four principles inspect it, the findings get fed back to the LLM to refine, and the loop iterates until the harness passes. That audit-and-refine cycle is exactly the middle of the generation pipeline, isolated and run on real code. If it surfaces defects reliably on production harnesses and produces fixes that maintainers actually accept, it has earned its place inside the full pipeline.
                         </p>
                         <p>
-                            实验对象选 OSS-Fuzz 上 <strong>70 个 C/C++ 项目</strong>作为基线 —— 这些项目的 harness 大多由项目维护者本人或资深贡献者写,经过上游 PR review,在 ClusterFuzz 上跑了多年。从这 70 个项目里我们抓出了 <strong>586 个生产 harness</strong>。流程是:
+                            The baseline is <strong>70 C/C++ projects on OSS-Fuzz</strong>. Most of these harnesses were written by the project maintainers or senior contributors, reviewed upstream, and have been running on ClusterFuzz for years. From those 70 projects we pulled <strong>586 production harnesses</strong>. The procedure:
                         </p>
                         <ul>
-                            <li>静态过:LLM agent 直接读 harness 源 + 库头文件,跑过 P1.1–P1.8、P2.1–P2.8 全部 16 个子检查 —— 引用必须落到 <code>file:line</code></li>
-                            <li>动态过:对可疑点构造对抗性输入(adversarial probing),跑 60s libFuzzer + ASan/LSan,看是否真的触发</li>
-                            <li>对每个 violation 提交"修好的版本",并跑同样 60s 看覆盖率<strong>不降</strong> —— 给上游一个直接 merge 的理由</li>
-                            <li>每个 harness 平均 10 分钟,10 个并发,总成本 ≈ <strong>$720</strong></li>
+                            <li><strong>Static pass.</strong> An LLM agent reads the harness source plus the library headers and walks the full 16 sub-checks across P1.1–P1.8 and P2.1–P2.8. Note the audit only mechanizes P1 and P2; P3 and P4 are judgement calls that a senior reviewer handles separately. Every claim must cite a <code>file:line</code>.</li>
+                            <li><strong>Dynamic pass.</strong> Adversarial probing builds inputs targeting each suspect point, then runs 60 seconds of libFuzzer with ASan and LSan to confirm the violation actually fires.</li>
+                            <li><strong>Repair and validate.</strong> For each violation we submit a fixed version and run the same 60 seconds to confirm coverage does <strong>not regress</strong>. That gives the upstream maintainer a direct reason to merge.</li>
+                            <li>Average wall-clock cost is about 10 minutes per harness with 10 parallel workers, for a total of roughly <strong>$720</strong>.</li>
                         </ul>
                         <br>
                         <p>
-                            然后看结果。
+                            Now the results.
                         </p>
 
-                        <h3>53 个 violation,跨 28 个项目</h3>
+                        <h3>53 violations across 28 projects</h3>
                         <p>
-                            我们一共找到 <strong>53 个 P1/P2 violation</strong>,占 586 个 harness 的 9.0%,分布在 28 个项目里。剩下的 42 个项目,这一轮我们没找出违规。需要说明的是,四原则不是确定性的判定 —— "没扫出问题"不等于"项目一定干净",只能说在我们这次审计中,这些项目的 harness 没触发任何子检查。这一点边界,值得提醒一下。
+                            We found <strong>53 P1/P2 violations across 586 harnesses</strong>, or 9.0%, spread across 28 projects. The remaining 42 projects produced no violations in this run. One caveat is worth flagging. The four principles are a checklist, not a decision procedure. "Found nothing" does not prove a project is clean. It only proves that none of the 16 sub-checks tripped on those particular harnesses in this audit.
                         </p>
                         <p>
-                            53 个全部以 PR / issue 形式提交给了对应上游。截至发稿:
+                            All 53 went upstream as PRs or issues. As of this writing.
                         </p>
 
                         <div class="results-stats" style="margin: 2rem 0;">
                             <div class="result-stat">
                                 <div class="stat-icon">53</div>
-                                <div class="stat-value">违规提报</div>
-                                <div class="stat-label">每个都附 fix patch</div>
+                                <div class="stat-value">Violations Filed</div>
+                                <div class="stat-label">Each ships with a fix patch</div>
                             </div>
                             <div class="result-stat">
                                 <div class="stat-icon">45</div>
-                                <div class="stat-value">验证或修复</div>
-                                <div class="stat-label">85%,含下面的 35</div>
+                                <div class="stat-value">Verified or Merged</div>
+                                <div class="stat-label">85%, includes the 35 below</div>
                             </div>
                             <div class="result-stat">
                                 <div class="stat-icon">35</div>
-                                <div class="stat-value">已合并(子集)</div>
-                                <div class="stat-label">66% 上线 OSS-Fuzz</div>
+                                <div class="stat-value">Merged (subset)</div>
+                                <div class="stat-label">66% live on OSS-Fuzz</div>
                             </div>
                             <div class="result-stat">
                                 <div class="stat-icon">1</div>
-                                <div class="stat-value">显式拒绝</div>
-                                <div class="stat-label">维护者真在逐条 review</div>
+                                <div class="stat-value">Explicit Rejection</div>
+                                <div class="stat-label">Maintainers really do review each one</div>
                             </div>
                         </div>
 
@@ -383,68 +383,68 @@ delete_parser:
 
                     <!-- 2 incidental real bugs (the headline) -->
                     <section>
-                        <h2>意外战利品:两个被 harness 遮住的真上游 bug</h2>
+                        <h2>The headline: two real upstream bugs that broken harnesses had been hiding</h2>
                         <p>
-                            这次审计最值得拿出来讲的不是数字,而是两个<strong>本来就在库里、但被错误的 harness 长期遮住的真 bug</strong>。修一个 P2 违规,有时会顺手把库的真实行为重新暴露给 sanitizer —— 这正是这次审计里发生的事。
+                            The most interesting result of this audit is not the count of violations. It is the two <strong>real upstream bugs that broken harnesses had been masking for years</strong>. Repairing a P2 violation occasionally re-exposes the library's real behaviour to the sanitizer. That happened twice in this run.
                         </p>
 
-                        <h3>案例 1:OpenSSL DES 栈缓冲读越界 —— 潜伏 25+ 年</h3>
+                        <h3>Case 1: OpenSSL DES stack-buffer over-read, latent 25+ years</h3>
                         <p>
-                            OpenSSL 的某个 harness 有一个 API 调用顺序上的 P2 违规,导致整条 cipher 路径在它的执行轨迹里其实是 dead code。修好之后,fuzzer 跑几秒就在 OpenSSL DES 实现里抛出一个 stack-buffer-overread。
+                            One OpenSSL harness had a P2 violation in its API call ordering that left the entire cipher path as dead code in the harness execution trace. Once we fixed the order, the fuzzer threw a stack-buffer over-read inside the OpenSSL DES implementation within seconds.
                         </p>
                         <p>
-                            这个 bug 的本体在 OpenSSL DES 模块里趟了 <strong>25 年以上</strong>,比 OpenSSL 这个名字本身还要老。它一直没被发现,不是因为难找,而是<strong>过去所有走到这条路径的 harness 都因为同样的 P2 错误根本没真正进到这个函数</strong>。一个调用顺序错误,把一个公开 API 的内存安全 bug 隐藏了 1/4 个世纪。
+                            The bug itself has been sitting in OpenSSL's DES module for <strong>over 25 years</strong>, older than the name "OpenSSL". It went unnoticed not because it was hard to find but because <strong>every harness that ever walked that path was tripped by the same P2 mistake and never actually entered the function</strong>. One call-order error kept a memory-safety bug on a public API hidden for a quarter century.
                         </p>
                         <p>
-                            上游 issue:<a href="https://github.com/openssl/openssl/issues/30284">openssl/openssl#30284</a>。修复已合并,issue 已关闭。
+                            Upstream issue: <a href="https://github.com/openssl/openssl/issues/30284">openssl/openssl#30284</a>. Fix merged, issue closed.
                         </p>
 
-                        <h3>案例 2:tidy-html5 内存泄漏 —— 缺一次 cleanup 调用</h3>
+                        <h3>Case 2: tidy-html5 memory leak, one missing cleanup call</h3>
                         <p>
-                            tidy-html5 的某个 harness 漏掉了一次必要的 cleanup 调用,违反 P2 的"paired API"约束。补上这一次调用之后,harness 立刻在原本被 cleanup 掩盖的路径上抛出 <code>LeakSanitizer</code> 警告 —— 是库内部 lexer 里的真 leak。
+                            A tidy-html5 harness was missing a required cleanup call, violating P2's paired-API constraint. Once we added the call, the harness immediately tripped <code>LeakSanitizer</code> on the path the missing cleanup had been hiding. The leak lives inside tidy-html5's own lexer code.
                         </p>
                         <p>
-                            根因和上面 OpenSSL 那条完全是一类:<strong>错误的 harness 用法把库的真实行为掩盖了</strong>。你可以把这两个看作"P2-driven bug discovery"的代表 —— 修 harness 不只是把 FP 干掉,更是在把库的真实行为重新暴露给 sanitizer。
+                            The root cause matches the OpenSSL case exactly. <strong>A wrong harness usage was masking the library's real behaviour.</strong> Treat these two as the canonical example of P2-driven bug discovery. Fixing the harness is not just about killing false positives; it is about returning the sanitizer's view of the library to ground truth.
                         </p>
                         <p>
-                            上游 issue:<a href="https://github.com/htacg/tidy-html5/issues/1177">htacg/tidy-html5#1177</a>。
+                            Upstream issue: <a href="https://github.com/htacg/tidy-html5/issues/1177">htacg/tidy-html5#1177</a>.
                         </p>
                     </section>
 
                     <!-- 14 FPs -->
                     <section>
-                        <h2>14 个永远不会变成噪声 bug 报告的 FP</h2>
+                        <h2>14 false positives that never reached upstream</h2>
                         <p>
-                            53 个 violation 里有 <strong>14 个会直接产生 FP 级别的 ASan/LSan crash</strong> —— 也就是说,如果我们绕开审计阶段、直接拿这些 harness 去 fuzz,这 14 个 harness 就会冒出"看似真实"的 crash,被自动化流水线打包成 14 份 bug report 砸到上游。
+                            Of the 53 violations, <strong>14 would produce false-positive ASan or LSan crashes</strong> if left in place. If we had skipped the audit and run those harnesses through fuzzing directly, all 14 would have surfaced convincing-looking crashes, gotten packaged into 14 bug reports, and dumped on the maintainers.
                         </p>
                         <p>
-                            这 14 份报告里没有一个是真 bug。它们的根因都在 harness 里 —— 一个 dict 没 free、一个对象生命周期错位、一个内部 chunk 解析直接被驱动。每一份都会让维护者花时间读 stack trace、构建 repro 环境、对照源码、最后失望地 close 为 NO_VULNERABILITY,顺便给我们的提交账号留下"质量低"的印象。
+                            Not one of the 14 is a real library bug. Each root cause sits inside the harness itself: a dict never freed, an object lifecycle mis-staged, an internal chunk handler driven directly. Every one of them would have cost a maintainer time reading the stack trace, rebuilding a reproducer, walking the source, and eventually closing it NO_VULNERABILITY. And it would leave a "low-quality submitter" stamp on our handle.
                         </p>
                         <p>
-                            <strong>四原则把这 14 个全部拦在了 fuzz 阶段之前。</strong>它们不是"跑出来再被 verify 排除",而是连跑都没跑就被静态识别 + 修复 + 提 PR 的方式消化掉。涉及的项目包括:
+                            <strong>The four principles caught all 14 before fuzzing ever ran.</strong> They were not crashes-then-discarded-by-verify. They were source-level violations identified, fixed, and merged upstream as PRs without any of them ever firing a sanitizer in production. Involved projects include:
                         </p>
                         <ul>
-                            <li><strong>lcms</strong> — <code>dict</code> 和 <code>transform_ext</code> 两个 harness 都有 P2 违规导致的 FP crash;修完以后干净</li>
-                            <li><strong>libarchive / linkify</strong> — P1 资源生命周期问题</li>
-                            <li><strong>libpng / readapi</strong> — P2 调用顺序错位</li>
-                            <li><strong>njs / script</strong> — P1 静态状态没重置</li>
-                            <li><strong>openvpn</strong> — <code>packet_id</code>、<code>verify_cert</code> 都有 P1 违规导致的假 leak</li>
-                            <li><strong>wamr / mutator</strong> — P2 协议违反</li>
+                            <li><strong>lcms.</strong> Both <code>dict</code> and <code>transform_ext</code> harnesses had P2 violations producing FP crashes. Clean after the fix.</li>
+                            <li><strong>libarchive / linkify.</strong> P1 resource-lifecycle issue.</li>
+                            <li><strong>libpng / readapi.</strong> P2 call-order mistake.</li>
+                            <li><strong>njs / script.</strong> P1 static state not reset between runs.</li>
+                            <li><strong>openvpn.</strong> Both <code>packet_id</code> and <code>verify_cert</code> had P1 violations producing fake leaks.</li>
+                            <li><strong>wamr / mutator.</strong> P2 protocol violation.</li>
                         </ul>
                         <br>
                         <p>
-                            这是审计的最大杠杆:<strong>不让 FP 流出去</strong>,就不需要事后再去修复维护者对自动化报告的不信任。
+                            This is the biggest lever the audit has. <strong>Stop the false positives from leaving the building.</strong> You never have to repair a maintainer's trust if you never wasted their time to begin with.
                         </p>
                     </section>
 
                     <!-- Coverage gain illustration -->
                     <section>
-                        <h2>顺带:覆盖率的提升不是目标,但很可观</h2>
+                        <h2>Side effect: coverage gains were not the goal, but they were large</h2>
                         <p>
-                            必须澄清一件事:四原则审计的目的<strong>不是涨覆盖率</strong>,目的是修正 harness 的正确性。但在很多 case 里,修一个 P1/P2 违规会顺便把死代码激活,覆盖率会跟着涨上去。我们把这当成 PR 通过的"无害证据"附在每个修复里。一些代表性的数字:
+                            One thing to be clear about. The audit's goal was <strong>not</strong> coverage. The goal was harness correctness. But in many cases, fixing a P1 or P2 violation also revives dead code, and coverage climbs as a side effect. We attach the coverage delta to each repair PR as a no-regression sanity check for the maintainer. A few representative numbers.
                         </p>
                         <ul>
-                            <li><code>opencv/filestorage</code> — <strong>+986%</strong> edges(原 harness 几乎是死代码)</li>
+                            <li><code>opencv/filestorage</code> · <strong>+986%</strong> edges (the original harness was almost entirely dead code).</li>
                             <li><code>libyaml/emitter</code> — <strong>14×</strong> edges</li>
                             <li><code>openssl/quic_server</code> — <strong>+65.7%</strong></li>
                             <li><code>bzip2/bzip2_fd</code> — <strong>+52.4%</strong></li>
@@ -453,51 +453,51 @@ delete_parser:
                         </ul>
                         <br>
                         <p>
-                            大幅度的提升通常对应"原 harness 是 dead code"的极端 case;小幅度通常是 harness 已经在跑、但有一个非阻塞的 P1/P2 违规(比如 jq/parse_stream)。两种都是 harness 质量问题,只是表现不一样。
+                            Large jumps usually map to a harness that was almost entirely dead code. Small ones usually map to a harness that was already running but carried a non-blocking P1 or P2 violation (jq/parse_stream is the canonical small-jump case). Both kinds are harness-quality problems; they just present differently.
                         </p>
                     </section>
 
                     <!-- Why this matters -->
                     <section>
-                        <h2>为什么这件事在 LLM 时代更重要</h2>
+                        <h2>Why this matters more in the LLM era</h2>
                         <p>
-                            手写 harness 的时代,质量问题靠人审 PR 拦掉;LLM 时代,harness 可以一夜之间生成几百个,如果不预设静态质量门槛,自动化就把"speed"翻译成了"FP 流量"。
+                            When harnesses were hand-written, quality issues got caught in PR review by other humans. In the LLM era a single overnight run can churn out hundreds of harnesses. Without a source-level quality gate up front, automation translates "speed" into "false-positive throughput".
                         </p>
                         <p>
-                            四原则不是"LLM-only"的工具 —— 它是<strong>源码层的 harness 正确性定义</strong>,既适用于人写的 harness 审计(就是这篇里 586 个的来源),也适用于 LLM 生成 harness 时的自检。我们在生成阶段也用同一套四原则,只是反过来用 —— 那是下一篇的内容。
+                            The four principles are not LLM-specific. They are a <strong>source-level definition of harness correctness</strong>, equally applicable to auditing human-written harnesses (the 586 in this post) and to self-checking LLM-generated ones. We use the same four principles inside our generation pipeline too. The next post covers that.
                         </p>
                         <p>
-                            如果你现在在做 LLM-driven fuzz harness generation,我们建议:
+                            If you are working on LLM-driven fuzz harness generation today, our suggestions:
                         </p>
                         <ol>
-                            <li>不要把 build 通过和 fuzz 60s 没崩当作"quality good";这两个信号都是必要不充分。</li>
-                            <li>在生成完 harness 之后强制跑 P1.1–P1.8、P2.1–P2.8 的子检查,违规的让 LLM 重写,而不是放进 fuzz queue。</li>
-                            <li>P3、P4 在生成<em>之前</em>用,选目标的时候就过一遍;选错了再写代码是浪费。</li>
-                            <li>给上游的每个 PR 必须附 root-cause + 修复 + 覆盖率不降的证据,不能只甩 sanitizer trace。</li>
+                            <li>Do not treat "compiles and survives 60 seconds of fuzzing" as a quality signal. Both are necessary, neither is sufficient.</li>
+                            <li>After generation, run the P1.1–P1.8 and P2.1–P2.8 sub-checks. Send violations back to the LLM for a rewrite. Do not park them in a fuzz queue.</li>
+                            <li>Apply P3 and P4 <em>before</em> generation, at target selection. Choosing the wrong entry and then writing code is wasted work.</li>
+                            <li>Every PR upstream needs the root cause, the fix, and a no-regression coverage check. A bare sanitizer trace is not enough.</li>
                         </ol>
                         <p>
-                            这套流程的成本是有限的:586 个 harness 平均每个 10 分钟、10 并发,总开销大约 $720。换来的是 14 个永远不会成为噪声报告的 FP、45 个被维护者验证或修复的 PR(其中 35 个已 merge)、以及两个被失效 harness 长期掩盖的真上游 bug(含 OpenSSL 潜伏 25 年的那条)。这笔账无论从工程化成本还是 ecosystem trust 角度都是正的。
+                            The pipeline cost is bounded. 586 harnesses, ~10 minutes each at 10 parallel workers, about $720 total. In return: 14 false positives that never become noise reports, 45 maintainer-verified-or-merged PRs (35 already landed), and two real upstream bugs that broken harnesses had been masking for years (including the 25-year-old OpenSSL DES one). The trade is positive either way you score it, in engineering cost or in ecosystem trust.
                         </p>
                     </section>
 
                     <!-- What's Next -->
                     <section class="future-section">
-                        <h2>下一篇:把四原则反过来用</h2>
+                        <h2>Next: turning the principles around</h2>
                         <p>
-                            这篇讲的是用四原则做<strong>审计</strong> —— 接住已有 harness、找出问题、提修复 PR。下一篇我们讲反过来的方向:用四原则做<strong>生成</strong> —— 给定一个新库,从 P4(选攻击面)开始往回走 P3 → P2 → P1,加上 Logic Group 的语义切分,在两周内部署 470 个 fuzzer,找到 40+ 个真漏洞,只有 3 个 FP。
+                            This post used the four principles for <strong>audit</strong>. Catch an existing harness, find the violations, ship a fix. The next post flips the direction. Use the principles for <strong>generation</strong>. Given a fresh library, walk P4 down to P1 (start with the attack surface, end at the code), combine that with Logic Group as the semantic-unit slicer, and in two weeks deploy 470 fuzzers across Chromium and its upstream dependencies. 40+ real vulnerabilities filed, only 3 false positives.
                         </p>
                         <div class="next-steps">
                             <div class="next-step">
-                                <h4>Blog 2 — 把四原则反过来用</h4>
-                                <p>Logic Group + reverse 4 原则:在 Chromium / Google vendor 链路上跑出 470 个 fuzzer 的工程化流水线。</p>
+                                <h4>Blog 2 — The principles, in reverse</h4>
+                                <p>Logic Group plus the reverse-direction four principles. The engineering pipeline that produced 470 fuzzers across the Chromium and Google-vendor stack.</p>
                             </div>
                             <div class="next-step">
-                                <h4>Blog 3 — Crash 之后怎么办</h4>
-                                <p>Verify 流程:四原则再审一遍 + 2 步复现 + Security Proxy 跟维护者 threat model 对齐。</p>
+                                <h4>Blog 3 — After the crash</h4>
+                                <p>The verify pipeline. Re-run the four principles, two-stage reproduction, then a Security Proxy step that aligns with the maintainer's threat model.</p>
                             </div>
                             <div class="next-step">
                                 <h4>OpenSSF working group</h4>
-                                <p>欢迎和我们就 LLM-generated harness 质量保障一起讨论 —— 我们最担心的不是 FP 灌水,而是真 bug 被维护者一并 auto-close。</p>
+                                <p>Happy to compare notes on LLM-generated harness quality. The thing we worry about most is not the FP flood. It is real bugs getting auto-closed alongside the noise.</p>
                             </div>
                         </div>
                     </section>
@@ -505,8 +505,8 @@ delete_parser:
                     <!-- CTA -->
                     <section class="cta-section">
                         <div class="cta-content">
-                            <h2>看看我们的工作</h2>
-                            <p>四原则的细节和审计 dataset 我们已经公开,可以直接复用。</p>
+                            <h2>Take a look at the work</h2>
+                            <p>The four principles, the sub-checks, and the audit dataset are public. Reuse encouraged.</p>
                             <div class="cta-buttons">
                                 <a href="https://github.com/o2lab/afc-crs-all-you-need-is-a-fuzzing-brain" class="btn btn-primary">
                                     <span>View on GitHub</span>
@@ -528,7 +528,7 @@ delete_parser:
 
         <!-- Footer -->
         <nav class="post-navigation">
-            <a href="logic-groups-and-reverse-four-principles.html" class="post-nav-link next"><span class="nav-label">Next</span><span class="nav-title">把四原则反过来用 →</span></a>
+            <a href="logic-groups-and-reverse-four-principles.html" class="post-nav-link next"><span class="nav-label">Next</span><span class="nav-title">The principles, in reverse →</span></a>
         </nav>
 
         <footer class="footer">
