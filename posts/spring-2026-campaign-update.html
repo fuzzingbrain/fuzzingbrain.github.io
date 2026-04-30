@@ -103,7 +103,10 @@
                             <a href="zero-day-vulnerability-discoveries.html">Our previous update</a>, in February, reported 62 vulnerabilities across 26 projects. Most of those came from auditing existing OSS-Fuzz harnesses on the general open-source ecosystem. The work done since has been deliberately different. The focus shifted to <strong>generating new harnesses</strong> for projects that did not have good fuzz coverage to begin with, and the target list moved one tier deeper into security-critical software.
                         </p>
                         <p>
-                            Two numbers worth highlighting that the hero stats above do not show. They both come from the new generation pipeline.
+                            All of that work runs on a single backbone we call the <strong>Four Principles</strong>. They are four source-level checks that every harness has to pass before we trust the crashes it produces. In short: (1) the harness code itself must be bug-free, (2) it must call library APIs in the order the library expects, (3) it should drive the library through its public attack surface (so any crash we find is reachable in production), and (4) the entry point it picks has to actually sit on a meaningful attack surface, not on a no-op helper. The first methodology post below introduces all four in detail.
+                        </p>
+                        <p>
+                            A few additional numbers worth highlighting that the hero stats above do not show.
                         </p>
 
                         <div class="performance-stats">
@@ -114,8 +117,8 @@
                             </div>
                             <div class="stat-box">
                                 <div class="stat-number">52</div>
-                                <div class="stat-label">Candidates Dropped</div>
-                                <div class="stat-detail">Filtered by the verify gate before any could reach upstream</div>
+                                <div class="stat-label">Crashes Caught Internally</div>
+                                <div class="stat-detail">52 fuzzer crashes that looked like real bugs but failed our own verification; we never sent them to upstream maintainers</div>
                             </div>
                             <div class="stat-box">
                                 <div class="stat-number">59%</div>
@@ -156,7 +159,7 @@
                                         <span class="post-category">Methodology · Milestone 2</span>
                                     </div>
                                     <h3 class="post-title" style="color: var(--text-primary);">Generate good harnesses on Chromium, find new bugs</h3>
-                                    <p class="post-excerpt"><strong>Two Weeks Inside Chromium: 472 Harnesses, 30 Vulnerabilities Filed Upstream.</strong> The four principles flipped into a generation criterion (P4 → P1) and combined with Logic Group as a semantic-unit slicer. 472 harnesses across 58 Chromium-stack libraries (libvpx, libwebp, libaom, openscreen, dawn, pdfium, sqlite, v8 …). 30 vulnerabilities filed upstream. 52 candidates dropped at the verify gate.</p>
+                                    <p class="post-excerpt"><strong>Two Weeks Inside Chromium: 472 Harnesses, 30 Vulnerabilities Filed Upstream.</strong> The four principles flipped into a generation criterion (P4 → P1) and combined with Logic Group as a semantic-unit slicer. 472 harnesses across 58 Chromium-stack libraries (libvpx, libwebp, libaom, openscreen, dawn, pdfium, sqlite, v8 …). 30 vulnerabilities filed upstream. 52 internal crashes caught and dropped before any reached a maintainer.</p>
                                     <div class="published-label">Read Milestone 2 →</div>
                                 </article>
                             </a>
@@ -501,7 +504,7 @@
                             <div class="timeline-item">
                                 <div class="timeline-date">April 2026</div>
                                 <h4>Two-Week Chromium Run</h4>
-                                <p>472 harnesses generated across 58 Chrome-stack libraries. 30 vulnerabilities filed upstream, 16 already confirmed. Verify gate dropped 52 candidates before any reached a maintainer.</p>
+                                <p>472 harnesses generated across 58 Chrome-stack libraries. 30 vulnerabilities filed upstream, 16 already confirmed. Another 52 fuzzer crashes were caught and dropped by our own internal verification before any reached a maintainer.</p>
                             </div>
                             <div class="timeline-item">
                                 <div class="timeline-date">April 30, 2026</div>
