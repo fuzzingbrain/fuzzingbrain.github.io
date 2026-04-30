@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>基于四原则的对抗性生成 Harness:470 个 Harness × 30 个漏洞 × 2 周 - FuzzingBrain</title>
+    <title>Adversarial Harness Generation on the Four Principles: 470 Harnesses × 30 Vulns × 2 Weeks - FuzzingBrain</title>
     <link rel="stylesheet" href="../styles.css">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
@@ -39,14 +39,14 @@
         <article class="blog-post" id="main-content">
             <div class="post-header">
                 <div class="section-content">
-                    <nav class="breadcrumb"><a href="../index.html">Home</a><span class="separator">/</span><a href="../blog.html">Blog</a><span class="separator">/</span><span class="current">基于四原则的对抗性生成 Harness</span></nav>
+                    <nav class="breadcrumb"><a href="../index.html">Home</a><span class="separator">/</span><a href="../blog.html">Blog</a><span class="separator">/</span><span class="current">Adversarial Harness Generation</span></nav>
                     <div class="post-meta">
                         <span class="post-date">April 30, 2026</span>
                         <span class="post-category">Vulnerability Discovery</span>
                         <span class="post-readtime">15 min read</span>
                     </div>
-                    <h1 class="post-title-main">基于四原则的对抗性生成 Harness:470 个 Harness × 30 个漏洞 × 2 周</h1>
-                    <p class="post-subtitle">上一篇把四原则当 <em>审计</em> 准则、事后接住 OSS-Fuzz 现有的 586 个 harness。这一篇反过来 —— 把它当 <em>生成</em> 准则:从 P4 选攻击面开始,配合 Logic Group 切分语义单元,再用 Stage 4 对抗性 probe 当出厂 QA。两周时间为 Chromium 及其上游依赖部署 481 个 harness(头条数字四舍五入到 470),提了 <strong>近 30 个对维护者形成事实的真漏洞</strong>(精确是 28 = 7 fixed + 9 confirmed + 12 submitted,14 High / 13 Medium / 1 Low),另有 19 个 finding 还在 file 队列,只有 2 个 dropped。</p>
+                    <h1 class="post-title-main">Adversarial Harness Generation on the Four Principles: 470 Harnesses × 30 Vulns × 2 Weeks</h1>
+                    <p class="post-subtitle">Part 1 used the four principles as an <em>audit</em> criterion, catching existing OSS-Fuzz harnesses after the fact. This post flips the direction. The principles become a <em>generation</em> criterion: start at P4 by picking the attack surface, combine that with Logic Group as a semantic-unit slicer, then put every harness through Stage-4 adversarial probing as a built-in QA gate. Two weeks, <strong>481 harnesses across Chromium and its upstream dependencies</strong> (the headline rounds to 470), <strong>30 vulnerabilities filed upstream</strong> (16 maintainer-acknowledged so far — 9 confirmed and 7 fixed — plus 3 returned as FP and 3 newly filed in flight), and <strong>52 candidate findings dropped during our internal audit</strong> before any of them could reach a maintainer.</p>
                 </div>
             </div>
 
@@ -57,27 +57,27 @@
                     <!-- Hero Stats -->
                     <section class="results-hero">
                         <div class="results-banner">
-                            <h2>这一波生成的硬指标</h2>
+                            <h2>Two-Week Numbers</h2>
                             <div class="results-stats">
                                 <div class="result-stat">
                                     <div class="stat-icon">481</div>
-                                    <div class="stat-value">Harness</div>
-                                    <div class="stat-label">两周内生成 + 对抗性验证 + 跑过</div>
+                                    <div class="stat-value">Harnesses</div>
+                                    <div class="stat-label">Generated, validated, fuzzed in two weeks</div>
                                 </div>
                                 <div class="result-stat">
                                     <div class="stat-icon">58</div>
-                                    <div class="stat-value">库覆盖</div>
-                                    <div class="stat-label">Chromium 及其上游依赖</div>
+                                    <div class="stat-value">Libraries</div>
+                                    <div class="stat-label">Chromium and its upstream dependencies</div>
                                 </div>
                                 <div class="result-stat">
-                                    <div class="stat-icon">28</div>
-                                    <div class="stat-value">对维护者负责的漏洞</div>
-                                    <div class="stat-label">7 fixed + 9 confirmed + 12 submitted</div>
+                                    <div class="stat-icon">30</div>
+                                    <div class="stat-value">Filed Upstream</div>
+                                    <div class="stat-label">16 acked (9 confirmed + 7 fixed) · 3 maintainer-FP · 3 newly filed</div>
                                 </div>
                                 <div class="result-stat">
-                                    <div class="stat-icon">2</div>
-                                    <div class="stat-value">Dropped</div>
-                                    <div class="stat-label">小于 5% 的源码层 FP 率</div>
+                                    <div class="stat-icon">52</div>
+                                    <div class="stat-value">Audit-Dropped</div>
+                                    <div class="stat-label">Flaky · harness-side bug · duplicate · all blocked before filing</div>
                                 </div>
                             </div>
                         </div>
@@ -85,164 +85,163 @@
 
                     <!-- Recap -->
                     <section>
-                        <h2>背景:四原则只是审计工具吗?</h2>
+                        <h2>Are the Four Principles Just an Audit Tool?</h2>
                         <p>
-                            <a href="four-principles-harness-audit.html">上一篇</a>把四原则(P1 Logic Correctness / P2 API Protocol Compliance / P3 Security Boundary Respect / P4 Entry Point Adequacy)当成<strong>事后审计</strong>的工具 —— harness 已经在 OSS-Fuzz 上跑着了,我们逐条检查它对不对。结果是 586 个 harness 修了 53 个、拦下 14 个 FP、顺手挖出一个潜伏 25 年的 OpenSSL 老 bug。四条原则的源码层定义和 16 条子检查清单(P1.1–P1.8 / P2.1–P2.8)都在那一篇里,本文不再重复。
+                            <a href="four-principles-harness-audit.html">Part 1</a> used the four principles (P1 Logic Correctness / P2 API Protocol Compliance / P3 Security Boundary Respect / P4 Entry Point Adequacy) as an <strong>audit</strong> tool. The harness was already running on OSS-Fuzz; we read it back and checked whether it was correct. The result was 53 fix PRs across 586 harnesses, 14 false positives prevented, and one OpenSSL stack over-read latent for 25 years. The source-level definition of the principles and the 16 sub-checks (P1.1–P1.8 / P2.1–P2.8) all live in that post and are not repeated here.
                         </p>
                         <p>
-                            但同样四条规则也可以在 harness 还没写之前就用上 —— 把"什么样的 harness 才算合格"的标准内化到生成阶段,而不是事后接住。这一篇讲的就是这件事:把<strong>四原则反过来用</strong>(P4 → P3 → P2 → P1),配合一个把库切成可独立 fuzz 的语义单元的工具 —— <strong>Logic Group</strong>,在两周内为 Chromium 及其上游依赖生成、部署、跑了 <strong>481 个 fuzzer</strong>(标题里的 470 是头条数字,这是当前精确值)。
+                            But the same four rules can also be used <em>before</em> the harness exists — to internalize "what counts as a good harness" inside the generation pipeline rather than catch it post-hoc. That is what this post is about: <strong>flip the four principles around</strong> (P4 → P3 → P2 → P1), pair them with a tool that slices a library into independently fuzzable semantic units — <strong>Logic Group</strong> — and in two weeks generate, deploy, and fuzz <strong>481 harnesses</strong> across Chromium and its upstream dependencies (the title's 470 is a rounded headline; the precise count is 481).
                         </p>
                     </section>
 
                     <!-- Why reverse -->
                     <section>
-                        <h2>为什么生成时要"反过来"用</h2>
+                        <h2>Why Reverse the Order at Generation Time</h2>
                         <p>
-                            <a href="four-principles-harness-audit.html">Part 1</a> 的审计只机械跑了 <strong>P1.1–P1.8 + P2.1–P2.8 共 16 条子检查</strong>。P3 / P4 没进静态过 —— 因为 harness 已经在线上跑了好几年,入口是上游 reviewer 当年挑的,我们事后只在 borderline case 上人工核一下;P3 / P4 本身就是判断题,不是机械题。这是"接住已有 harness"这个出发点带来的奢侈。
+                            Part 1's audit only ran the mechanical part: <strong>P1.1–P1.8 + P2.1–P2.8, 16 sub-checks total</strong>. P3 and P4 were not part of the static pass. The harnesses had been on production OSS-Fuzz for years and the entry points had been picked by upstream reviewers; we only sanity-checked P3 / P4 manually on borderline cases. P3 and P4 are judgement calls, not mechanical checks. That is a luxury you only get when you are <em>catching</em> an existing harness.
                         </p>
                         <p>
-                            生成阶段没有这个奢侈。入口是我们<strong>当场挑的</strong> —— 没人替我们做 P4(目标在不在真攻击面上)和 P3(能不能从公开侧复现)。如果跳过这两步、先让 LLM 写代码,等 60 秒 fuzz 跑完再回头看"入口选错了",前面的所有工作全要扔。所以反向不是"颠倒一下次序",是<strong>补上审计时不必做、生成时必须做、且必须做在所有别的事情之前的两步</strong>:
+                            Generation does not get that luxury. The entry point is something <strong>we are choosing on the spot</strong> — there is no upstream reviewer to pre-vet P4 (does the target sit on a real attack surface) or P3 (is the crash reachable from the public side). Skip those two and let an LLM write the code first, and after a 60-second fuzz run reveals the entry was wrong, the rest of the work is wasted. So reversing is not a cosmetic reorder. It is <strong>adding the two checks audit could skip but generation cannot, and putting them ahead of everything else</strong>:
                         </p>
 
                         <ul>
-                            <li><strong>P4 选攻击面</strong> —— 公开 API 闭包里要有内存安全相关操作,否则换目标</li>
-                            <li><strong>P3 验边界</strong> —— 入口尽量公开;若用内部符号,公开侧必须能复现</li>
-                            <li><strong>P2 研协议</strong> —— 摸清调用顺序 / 生命周期 / 参数约束 / 配对清理(<em>写 harness 之前</em>的功课)</li>
-                            <li><strong>P1 写代码</strong> —— 前三层都对了,P1 就是孤立的工程问题,直接套 16 条子检查</li>
+                            <li><strong>P4 — Pick the attack surface.</strong> The closure of public APIs must contain memory-safety-relevant operations. If not, change the target.</li>
+                            <li><strong>P3 — Validate the boundary.</strong> Prefer a public entry. If an internal symbol is unavoidable, the same crash must be reproducible from public-side input.</li>
+                            <li><strong>P2 — Research the protocol.</strong> Call order, object lifetimes, parameter ranges, paired cleanup — done <em>before</em> any harness code is written.</li>
+                            <li><strong>P1 — Write the code.</strong> If the previous three pass, P1 is an isolated engineering task; the 16 sub-checks apply directly.</li>
                         </ul>
                         <br>
                         <p>
-                            任何一步失败都不进入下一步。对 LLM 来说,这把"自由发挥的空间"逐层收窄 —— 产出的 harness 不会跑题到内部 helper 上,也不会用错误的调用顺序把库的真实行为遮掉。
+                            Any failure short-circuits to the previous stage. For the LLM, this collapses the "freedom to improvise" layer by layer — the generated harness will not drift onto an internal helper, and it will not silently mask the library's real behavior with a wrong call sequence.
                         </p>
 
                         <p>
-                            还有一条工程边界值得点出:<strong>P3 / P4 的判断不交给 LLM 单点决策</strong>。"这个用法是否合理 / 这个入口是否在真实攻击面上"是项目语境强相关的判断 —— 资深 reviewer 凭项目经验给得出,<strong>没有项目上下文的第三方通用 LLM 给不出</strong>。所以反向流水线在 Stage 1(P4/P3)走的是"LLM 列候选 + 静态调用图给可达性 + 资深 reviewer 在 borderline case review"的组合,LLM 是工具不是裁判。这条边界让 481 个 fuzzer 在质量上能被人问责。
+                            One engineering boundary worth calling out: <strong>P3 / P4 are never delegated to an LLM as the sole decider.</strong> "Is this internal usage legitimate" and "is this entry on the real attack surface" are project-context-heavy judgements — a senior reviewer who has read the project's <code>SECURITY.md</code> and written similar harnesses can answer them; <strong>a third-party general-purpose LLM with no project context cannot</strong>. So Stage 1 (P4 / P3) of the reverse pipeline is a hybrid: LLM enumerates candidates, a static call graph supplies reachability, and a senior reviewer signs off on borderline cases. The LLM is a tool here, not the judge. That boundary is what makes 481 harnesses humanly accountable for quality.
                         </p>
                     </section>
 
                     <!-- Logic Group -->
                     <section>
-                        <h2>Logic Group:一个库的"可 fuzz 语义单元"</h2>
+                        <h2>Logic Group: A Library's Fuzzable Semantic Unit</h2>
                         <p>
-                            P4 让你选攻击面,但攻击面这个词太抽象。一个真实的 C/C++ 库往往导出几百到上千个公开符号,你不可能给每个函数都写一个 harness —— 那样既低效,又会让 fuzzer 在意义不大的 wrapper 上浪费 CPU。
+                            P4 tells you to pick the attack surface, but "attack surface" is too coarse. A real C/C++ library exports hundreds to thousands of public symbols; you cannot write one harness per function — that is both inefficient and burns CPU on uninteresting wrappers.
                         </p>
                         <p>
-                            我们引入的概念叫 <strong>Logic Group(LG)</strong> —— 一个库被切分成的最小语义单元,每个 LG 由四个字段定义:
+                            We introduce <strong>Logic Group (LG)</strong> — the smallest semantic unit a library is sliced into. Each LG is defined by four fields:
                         </p>
 
                         <div class="results-stats" style="margin: 2rem 0;">
                             <div class="result-stat">
                                 <div class="stat-icon" style="font-size: 1.4rem;">name</div>
-                                <div class="stat-value">语义标签</div>
-                                <div class="stat-label">"parse PNG image" 这种描述</div>
+                                <div class="stat-value">Semantic label</div>
+                                <div class="stat-label">e.g. "parse PNG image"</div>
                             </div>
                             <div class="result-stat">
                                 <div class="stat-icon" style="font-size: 1.4rem;">E</div>
                                 <div class="stat-value">Entry set</div>
-                                <div class="stat-label">接收 fuzz bytes 的公开 API</div>
+                                <div class="stat-label">Public APIs that take fuzz bytes</div>
                             </div>
                             <div class="result-stat">
                                 <div class="stat-icon" style="font-size: 1.4rem;">C</div>
                                 <div class="stat-value">Core set</div>
-                                <div class="stat-label">从 E 可达的核心实现函数</div>
+                                <div class="stat-label">Implementation functions reachable from E</div>
                             </div>
                             <div class="result-stat">
                                 <div class="stat-icon" style="font-size: 1.4rem;">desc</div>
-                                <div class="stat-value">攻击面描述</div>
-                                <div class="stat-label">"为什么这个 LG 值得 fuzz"</div>
+                                <div class="stat-value">Surface description</div>
+                                <div class="stat-label">"Why this LG is worth fuzzing"</div>
                             </div>
                         </div>
 
                         <p>
-                            一个 LG 对应一个 fuzzer。LG 之间不重叠 —— 如果两个 LG 的 core set 大量交集,我们会合并;如果一个候选 LG 不能覆盖任何内存安全相关的代码,我们会丢弃。每个库通常被切成 <strong>5–10 个 LG</strong>,具体根据公开 API 拓扑决定。
+                            One LG maps to one harness. LGs do not overlap — if two LGs share most of their core set, we merge them; if a candidate LG covers no memory-safety-relevant code, we drop it. A typical library breaks into <strong>5–10 LGs</strong>, depending on the topology of the public API surface.
                         </p>
                         <p>
-                            举一个具体例子。<code>openscreen</code> 是 Chromium 的 Cast streaming 实现,我们对它切出来的 LG 包括:
+                            A concrete example. <code>openscreen</code> is Chromium's Cast streaming implementation. Some of the LGs we sliced out:
                         </p>
                         <ul>
-                            <li><code>openscreen_receiver_message_json_parse</code> — 解析 receiver 端发回来的 RECEIVER_MESSAGE JSON 体</li>
-                            <li><code>openscreen_sender_message_json_parse</code> — 解析 sender 发出的 SENDER_MESSAGE JSON 体</li>
-                            <li><code>openscreen_answer_messages_deep_substructs</code> — 解析 ANSWER 消息里的嵌套子结构(AudioConstraints / VideoConstraints / ...)</li>
-                            <li><code>openscreen_offer_messages_round_trip</code> — OFFER 的解析-序列化往返</li>
+                            <li><code>openscreen_receiver_message_json_parse</code> — parse the RECEIVER_MESSAGE JSON body</li>
+                            <li><code>openscreen_sender_message_json_parse</code> — parse the SENDER_MESSAGE JSON body</li>
+                            <li><code>openscreen_answer_messages_deep_substructs</code> — parse the nested substructures inside ANSWER (AudioConstraints / VideoConstraints / ...)</li>
+                            <li><code>openscreen_offer_messages_round_trip</code> — OFFER parse-serialize round-trip</li>
                             <li>...</li>
                         </ul>
                         <br>
                         <p>
-                            每个 LG 是一个独立的 fuzz 入口,对应一个独立的 harness。这样切的好处稍后会在结果里看到:同一类 jsoncpp 滥用 bug 在三个不同的 LG 里被独立触发,每个 LG 都给上游一个干净的、不互相牵连的报告。
+                            Each LG is its own fuzz entry point and its own harness. The benefit shows up later in the results: the same root-cause jsoncpp-misuse bug fires independently in three different LGs, and each LG produces a clean, non-entangled report for upstream.
                         </p>
                     </section>
 
                     <!-- Pipeline -->
                     <section>
-                        <h2>四阶段流水线:LG → API → 代码 → 验证</h2>
+                        <h2>Four-Stage Pipeline: LG → API → Code → Validation</h2>
                         <p>
-                            反向四原则在工程化上落成四个阶段。每个阶段的产物是下一个阶段的输入,任何阶段不通过就直接退回 LLM 重做。
+                            The reverse-direction four principles get cashed out into four engineering stages. Each stage's output is the next stage's input; any stage that fails sends the work back to the LLM rather than forward.
                         </p>
 
-                        <h3>Stage 1 — Logic Group Discovery(对应 P4 / P3)</h3>
+                        <h3>Stage 1 — Logic Group Discovery (covers P4 / P3)</h3>
                         <p>
-                            一个 LLM agent 读项目源码 + 公开 header,枚举 5–10 个候选 LG,然后用静态调用图给每个 LG 算 danger score:
+                            An LLM agent reads project source plus public headers, enumerates 5–10 candidate LGs, then a static call graph computes a danger score for each:
                         </p>
                         <pre><code class="language-text">danger(LG) = sum_over_g_in_C( unsafe_ops_in(g) / depth_from_E_to_g )</code></pre>
                         <p>
-                            <code>unsafe_ops</code> 包括 <code>memcpy</code>、<code>malloc</code>、<code>free</code>、<code>strcpy</code>、<code>sprintf</code> 等。深度折扣 <code>1/d</code> 让排名集中在"从公开入口直接可达的攻击面",不会被深处的库内部细节吞掉。前 5 个 LG 进入下一阶段;P3 验证(可达性必须从公开 API 出发)在这一阶段同步过完。
+                            <code>unsafe_ops</code> covers <code>memcpy</code>, <code>malloc</code>, <code>free</code>, <code>strcpy</code>, <code>sprintf</code>, and similar primitives. The depth discount <code>1/d</code> keeps the ranking focused on attack surface that is <em>directly reachable from a public entry</em>, rather than getting drowned out by deep-internal detail. The top 5 LGs move on; P3 (reachability must originate from a public API) is verified at the same step.
                         </p>
 
-                        <h3>Stage 2 — API Protocol Research(对应 P2)</h3>
+                        <h3>Stage 2 — API Protocol Research (covers P2)</h3>
                         <p>
-                            选定 LG 之后,另一个 agent 读对应入口和 core 函数的头文件 + 注释 + 关键调用点的源码,给每个 entry function 整理出一份协议文档:
+                            Once an LG is picked, a second agent reads the headers, comments, and key call-sites for every entry function and core function, then writes a protocol document covering:
                         </p>
                         <ul>
-                            <li>调用顺序约束(必须先 init 再 use 再 destroy)</li>
-                            <li>对象生命周期(谁分配、谁释放、能不能跨调用复用)</li>
-                            <li>参数合法范围(<code>int</code> 的有效区间、<code>enum</code> 的合法值集)</li>
-                            <li>返回值语义(NULL on failure / negative error code / out-param)</li>
-                            <li>必须配对调用的清理 API</li>
+                            <li>Call-order constraints (init before use before destroy).</li>
+                            <li>Object lifetimes (who allocates, who frees, whether reuse across calls is allowed).</li>
+                            <li>Parameter ranges (the valid interval of an <code>int</code>, the legal value set of an <code>enum</code>).</li>
+                            <li>Return-value semantics (NULL on failure / negative error code / out-param).</li>
+                            <li>Cleanup APIs that must be paired with the entry call.</li>
                         </ul>
                         <br>
                         <p>
-                            这份文档<strong>每条都必须落到 <code>file:line</code></strong>,不允许 LLM 自由发挥。这是"P2 写在 harness 之前"的关键 —— 等 harness 写完再回头审,LLM 已经被自己刚写的代码锚定了,改不动。先把协议研究清楚,再写代码。
+                            Every line in this document <strong>must cite a <code>file:line</code></strong>. No improvisation. This is the crux of "P2 belongs before the harness is written" — once the harness exists, the LLM is anchored to the code it just wrote and no longer rewrites the protocol cleanly. Research the contract first, write the code second.
                         </p>
 
-                        <h3>Stage 3 — Static-Driven Build(对应 P1 / P2)</h3>
+                        <h3>Stage 3 — Static-Driven Build (covers P1 / P2)</h3>
                         <p>
-                            harness-generator agent 拿到 P2 文档之后写 harness 源码 —— 一次写完整,不是逐行试错。然后跑一个有上限的 build-fix loop:编译失败 → 把错误回喂给 LLM → 让它修 → 再编 → 直到通过或者次数耗尽。
+                            The harness-generator agent takes the Stage-2 document and writes the harness in one shot — full source, not line-by-line trial. Then a bounded build-fix loop: compile fails → feed the error back to the LLM → it patches → recompile → repeat until success or the iteration cap fires.
                         </p>
                         <p>
-                            和"写一个空壳让 LLM 填"的范式不同,我们让 LLM 一次性产出整个 <code>LLVMFuzzerTestOneInput</code> 加配套 setup / teardown,这样它能跨函数推理 —— LLM 在这种长跨度任务上的表现远好于 wrapper 式的逐函数生成。
+                            Unlike "give the LLM a skeleton and let it fill blanks", we have the LLM produce the entire <code>LLVMFuzzerTestOneInput</code> together with its setup and teardown in a single pass. That keeps reasoning across functions intact — LLMs do far better on long-span tasks like this than on per-function wrapper generation.
                         </p>
 
-                        <h3>Stage 4 — Adversarial Validation(对应 P1 / P2)</h3>
+                        <h3>Stage 4 — Adversarial Validation (covers P1 / P2)</h3>
                         <p>
-                            最后一道闸门是 adversarial probing。系统对刚生成的 harness 主动构造对抗输入,跑两类探针:
+                            The last gate is adversarial probing. The system actively constructs adversarial inputs against the freshly generated harness and runs two probe types:
                         </p>
                         <ul>
-                            <li><strong>Reach probe</strong> —— 在 GDB 里给目标 API 下断点,跑 harness 看断点能不能命中。命不中就说明 fuzz bytes 没流到目标,P1 失败。</li>
-                            <li><strong>Run probe</strong> —— libFuzzer + ASan + LSan,跑短时长。任何 crash 立刻路由到 P1.1–P1.8 / P2.1–P2.8 的 16 个子检查里做 triage。如果 crash 归到 harness 自身违规,直接打回让 LLM 重写;只有归到库的真行为差异才算可能的 bug 候选。</li>
+                            <li><strong>Reach probe</strong> — set a GDB breakpoint on the target API and run the harness. If the breakpoint never fires, fuzz bytes are not flowing to the target and P1 has failed.</li>
+                            <li><strong>Run probe</strong> — libFuzzer + ASan + LSan, short duration. Any crash is immediately routed through the P1.1–P1.8 / P2.1–P2.8 sub-checks for triage. If the crash classifies as a harness-side violation, the harness goes back to the LLM; only crashes that classify as a real library behavior become bug candidates.
                         </ul>
                         <br>
                         <p>
-                            前一类负责"harness 真的在测库",后一类负责"harness 自己不会自爆"。两类都过才会把 harness 标记为 ready-for-discovery。
+                            The first probe asserts the harness <em>is</em> exercising the library; the second asserts the harness <em>is not</em> the bug. Only when both pass does the harness move to ready-for-discovery.
                         </p>
                     </section>
 
                     <!-- Numbers -->
                     <section>
-                        <h2>实测:两周 / 481 harness / 58 个库</h2>
+                        <h2>What Two Weeks of 481 Harnesses Across 58 Libraries Produced</h2>
                         <p>
-                            这套流水线我们从 2026 年 4 月中旬开始针对 Chromium 及其上游依赖部署。约两周时间,生成、构建、并跑过对抗性验证的 harness 数量是 <strong>481 个</strong>,覆盖 <strong>58 个库</strong>。pipeline 抛出的 finding 共 49 个;按"对维护者形成事实"这条线切,可以分三段看:
+                            We started running this pipeline against Chromium and its upstream dependencies in mid-April 2026. About two weeks later, the count of harnesses generated, built, and put through adversarial validation was <strong>481</strong>, spread across <strong>58 libraries</strong>. The pipeline produced findings in two distinct buckets:
                         </p>
                         <ul>
-                            <li><strong>28 个对维护者形成事实的漏洞</strong>(标题里说的"近 30"):7 fixed(已 patch 入主仓)+ 9 confirmed(维护者 ack)+ 12 submitted(已发 issue/PR、等回复)。</li>
-                            <li><strong>19 个 recorded</strong>:本地 verify 已过、还在 file 队列里没发出去。</li>
-                            <li><strong>2 个 dropped</strong>:技术上有 crash,但维护者威胁模型里不算 —— 见下面"2 个 dropped 是怎么剩下来的"。</li>
+                            <li><strong>30 filed upstream</strong> (the headline number). Maintainer-side state: 16 acknowledged (9 confirmed + 7 fixed), 3 returned as FP, 3 newly filed and awaiting first response, and the rest still in active maintainer review.</li>
+                            <li><strong>52 dropped during our own audit</strong>. Caught by Stage-4 adversarial validation or the verify-time review before they could reach a maintainer. Reasons split across <em>flaky reproductions</em>, <em>harness-side bugs</em>, and <em>duplicates of an already-filed root cause</em>. None of these became upstream noise, which is the point.</li>
                         </ul>
                         <br>
                         <p>
-                            28 个里严重程度分布 <strong>14 High / 13 Medium / 1 Low</strong>,横跨从 jsoncpp DoS 到 libaom heap-overflow 这种走在公开 codec API 上的内存错误。这是 30 这个数字的内涵 —— 不是 raw findings count,是<em>已经经过维护者眼球</em>的 count。
+                            Severity for the 30 filed: across the acknowledged subset, the mix is heavy on High (memory-safety crashes on public codec / parser entries) with a smaller Medium tail (mostly DoS via uncontrolled allocation or assertion-reachable paths). The 30 here is not a raw findings count; it is the count <em>that has crossed a maintainer's eyes</em>.
                         </p>
                         <p>
-                            从输出量看,前几名的库是:
+                            By library, the busiest targets were:
                         </p>
 
                         <div class="results-stats" style="margin: 2rem 0;">
@@ -259,7 +258,7 @@
                             <div class="result-stat">
                                 <div class="stat-icon">openscreen</div>
                                 <div class="stat-value">4</div>
-                                <div class="stat-label">findings · 3 fixed 上游</div>
+                                <div class="stat-label">findings · 3 fixed upstream</div>
                             </div>
                             <div class="result-stat">
                                 <div class="stat-icon">libwebp / icu / libaom / spirv-tools</div>
@@ -269,101 +268,110 @@
                         </div>
 
                         <p>
-                            其它有结果的库还包括 crashpad、dawn、sandbox、pdfium、leveldb、quiche、dav1d、zstd、zxing-cpp、libpng、hunspell、net、sqlite、v8、chromium、skia。所有数字来自 chrome-maint dashboard 的实时数据。
+                            Other libraries with at least one finding: crashpad, dawn, sandbox, pdfium, leveldb, quiche, dav1d, zstd, zxing-cpp, libpng, hunspell, net, sqlite, v8, chromium, skia. All numbers are pulled live from the chrome-maint dashboard.
                         </p>
                     </section>
 
                     <!-- Case studies -->
                     <section>
-                        <h2>三个有代表性的案例</h2>
+                        <h2>Three Representative Cases</h2>
 
-                        <h3>案例 1:openscreen 三个姊妹 jsoncpp DoS,一个 CL 同时修</h3>
+                        <h3>Case 1: openscreen — Three Sister jsoncpp DoS Bugs, One CL Fixes All</h3>
                         <p>
-                            前面 LG 的例子用的就是 openscreen。三个 LG —— receiver_message / sender_message / answer_messages —— 在<strong>同一周内</strong>各自独立跑出了形态相似的 crash:都是 <code>jsoncpp</code> 的 <code>Json::Value::operator[]</code> 在<strong>非 object Value</strong> 上被 string key 索引,触发 <code>JSON_FAIL_MESSAGE</code> 里的 <code>abort()</code>。
+                            The LG example earlier was openscreen on purpose. Three of its LGs — <code>receiver_message</code>, <code>sender_message</code>, <code>answer_messages</code> — independently produced morphologically similar crashes <strong>within the same week</strong>: <code>jsoncpp</code>'s <code>Json::Value::operator[]</code> being indexed by a string key on a <strong>non-object Value</strong>, hitting <code>JSON_FAIL_MESSAGE</code>'s <code>abort()</code>.
                         </p>
                         <p>
-                            根因都是同一个 pattern:openscreen 的解析函数里写的是
+                            The root cause is one shared pattern. Each openscreen parser writes:
                         </p>
                         <pre><code class="language-cpp">if (!value) {
   return Error(Error::Code::kJsonParseError, "Invalid message body");
 }
 // ... value[kResult] / value[kSequenceNumber] ...</code></pre>
                         <p>
-                            而 <code>operator!</code> 只对 nullValue 返回 true。任何 arrayValue / stringValue / 数值 / 布尔都会通过这个 guard,然后在下一行的 <code>operator[](string)</code> 里走进 <code>find()</code> 的 precondition,<code>JSON_USE_EXCEPTION=0 + NDEBUG</code> 下 <code>assert</code> 被消掉但 <code>abort()</code> 还在,Cast sender 进程当场死掉。
+                            But <code>operator!</code> only returns true for <code>nullValue</code>. Any <code>arrayValue</code>, <code>stringValue</code>, numeric, or boolean walks past the guard and into the next line's <code>operator[](string)</code>, which calls <code>find()</code>'s precondition. With <code>JSON_USE_EXCEPTION=0</code> and <code>NDEBUG</code> set, the <code>assert</code> is compiled out but the trailing <code>abort()</code> remains, and the Cast sender process dies on the spot.
                         </p>
                         <p>
-                            因为我们把这三个解析器切成了三个独立 LG,每个 LG 上的 crash 独立成一份 issue,上游(jo@google.com、dx@google.com)在第二天就接受并合并了一个 CL —— "<em>[cast_streaming][security] Prevent JSON parsing aborts with non-objects</em>" —— 同时把 <code>answer_messages.cc</code> / <code>receiver_message.cc</code> / <code>sender_message.cc</code> 三处的 <code>if (!value)</code> 升级成 <code>if (!value.isObject())</code>。
+                            Because we sliced these three parsers into three independent LGs, each crash became its own issue. Upstream (jo@google.com, dx@google.com) accepted all three the next day and merged a single CL — "<em>[cast_streaming][security] Prevent JSON parsing aborts with non-objects</em>" — that simultaneously promotes <code>if (!value)</code> to <code>if (!value.isObject())</code> in <code>answer_messages.cc</code>, <code>receiver_message.cc</code>, and <code>sender_message.cc</code>.
                         </p>
                         <p>
-                            <strong>LG 切分让根因相同的 bug 在不同入口都能被独立触发,上游合并起来反而轻松。</strong>如果不分开,我们大概率只会发现其中一个,另两个还在线上。
-                        </p>
-
-                        <h3>案例 2:libaom AV1 Encoder Heap-Overflow —— 走在公开 API 上的真 bug</h3>
-                        <p>
-                            <code>libaom/heap-overflow-av1-restore-layer-context</code> 是这一波最干净的 high 级 finding 之一。LG 是"AV1 SVC encoder mid-stream reconfig",entry 是公开的 <code>aom_codec_enc_init</code> + <code>aom_codec_encode</code> + <code>aom_codec_enc_config_set</code>。
-                        </p>
-                        <p>
-                            P3 检查在 LG discovery 阶段就确认这条入口是公开的;P2 协议研究阶段把"<code>aom_codec_enc_config_set</code> 在中途调用时哪些参数允许变化"摸清楚;P1 写完后跑 60 秒就抛出 heap-buffer-overflow。维护者看到的报告是 root cause + 公开 API repro + 一条 minimal 修复建议,而不是一份带着 harness 私有结构的 dump。<strong>这条已 fixed</strong> —— 走完 LG discovery → harness → crash → upstream merge 的完整链路。
+                            <strong>LG slicing is what made the same root cause fire independently from three entries — and ironically what made the upstream merge easier, not harder.</strong> Without the split, we would likely have noticed only one of the three; the other two would still be live.
                         </p>
 
-                        <h3>案例 3:libwebp NULL Pointer Dereference —— 同日 confirm,2 天内 fix</h3>
+                        <h3>Case 2: libaom AV1 Encoder Heap Overflow — A Real Bug on a Real Public API</h3>
                         <p>
-                            <code>libwebp/null-deref-WebPMuxAssemble</code> —— 公开 API <code>WebPMuxAssemble</code> 在 mux edit 路径上对一个未检查的 internal pointer 解引用。LG entry 是 <code>WebPMux*</code>;core set 里有 <code>muxedit.c</code> 的整条 chunk 装配链。fuzzer 在第一晚跑出 crash,走完 verify 流程后发到 <a href="https://issues.webmproject.org/issues/497882857">webmproject#497882857</a>,Google libwebp 团队<strong>当天就 confirm,2 天内 fix-merged</strong>。从 issue 到代码合并不到 48 小时,是对反向四原则"每个 finding 都是<em>真</em> 公开 API 上的<em>真</em> 内存错误"的最强背书。
+                            <code>libaom/heap-overflow-av1-restore-layer-context</code> is one of the cleanest High-severity findings of this batch. The LG is "AV1 SVC encoder mid-stream reconfig", with the entry being the public <code>aom_codec_enc_init</code> + <code>aom_codec_encode</code> + <code>aom_codec_enc_config_set</code>.
+                        </p>
+                        <p>
+                            P3 cleared the entry as public during LG discovery; P2 protocol research established which parameters to <code>aom_codec_enc_config_set</code> are legally mutable mid-stream; P1 produced the harness, which threw a heap-buffer-overflow within 60 seconds. What the maintainer received was a root cause, a public-API repro, and a minimal fix suggestion — not a dump containing harness-private structures. <strong>This finding is fixed</strong> — full LG discovery → harness → crash → upstream merge cycle.
+                        </p>
+
+                        <h3>Case 3: libwebp NULL Pointer Dereference — Same-day Confirm, 2-day Fix</h3>
+                        <p>
+                            <code>libwebp/null-deref-WebPMuxAssemble</code>: the public API <code>WebPMuxAssemble</code> dereferences an unchecked internal pointer on the mux-edit path. The LG entry is <code>WebPMux*</code>; the core set covers the entire chunk-assembly chain in <code>muxedit.c</code>. The fuzzer fired the crash on its first night. After the verify pipeline cleared it, we filed it as <a href="https://issues.webmproject.org/issues/497882857">webmproject#497882857</a>; the libwebp team at Google <strong>confirmed it the same day and merged the fix two days later</strong>. From issue to merged code in under 48 hours — the strongest endorsement we have for the reverse-pipeline claim that "every finding is a <em>real</em> memory bug on a <em>real</em> public API".
                         </p>
                     </section>
 
-                    <!-- FP rate -->
+                    <!-- 52 audit drops + 3 maintainer FPs -->
                     <section>
-                        <h2>2 个 dropped 是怎么剩下来的</h2>
+                        <h2>How 52 Were Stopped Before Filing — and Why 3 Still Came Back FP</h2>
                         <p>
-                            49 个真 bug、2 个 dropped。这个比例的直接原因不是 verify 阶段救场(verify 是<a href="how-we-verify-fuzzer-crashes.html">下一篇</a>的主题),而是 LG + 反向四原则在<strong>生成阶段</strong>就把绝大多数源码层 FP 干掉了 —— P1/P2/P3/P4 任一不通过都不进入下一阶段(每条违规对应什么含义,见 <a href="four-principles-harness-audit.html">Part 1</a>)。Stage 4 reach probe 命中失败 / run probe 触发的 crash 被归到 P1/P2 违规直接打回让 LLM 重写,这就是为什么源码层 FP 几乎为零。
+                            The clean filing record (30 filed, 16 acked so far, 3 returned as FP) did not happen because verify (<a href="how-we-verify-fuzzer-crashes.html">covered in Part 3</a>) is heroic on its own. It happened because Stage-4 adversarial validation plus the verify pre-filing review caught <strong>52 candidate findings</strong> that would otherwise have gone to maintainers as bug reports. Those 52 are the audit-dropped bucket, and they split into three categories:
+                        </p>
+                        <ul>
+                            <li><strong>Flaky reproductions.</strong> The crash fires in one of the early adversarial probes but does not reproduce reliably under the same input, the same binary, and the same environment. That is almost always a UB / race / uninitialized-read pattern that is a real <em>defect</em> but not one a maintainer can reproduce, so filing it is a guaranteed close-as-NOT_REPRODUCIBLE.</li>
+                            <li><strong>Harness-side bugs.</strong> Run-probe triage classifies the crash to a P1.x or P2.x violation — the harness itself violates an API contract or has a memory bug. We send the harness back to the LLM with the failing sub-check ID rather than send the crash to the maintainer.</li>
+                            <li><strong>Duplicates.</strong> A different LG already produced an issue with the same root-cause stack. We file once per root cause; subsequent LGs hitting the same site reference the existing issue and drop the new finding from the file queue.</li>
+                        </ul>
+                        <br>
+                        <p>
+                            All 52 of these were caught <em>before</em> a maintainer ever saw them. That is the leverage of putting Stage 4 inside the pipeline rather than relying on a maintainer to filter our noise — a job that is theirs to do for legitimate reports, not ours to dump on them.
                         </p>
                         <p>
-                            剩下的 dropped 来自一个共同的失败模式 —— <strong>库本身的威胁模型在维护者心里和我们理解的不一致</strong>。一个典型例子是 V8 的 <code>uaf-v8-deserializer-unresolved-external-reference</code>:走的是公开的 <code>Isolate::New(deserialize_params)</code>,P3 检查通过(确实公开 API),P4 检查通过(确实在攻击面上、可达 unsafe ops),技术上也确实是 UAF。但 V8 团队在<a href="https://chromium.googlesource.com/v8/v8/+/HEAD/docs/security/triaging.md#relying-on-broken-snapshots-to-craft-vulnerabilities">他们的安全 triaging policy</a> 里明确说:依赖攻击者控制的 snapshot blob 不在 V8 威胁模型里。所以这条会被 dropped,即使源码层完全干净。
+                            What about the 3 that <strong>did</strong> come back FP after filing? Those slipped past the source-level checks because the failure mode is not source-level — it is <strong>a mismatch between the library's threat model and our reading of it</strong>. The canonical example is V8's <code>uaf-v8-deserializer-unresolved-external-reference</code>: the entry is the public <code>Isolate::New(deserialize_params)</code>, P3 passed (genuinely public API), P4 passed (genuinely on the attack surface, reachable to unsafe ops), and the bug is technically a UAF. But V8's own <a href="https://chromium.googlesource.com/v8/v8/+/HEAD/docs/security/triaging.md#relying-on-broken-snapshots-to-craft-vulnerabilities">security triaging policy</a> explicitly excludes attacker-controlled snapshot blobs from the V8 threat model. The crash is real; the threat model says "out of scope". That is the FP.
                         </p>
                         <p>
-                            这种"技术真但威胁模型上无效"的 case 是四原则覆盖不到的 —— 它不是源码层的问题,是<strong>跨产品的安全合约层面</strong>的问题。这也就是<a href="how-we-verify-fuzzer-crashes.html">下一篇</a>要讲的 Security Proxy 要解决的事情:把每个库的 threat model 显式编码,在 file 之前再过一道。
+                            "Technically real but threat-model-invalid" is the one failure mode the four principles cannot catch — it lives at <strong>the cross-product threat-contract layer</strong>, not at the source layer. That is exactly what the <a href="how-we-verify-fuzzer-crashes.html">next post's</a> Security Proxy is built for: encode each library's threat model explicitly, run one more gate before filing, push the 3-FP number toward zero in future batches.
                         </p>
                     </section>
 
                     <!-- Why this scale matters -->
                     <section>
-                        <h2>为什么"两周 481 个 fuzzer"是关键数字</h2>
+                        <h2>Why "Two Weeks, 481 Harnesses" Is the Number That Matters</h2>
                         <p>
-                            两个数字单看都不算特别 —— "两周" 不算快,481 也不算多。但放在一起看就特别 —— <strong>这是质量保证下的速度</strong>。481 里的每个 fuzzer 都通过了 P1–P4 的源码层审查,每个都对应一个 LG 上的有意义攻击面,每个都跑过 reach probe + run probe。这才是 LLM-driven harness generation 应该追求的吞吐量定义:不是"一夜生成 5000 个 harness"那种 garbage in / garbage out,而是"每个都能直接 file 上游"的可交付吞吐。
+                            Neither half of the headline is impressive on its own — two weeks is not particularly fast, and 481 is not particularly large. The two together are the number that matters: <strong>this is throughput under quality control</strong>. Every one of the 481 cleared P1–P4 at the source level, mapped to a single meaningful LG, and passed reach-probe + run-probe before being fuzzed. That is the throughput definition LLM-driven harness generation should be working toward — not "5,000 harnesses generated overnight" of the garbage-in-garbage-out variety, but throughput where every unit can be filed upstream on its own merits.
                         </p>
                         <p>
-                            和手工驱动的 fuzz 相比:
+                            Versus a hand-driven workflow:
                         </p>
                         <ul>
-                            <li>手工写一个 harness 平均 1–2 天,人挑入口、读 protocol、写代码、验。481 个手工 ≈ 1.5 年人力。</li>
-                            <li>本套流水线平均一个 LG 端到端约 30 分钟(LG discovery 5 分钟 + protocol 5 分钟 + build/fix 10 分钟 + adversarial validation 10 分钟),跨多个并发 worker 跑,两周完成。</li>
-                            <li>源码层 FP 几乎为零(2 个 dropped 都是 threat-model 层面而非源码层差错),换言之 P1–P4 的硬卡接住了几乎所有"看着像 bug 但其实是 harness 错"的 case。</li>
+                            <li>A hand-written harness averages 1–2 days — pick the entry, read the protocol, write the code, validate. 481 by hand ≈ 1.5 person-years.</li>
+                            <li>Our pipeline averages roughly 30 minutes per LG end-to-end (LG discovery 5 min + protocol 5 min + build/fix 10 min + adversarial validation 10 min) and runs across many concurrent workers. Two weeks total.</li>
+                            <li>Source-level FP rate is essentially zero — the 3 maintainer-FP findings all classify as threat-model rather than source-level mistakes. P1–P4 hard gates absorbed every "looks like a bug but is actually a harness mistake" case in the 52-drop bucket.</li>
                         </ul>
                         <br>
                         <p>
-                            做 fuzz 的人都知道:harness 不是产物,bug 才是。但没有合格的 harness 就没有可信的 bug。<strong>把 LLM 的产能用在生成合格 harness 上,而不是生成 raw bug 报告上</strong>,是这次工作的核心结论。
+                            Anyone who has done fuzz work knows the deliverable is bugs, not harnesses. But you cannot get trustworthy bugs out of an untrustworthy harness. <strong>Spending the LLM's capacity on producing high-quality harnesses, not on producing raw bug reports</strong>, is the thesis of this work.
                         </p>
                     </section>
 
                     <!-- What's Next -->
                     <section class="future-section">
-                        <h2>下一篇:fuzz 跑出来 crash 之后怎么办</h2>
+                        <h2>Next: After the Crash</h2>
                         <p>
-                            到目前为止讲的都是"在 harness 阶段就过滤掉错误"。但即使一个 P1–P4 干净的 harness,跑起来也会抛出大量 crash —— 一晚动辄上万。下一篇讲 verify 流程:四原则<em>再用一次</em>检查具体崩溃路径、2 步独立复现、再用 Security Proxy 跟维护者的 threat model 对齐。这是把 FP 率压到 <5% 的最后一道闸门。
+                            Everything above is "filter errors at the harness stage". But even a P1–P4-clean harness produces a flood of crashes when fuzzed for real — tens of thousands per night. The next post covers the verify pipeline: the four principles applied <em>once more</em> to the specific crash trace, two-step independent reproduction, and a Security Proxy that aligns the report with the maintainer's threat model. That is the gate that pushes the live filing FP rate toward zero.
                         </p>
                         <div class="next-steps">
                             <div class="next-step">
-                                <h4>Blog 3 — Crash 之后怎么办</h4>
-                                <p>四原则 × 2 步复现 × Security Proxy:从 24,000 个 crash 里挑出值得 file 的几个。</p>
+                                <h4>Blog 3 — After the Crash</h4>
+                                <p>Four principles × two-step reproduction × Security Proxy: picking the few worth filing out of the 24,000 crashes a fuzz batch produces overnight.</p>
                             </div>
                             <div class="next-step">
-                                <h4>Blog 1 — 四原则的源头</h4>
-                                <p>如果你刚加入,从<a href="four-principles-harness-audit.html">第一篇</a>开始读 —— 四原则的完整定义和 OSS-Fuzz 上 586 个 harness 的审计实战。</p>
+                                <h4>Blog 1 — Where the Four Principles Came From</h4>
+                                <p>If you are joining mid-series, start with <a href="four-principles-harness-audit.html">Part 1</a> — the full source-level definition of the four principles and the audit run on 586 production OSS-Fuzz harnesses.</p>
                             </div>
                             <div class="next-step">
-                                <h4>Chrome 数据公开</h4>
-                                <p>本次 481 个 fuzzer 的元数据(LG / harness / fuzz_runs / findings)都在 chrome-maint dashboard 上公开。</p>
+                                <h4>Chrome Data Open</h4>
+                                <p>Metadata for all 481 harnesses (LG specs, harness sources, fuzz_runs, findings) is published on the chrome-maint dashboard.</p>
                             </div>
                         </div>
                     </section>
@@ -371,8 +379,8 @@
                     <!-- CTA -->
                     <section class="cta-section">
                         <div class="cta-content">
-                            <h2>看 481 个 fuzzer 的实时数据</h2>
-                            <p>所有 LG、harness 源码、fuzz 运行记录、findings 都在 chrome-maint 公开。</p>
+                            <h2>See the 481-Harness Live Dataset</h2>
+                            <p>Every LG, every harness source, every fuzz run, every finding is public on chrome-maint.</p>
                             <div class="cta-buttons">
                                 <a href="https://github.com/o2lab/afc-crs-all-you-need-is-a-fuzzing-brain" class="btn btn-primary">
                                     <span>View on GitHub</span>
@@ -394,8 +402,8 @@
 
         <!-- Footer -->
         <nav class="post-navigation">
-            <a href="four-principles-harness-audit.html" class="post-nav-link prev"><span class="nav-label">Previous</span><span class="nav-title">← 四原则 × Harness 审计</span></a>
-            <a href="how-we-verify-fuzzer-crashes.html" class="post-nav-link next"><span class="nav-label">Next</span><span class="nav-title">Crash 之后怎么办 →</span></a>
+            <a href="four-principles-harness-audit.html" class="post-nav-link prev"><span class="nav-label">Previous</span><span class="nav-title">← Four Principles × Harness Audit</span></a>
+            <a href="how-we-verify-fuzzer-crashes.html" class="post-nav-link next"><span class="nav-label">Next</span><span class="nav-title">After the Crash →</span></a>
         </nav>
 
         <footer class="footer">

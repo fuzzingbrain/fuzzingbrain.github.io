@@ -363,7 +363,7 @@ gate:
                         </p>
                         <ul>
                             <li><a href="four-principles-harness-audit.html"><strong>第一篇</strong></a> —— 用四原则<em>审</em>已有 harness,在 OSS-Fuzz 上拦下 14 个 FP、提了 53 个修复 PR、顺便挖出 25 年的 OpenSSL 老 bug。</li>
-                            <li><a href="logic-groups-and-reverse-four-principles.html"><strong>第二篇</strong></a> —— 基于四原则的对抗性生成:用四原则<em>反向</em>(P4 → P1)配合 Logic Group 切分,两周为 Chromium 及其依赖部署 481 个 harness,近 30 个对维护者形成事实的真漏洞(7 fixed + 9 confirmed + 12 submitted),只有 2 个 dropped。</li>
+                            <li><a href="logic-groups-and-reverse-four-principles.html"><strong>第二篇</strong></a> —— Adversarial harness generation on the four principles:用四原则<em>反向</em>(P4 → P1)配合 Logic Group 切分,两周为 Chromium 及其依赖部署 481 个 harness,30 个 file 给上游(16 acked so far — 9 confirmed + 7 fixed),52 个在我们 audit 阶段就 drop 掉了。</li>
                             <li><strong>本篇</strong> —— 用四原则<em>第三次</em>审具体崩溃路径,加上两次独立复现和 Security Proxy,把 file 上去的每个 issue 都做到对维护者真正友好。</li>
                         </ul>
                         <p>
@@ -388,7 +388,7 @@ gate:
                             </div>
                             <div class="next-step">
                                 <h4>Chrome 实测数据</h4>
-                                <p>第二篇里 481 个 harness / 28 confirmed-or-submitted findings 的元数据全部在 chrome-maint dashboard 上公开。</p>
+                                <p>第二篇里 481 个 harness / 30 filed / 52 audit-dropped 的元数据全部在 chrome-maint dashboard 上公开。</p>
                             </div>
                         </div>
                     </section>
