@@ -110,7 +110,7 @@
                             <li><strong>P2 研协议</strong> —— 摸清调用顺序 / 生命周期 / 参数约束 / 配对清理(<em>写 harness 之前</em>的功课)</li>
                             <li><strong>P1 写代码</strong> —— 前三层都对了,P1 就是孤立的工程问题,直接套 16 条子检查</li>
                         </ul>
-
+                        <br>
                         <p>
                             任何一步失败都不进入下一步。对 LLM 来说,这把"自由发挥的空间"逐层收窄 —— 产出的 harness 不会跑题到内部 helper 上,也不会用错误的调用顺序把库的真实行为遮掉。
                         </p>
@@ -166,6 +166,7 @@
                             <li><code>openscreen_offer_messages_round_trip</code> — OFFER 的解析-序列化往返</li>
                             <li>...</li>
                         </ul>
+                        <br>
                         <p>
                             每个 LG 是一个独立的 fuzz 入口,对应一个独立的 harness。这样切的好处稍后会在结果里看到:同一类 jsoncpp 滥用 bug 在三个不同的 LG 里被独立触发,每个 LG 都给上游一个干净的、不互相牵连的报告。
                         </p>
@@ -198,6 +199,7 @@
                             <li>返回值语义(NULL on failure / negative error code / out-param)</li>
                             <li>必须配对调用的清理 API</li>
                         </ul>
+                        <br>
                         <p>
                             这份文档<strong>每条都必须落到 <code>file:line</code></strong>,不允许 LLM 自由发挥。这是"P2 写在 harness 之前"的关键 —— 等 harness 写完再回头审,LLM 已经被自己刚写的代码锚定了,改不动。先把协议研究清楚,再写代码。
                         </p>
@@ -218,6 +220,7 @@
                             <li><strong>Reach probe</strong> —— 在 GDB 里给目标 API 下断点,跑 harness 看断点能不能命中。命不中就说明 fuzz bytes 没流到目标,P1 失败。</li>
                             <li><strong>Run probe</strong> —— libFuzzer + ASan + LSan,跑短时长。任何 crash 立刻路由到 P1.1–P1.8 / P2.1–P2.8 的 16 个子检查里做 triage。如果 crash 归到 harness 自身违规,直接打回让 LLM 重写;只有归到库的真行为差异才算可能的 bug 候选。</li>
                         </ul>
+                        <br>
                         <p>
                             前一类负责"harness 真的在测库",后一类负责"harness 自己不会自爆"。两类都过才会把 harness 标记为 ready-for-discovery。
                         </p>
@@ -234,6 +237,7 @@
                             <li><strong>19 个 recorded</strong>:本地 verify 已过、还在 file 队列里没发出去。</li>
                             <li><strong>2 个 dropped</strong>:技术上有 crash,但维护者威胁模型里不算 —— 见下面"2 个 dropped 是怎么剩下来的"。</li>
                         </ul>
+                        <br>
                         <p>
                             28 个里严重程度分布 <strong>14 High / 13 Medium / 1 Low</strong>,横跨从 jsoncpp DoS 到 libaom heap-overflow 这种走在公开 codec API 上的内存错误。这是 30 这个数字的内涵 —— 不是 raw findings count,是<em>已经经过维护者眼球</em>的 count。
                         </p>
@@ -336,6 +340,7 @@
                             <li>本套流水线平均一个 LG 端到端约 30 分钟(LG discovery 5 分钟 + protocol 5 分钟 + build/fix 10 分钟 + adversarial validation 10 分钟),跨多个并发 worker 跑,两周完成。</li>
                             <li>源码层 FP 几乎为零(2 个 dropped 都是 threat-model 层面而非源码层差错),换言之 P1–P4 的硬卡接住了几乎所有"看着像 bug 但其实是 harness 错"的 case。</li>
                         </ul>
+                        <br>
                         <p>
                             做 fuzz 的人都知道:harness 不是产物,bug 才是。但没有合格的 harness 就没有可信的 bug。<strong>把 LLM 的产能用在生成合格 harness 上,而不是生成 raw bug 报告上</strong>,是这次工作的核心结论。
                         </p>
