@@ -46,7 +46,7 @@
                         <span class="post-readtime">15 min read</span>
                     </div>
                     <h1 class="post-title-main">Adversarial Harness Generation on the Four Principles: 472 Harnesses × 30 Vulns × 2 Weeks</h1>
-                    <p class="post-subtitle">Part 1 used the four principles as an <em>audit</em> criterion, catching existing OSS-Fuzz harnesses after the fact. This post flips the direction. The principles become a <em>generation</em> criterion. Start at P4 by picking the attack surface, combine that with Logic Group as a semantic-unit slicer, then put every harness through Stage-4 adversarial probing as a built-in QA gate. Two weeks, <strong>472 harnesses across Chromium and its upstream dependencies</strong>, <strong>30 vulnerabilities filed upstream</strong> (16 maintainer-acknowledged so far, of which 9 are confirmed and 7 are fixed; 3 came back as FP, 3 are newly filed and in flight), and <strong>52 candidate findings dropped during our internal audit</strong> before any of them could reach a maintainer.</p>
+                    <p class="post-subtitle">Part 1 used the four principles as an <em>audit</em> criterion, catching existing OSS-Fuzz harnesses after the fact. This post flips the direction. The principles become a <em>generation</em> criterion. Start at P4 by picking the attack surface, combine that with Logic Group as a semantic-unit slicer, then put every harness through Stage-4 adversarial probing as a built-in QA gate. Two weeks, <strong>472 harnesses across Chromium and its upstream dependencies</strong>, <strong>30 vulnerabilities filed upstream</strong> (16 acked so far with 9 confirmed and 7 fixed, 3 returned as FP, and 11 still awaiting review including 3 just-filed submissions), and <strong>52 candidate findings dropped by our pre-filing verify gate</strong> before any of them could reach a maintainer.</p>
                 </div>
             </div>
 
@@ -72,12 +72,12 @@
                                 <div class="result-stat">
                                     <div class="stat-icon">30</div>
                                     <div class="stat-value">Filed Upstream</div>
-                                    <div class="stat-label">16 acked (9 confirmed + 7 fixed) · 3 maintainer-FP · 3 newly filed</div>
+                                    <div class="stat-label">16 acked (9 confirmed + 7 fixed) · 3 maintainer-FP · 11 awaiting review</div>
                                 </div>
                                 <div class="result-stat">
                                     <div class="stat-icon">52</div>
-                                    <div class="stat-value">Audit-Dropped</div>
-                                    <div class="stat-label">Flaky · harness-side bug · duplicate · all blocked before filing</div>
+                                    <div class="stat-value">Verify-Dropped</div>
+                                    <div class="stat-label">Flaky · duplicate · harness-side · blocked before filing</div>
                                 </div>
                             </div>
                         </div>
@@ -87,7 +87,7 @@
                     <section>
                         <h2>Are the Four Principles Just an Audit Tool?</h2>
                         <p>
-                            <a href="four-principles-harness-audit.html">Part 1</a> used the four principles (P1 Logic Correctness / P2 API Protocol Compliance / P3 Security Boundary Respect / P4 Entry Point Adequacy) as an <strong>audit</strong> tool. The harness was already running on OSS-Fuzz; we read it back and checked whether it was correct. The result was 53 fix PRs across 586 harnesses, 14 false positives prevented, and one OpenSSL stack over-read latent for 25 years. The source-level definition of the principles and the 16 sub-checks (P1.1–P1.8 / P2.1–P2.8) all live in that post and are not repeated here.
+                            <a href="four-principles-harness-audit.html">Part 1</a> used the four principles (P1 Logic Correctness, P2 API Protocol Compliance, P3 Security Boundary Respect, P4 Entry Point Adequacy) as an <strong>audit</strong> tool. The harness was already running on OSS-Fuzz. We read it back and checked whether it was correct. The result was 53 fix PRs across 586 harnesses, 14 false positives prevented, and one OpenSSL stack over-read latent for 25 years. The source-level definition of the principles and the 16 sub-checks (P1.1 through P1.8 and P2.1 through P2.8) all live in that post and are not repeated here.
                         </p>
                         <p>
                             But the same four rules can also be used <em>before</em> the harness exists, to internalize "what counts as a good harness" inside the generation pipeline rather than catch it post-hoc. That is what this post is about. <strong>Flip the four principles around</strong> (P4 → P3 → P2 → P1), pair them with a tool that slices a library into independently fuzzable semantic units called <strong>Logic Group</strong>, and in two weeks generate, deploy, and fuzz <strong>472 harnesses</strong> across Chromium and its upstream dependencies.
@@ -166,7 +166,7 @@
                         </p>
                         <pre><code class="language-text">danger(LG) = sum_over_g_in_C( unsafe_ops_in(g) / depth_from_E_to_g )</code></pre>
                         <p>
-                            <code>unsafe_ops</code> covers <code>memcpy</code>, <code>malloc</code>, <code>free</code>, <code>strcpy</code>, <code>sprintf</code>, and similar primitives. The depth discount <code>1/d</code> keeps the ranking focused on attack surface that is <em>directly reachable from a public entry</em>, so deep-internal detail does not drown the score. The top 5 LGs move on. P3 (reachability must originate from a public API) is verified at the same step.
+                            <code>unsafe_ops</code> covers <code>memcpy</code>, <code>malloc</code>, <code>free</code>, <code>strcpy</code>, <code>sprintf</code>, and similar primitives. The depth discount <code>1/d</code> keeps the ranking focused on attack surface that is <em>directly reachable from a public entry</em>, so deep-internal detail does not drown the score. Every candidate whose danger score clears a non-trivial threshold advances to Stage 2. In practice, that leaves about 8 LGs per library, once the wrappers and trivial accessors get pruned. P3 (reachability must originate from a public API) is verified at the same step.
                         </p>
                         <p>
                             One engineering boundary worth calling out here. <strong>P3 and P4 are never delegated to an LLM as the sole decider.</strong> Whether an internal usage is legitimate, and whether an entry sits on the real attack surface, are project-context-heavy judgements. A senior reviewer who has read the project's <code>SECURITY.md</code> and written similar harnesses can answer them. A third-party general-purpose LLM with no project context cannot. So Stage 1 runs as a hybrid. The LLM enumerates candidates, the static call graph supplies reachability, and a senior reviewer signs off on borderline cases. The LLM is a tool here, not the judge. That boundary is what makes 472 harnesses humanly accountable for quality.
@@ -201,7 +201,7 @@
                             The last gate is adversarial probing. The system actively constructs adversarial inputs against the freshly generated harness and runs two probe types.
                         </p>
                         <ul>
-                            <li><strong>Reach probe.</strong> Set a GDB breakpoint on the target API and run the harness. If the breakpoint never fires, fuzz bytes are not flowing to the target and P1 has failed.</li>
+                            <li><strong>Reach probe.</strong> Set a GDB breakpoint on the target API and run the harness. If the breakpoint never fires, fuzz bytes are not flowing to the target and P1.4 (input flow) has failed.</li>
                             <li><strong>Run probe.</strong> libFuzzer with ASan and LSan, short duration. Any crash is immediately routed through the P1.1 to P1.8 and P2.1 to P2.8 sub-checks for triage. If the crash classifies as a harness-side violation, the harness goes back to the LLM. Only crashes that classify as a real library behavior become bug candidates.</li>
                         </ul>
                         <br>
@@ -217,12 +217,12 @@
                             We started running this pipeline against Chromium and its upstream dependencies in mid-April 2026. About two weeks later, the count of harnesses generated, built, and put through adversarial validation was <strong>472</strong>, spread across <strong>58 libraries</strong>. The pipeline produced findings in two distinct buckets:
                         </p>
                         <ul>
-                            <li><strong>30 filed upstream</strong> (the headline number). Maintainer-side state breaks down as 16 acknowledged (9 confirmed and 7 fixed), 3 returned as FP, 3 newly filed and awaiting first response, and the rest still in active maintainer review.</li>
-                            <li><strong>52 dropped during our own audit</strong>. Caught by Stage-4 adversarial validation or the verify-time review before they could reach a maintainer. Reasons split across <em>flaky reproductions</em>, <em>harness-side bugs</em>, and <em>duplicates of an already-filed root cause</em>. None of these became upstream noise, which is the point.</li>
+                            <li><strong>30 filed upstream</strong> (the headline number). Maintainer-side state breaks down as 16 acknowledged (9 confirmed and 7 fixed), 3 returned as FP, and 11 still awaiting maintainer review. Of the 11, 3 were just filed and 8 are older submissions still under triage.</li>
+                            <li><strong>52 dropped by our pre-filing verify gate</strong>. These are crashes that fuzzing produced and that verify caught before they could become an upstream issue. Reasons split across <em>flaky reproductions</em>, <em>duplicates of an already-filed root cause</em>, and <em>harness-side bugs that slipped past Stage-4 validation</em>. None of these became upstream noise, which is the point.</li>
                         </ul>
                         <br>
                         <p>
-                            The 30 here is not a raw findings count. It is the count <em>that has crossed a maintainer's eyes</em>. The mix spans memory-safety crashes on public codec and parser entries, DoS via uncontrolled allocation, and reachable-assertion aborts; we don't pre-classify severity, since that's the maintainer's call.
+                            The 30 here is not a raw findings count. It is the count <em>that has crossed a maintainer's eyes</em>. The mix spans memory-safety crashes on public codec and parser entries, DoS via uncontrolled allocation, and reachable-assertion aborts. We don't pre-classify severity, since that's the maintainer's call.
                         </p>
                         <p>
                             By library, the busiest targets were:
@@ -252,7 +252,7 @@
                         </div>
 
                         <p>
-                            Other libraries with at least one finding: crashpad, dawn, sandbox, pdfium, leveldb, quiche, dav1d, zstd, zxing-cpp, libpng, hunspell, net, sqlite, v8, chromium, skia. All numbers are pulled live from the chrome-maint dashboard.
+                            Other libraries with at least one finding include crashpad, dawn, sandbox, pdfium, leveldb, quiche, dav1d, zstd, zxing-cpp, libpng, hunspell, net, sqlite, v8, chromium, and skia. All numbers are pulled live from the chrome-maint dashboard.
                         </p>
                     </section>
 
@@ -295,20 +295,20 @@
                         </p>
                     </section>
 
-                    <!-- 52 audit drops + 3 maintainer FPs -->
+                    <!-- 52 verify drops + 3 maintainer FPs -->
                     <section>
                         <h2>How 52 Were Stopped Before Filing — and Why 3 Still Came Back FP</h2>
                         <p>
-                            The clean filing record (30 filed, 16 acked so far, 3 returned as FP) did not happen because verify (<a href="how-we-verify-fuzzer-crashes.html">covered in Part 3</a>) is heroic on its own. It happened because Stage-4 adversarial validation plus the verify pre-filing review caught <strong>52 candidate findings</strong> that would otherwise have gone to maintainers as bug reports. Those 52 are the audit-dropped bucket, and they split into three categories:
+                            The clean filing record (30 filed, 16 acked so far, 3 returned as FP) did not happen because verify (<a href="how-we-verify-fuzzer-crashes.html">covered in Part 3</a>) is heroic on its own. It happened because the pre-filing verify gate caught <strong>52 crash candidates</strong> that would otherwise have gone to maintainers as bug reports. Stage 4 does adjacent work earlier in the pipeline. It catches harness-side problems <em>before</em> the harness fuzzes for real, so most harness-induced crashes never become candidate findings in the first place. The 52 are what verify still found after that. They split into three categories.
                         </p>
                         <ul>
-                            <li><strong>Flaky reproductions.</strong> The crash fires in one of the early adversarial probes but does not reproduce reliably under the same input, the same binary, and the same environment. That is almost always a UB / race / uninitialized-read pattern that is a real <em>defect</em> but not one a maintainer can reproduce, so filing it is a guaranteed close-as-NOT_REPRODUCIBLE.</li>
-                            <li><strong>Harness-side bugs.</strong> Run-probe triage classifies the crash to a P1.x or P2.x violation, meaning the harness itself violates an API contract or has a memory bug. We send the harness back to the LLM with the failing sub-check ID rather than send the crash to the maintainer.</li>
-                            <li><strong>Duplicates.</strong> A different LG already produced an issue with the same root-cause stack. We file once per root cause; subsequent LGs hitting the same site reference the existing issue and drop the new finding from the file queue.</li>
+                            <li><strong>Flaky reproductions.</strong> The crash fired once during fuzzing but does not reproduce reliably when the verify replay re-runs the saved input against the same binary. Usually a race or environment-dependent timing pattern. The defect may be real, but a maintainer cannot reliably reproduce it from what we would file, so filing it is a guaranteed close-as-NOT_REPRODUCIBLE.</li>
+                            <li><strong>Duplicates.</strong> A different LG already produced an issue with the same root-cause stack. We file once per root cause. Subsequent LGs hitting the same site reference the existing issue and drop the new finding from the file queue.</li>
+                            <li><strong>Harness-side bugs that slipped past Stage 4.</strong> Verify re-runs the P1.1 to P1.8 and P2.1 to P2.8 sub-checks against the specific crash trace and sometimes catches a violation that Stage-4 adversarial probes did not surface (the bad input only shows up in long-form fuzzing). The harness goes back to the LLM with the failing sub-check ID rather than the crash going to the maintainer.</li>
                         </ul>
                         <br>
                         <p>
-                            All 52 of these were caught <em>before</em> a maintainer ever saw them. That is the leverage of putting Stage 4 inside the pipeline rather than relying on a maintainer to filter our noise, a job that is theirs to do for legitimate reports rather than ours to dump on them.
+                            All 52 of these were caught <em>before</em> a maintainer ever saw them. That is the leverage of having a verify gate in the pipeline rather than relying on a maintainer to filter our noise, a job that is theirs to do for legitimate reports rather than ours to dump on them.
                         </p>
                         <p>
                             What about the 3 that <strong>did</strong> come back FP after filing? Those slipped past the source-level checks because the failure mode is not source-level. It is <strong>a mismatch between the library's threat model and our reading of it</strong>. The canonical example is V8's <code>uaf-v8-deserializer-unresolved-external-reference</code>. The entry is the public <code>Isolate::New(deserialize_params)</code>, P3 passed (genuinely public API), P4 passed (genuinely on the attack surface, reachable to unsafe ops), and the bug is technically a UAF. But V8's own <a href="https://chromium.googlesource.com/v8/v8/+/HEAD/docs/security/triaging.md#relying-on-broken-snapshots-to-craft-vulnerabilities">security triaging policy</a> explicitly excludes attacker-controlled snapshot blobs from the V8 threat model. The crash is real, the threat model says "out of scope", and that is the FP.
@@ -330,7 +330,7 @@
                         <ul>
                             <li>A hand-written harness averages 1 to 2 days. Pick the entry, read the protocol, write the code, validate. 472 by hand is roughly 1.5 person-years.</li>
                             <li>Our pipeline averages roughly 30 minutes per LG end-to-end (LG discovery 5 min, protocol 5 min, build/fix 10 min, adversarial validation 10 min), and runs across many concurrent workers. Two weeks total.</li>
-                            <li>Source-level FP rate is essentially zero. The 3 maintainer-FP findings all classify as threat-model rather than source-level mistakes, and the P1 through P4 hard gates absorbed every "looks like a bug but is actually a harness mistake" case into the 52-drop bucket.</li>
+                            <li>Source-level FP rate is essentially zero. The 3 maintainer-FP findings all classify as threat-model rather than source-level mistakes. The 16 P1 and P2 sub-checks, applied at Stage 4 and again at verify, absorbed every source-level harness mistake before it could reach a maintainer.</li>
                         </ul>
                         <br>
                         <p>
