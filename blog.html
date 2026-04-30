@@ -44,26 +44,26 @@
         <!-- Featured Post -->
         <section class="featured-post">
             <div class="section-content">
-                <div class="featured-badge">Latest Post</div>
+                <div class="featured-badge">Latest · April 30, 2026</div>
                 <article class="post-featured">
                     <div class="post-meta">
-                        <span class="post-date">February 6, 2026</span>
-                        <span class="post-category">Security Research</span>
-                        <span class="post-readtime">15 min read</span>
+                        <span class="post-date">April 30, 2026</span>
+                        <span class="post-category">Campaign Update</span>
+                        <span class="post-readtime">6 min read</span>
                     </div>
                     <h2 class="post-title">
-                        <a href="posts/zero-day-vulnerability-discoveries.html">62 Vulnerabilities, 26 Projects, 36 Patches: FuzzingBrain's Open Source Security Campaign</a>
+                        <a href="posts/spring-2026-campaign-update.html">Spring 2026 Campaign Update: 103 Zero-Days, 56 Projects, Three Methodology Posts</a>
                     </h2>
                     <p class="post-excerpt">
-                        How our AI-assisted fuzzing system discovered and helped fix critical zero-day vulnerabilities in widely-used open source software -- from CUPS and Apache Avro to Ghidra and OpenLDAP.
+                        A short stage report. 103 vulnerabilities filed upstream across 56 open-source projects, 58 already patched, 12 confirmed. Most of this period went into harness quality. We are publishing three methodology posts alongside this update that explain how we did it, in order.
                     </p>
                     <div class="post-highlights">
-                        <span class="highlight-tag">62 Zero-Days</span>
-                        <span class="highlight-tag">26 Projects</span>
-                        <span class="highlight-tag">43 Confirmed</span>
-                        <span class="highlight-tag">36 Patched</span>
+                        <span class="highlight-tag">103 Filed</span>
+                        <span class="highlight-tag">58 Patched</span>
+                        <span class="highlight-tag">56 Projects</span>
+                        <span class="highlight-tag">&lt;5% FP</span>
                     </div>
-                    <a href="posts/zero-day-vulnerability-discoveries.html" class="post-link">Read Full Post →</a>
+                    <a href="posts/spring-2026-campaign-update.html" class="post-link">Read the Update →</a>
                 </article>
             </div>
         </section>
@@ -73,6 +73,62 @@
             <div class="section-content">
                 <h2 class="section-title">Recent Posts</h2>
                 <div class="posts-grid">
+                    <article class="post-preview published">
+                        <div class="post-meta">
+                            <span class="post-date">April 30, 2026</span>
+                            <span class="post-category">Methodology · Part 1</span>
+                        </div>
+                        <h3 class="post-title">
+                            <a href="posts/four-principles-harness-audit.html">Harnesses Have Bugs Too: A Four-Principles Audit of 586 OSS-Fuzz Harnesses</a>
+                        </h3>
+                        <p class="post-excerpt">
+                            Before generating "good" fuzz harnesses, we need a checkable definition of "good". This post offers the Four Principles, then validates them on 586 production OSS-Fuzz harnesses across 70 projects. 53 fix PRs filed, 45 verified or merged, 14 false positives caught at audit, two real upstream bugs surfaced when broken harnesses were repaired.
+                        </p>
+                        <div class="published-label">Series · Part 1</div>
+                    </article>
+
+                    <article class="post-preview published">
+                        <div class="post-meta">
+                            <span class="post-date">April 30, 2026</span>
+                            <span class="post-category">Vulnerability Discovery</span>
+                        </div>
+                        <h3 class="post-title">
+                            <a href="posts/logic-groups-and-reverse-four-principles.html">Two Weeks Inside Chromium: 472 Harnesses, 30 Vulnerabilities Filed Upstream</a>
+                        </h3>
+                        <p class="post-excerpt">
+                            Point the four principles at Google Chromium and its vendor stack (libvpx, libwebp, libaom, openscreen, dawn, pdfium, sqlite, v8, …). Flip the principles into a generation criterion, pair with Logic Group as the semantic-unit slicer, every harness goes through Stage-4 adversarial probing. Two weeks: 472 harnesses, 30 vulnerabilities filed upstream (16 acked so far — 9 confirmed + 7 fixed), and 52 candidates dropped before any could reach a maintainer.
+                        </p>
+                        <div class="published-label">Series · Part 2</div>
+                    </article>
+
+                    <article class="post-preview published">
+                        <div class="post-meta">
+                            <span class="post-date">April 30, 2026</span>
+                            <span class="post-category">Verification</span>
+                        </div>
+                        <h3 class="post-title">
+                            <a href="posts/how-we-verify-fuzzer-crashes.html">How We Verify Fuzzer Crashes: Four Principles, Two Reproductions, and Security Proxies</a>
+                        </h3>
+                        <p class="post-excerpt">
+                            A fuzzer can produce 24,000 crashes overnight, and almost none of them deserve to be filed. Three gates hold every candidate before it reaches the maintainer, keeping our false-positive rate under 5%.
+                        </p>
+                        <div class="published-label">Series · Part 3</div>
+                    </article>
+
+                    <article class="post-preview published">
+                        <div class="post-meta">
+                            <span class="post-date">February 6, 2026</span>
+                            <span class="post-category">Security Research</span>
+                        </div>
+                        <h3 class="post-title">
+                            <a href="posts/zero-day-vulnerability-discoveries.html">62 Vulnerabilities, 26 Projects, 36 Patches: FuzzingBrain's Open Source Security Campaign</a>
+                        </h3>
+                        <p class="post-excerpt">
+                            How our AI-assisted fuzzing system discovered and helped fix critical zero-day vulnerabilities in widely-used open source software.
+                        </p>
+                        <div class="published-label">Published</div>
+                    </article>
+
                     <article class="post-preview published">
                         <div class="post-meta">
                             <span class="post-date">October 6, 2025</span>

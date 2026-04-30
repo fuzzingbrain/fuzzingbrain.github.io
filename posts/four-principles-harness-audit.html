@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Harnesses Have Bugs Too: A Four-Principles Audit of 586 OSS-Fuzz Harnesses - FuzzingBrain</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/line-numbers/prism-line-numbers.min.css">
+</head>
+<body>
+    <a href="#main-content" class="skip-to-content">Skip to main content</a>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="../index.html" class="logo-link">
+                        <img src="../assets/images/fuzzbrain.jpg" alt="FuzzingBrain Logo" class="brain-logo">
+                        <h1>FuzzingBrain</h1>
+                    </a>
+                </div>
+                <button class="mobile-menu-btn" aria-label="Toggle navigation menu">
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                </button>
+                <nav class="nav" aria-label="Main navigation">
+                    <a href="../documentation.html">Docs</a>
+                    <a href="../quickstart.html">Quickstart</a>
+                    <a href="../blog.html" class="nav-active">Blog</a>
+                    <a href="../index.html#results">Results</a>
+                    <a href="https://github.com/o2lab/afc-crs-all-you-need-is-a-fuzzing-brain" class="nav-cta" target="_blank" rel="noopener noreferrer">GitHub</a>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Article Header -->
+        <article class="blog-post" id="main-content">
+            <div class="post-header">
+                <div class="section-content">
+                    <nav class="breadcrumb"><a href="../index.html">Home</a><span class="separator">/</span><a href="../blog.html">Blog</a><span class="separator">/</span><span class="current">Four-Principles Harness Audit</span></nav>
+                    <div class="post-meta">
+                        <span class="post-date">April 30, 2026</span>
+                        <span class="post-category">Methodology</span>
+                        <span class="post-readtime">14 min read</span>
+                    </div>
+                    <h1 class="post-title-main">Harnesses Have Bugs Too: A Four-Principles Audit of 586 OSS-Fuzz Harnesses</h1>
+                    <p class="post-subtitle">Before we can ask an LLM to generate "good" fuzz harnesses, we need to answer a more basic question: what makes a harness good, and is there a checkable definition? This post offers our answer — the Four Principles — and validates it by applying the criteria to 586 production OSS-Fuzz harnesses across 70 projects. The audit prevented 14 false-positive crash reports from ever reaching upstream, produced 53 harness-fix PRs of which 45 (85%) were verified or merged by maintainers, and surfaced two real upstream bugs that broken harnesses had been masking for years — including one latent in OpenSSL's DES implementation for over 25 years.</p>
+                </div>
+            </div>
+
+            <!-- Post Content -->
+            <div class="post-content">
+                <div class="section-content">
+
+                    <!-- Hero Stats -->
+                    <section class="results-hero">
+                        <div class="results-banner">
+                            <h2>Audit at a Glance</h2>
+                            <div class="results-stats">
+                                <div class="result-stat">
+                                    <div class="stat-icon">586</div>
+                                    <div class="stat-value">Harnesses Audited</div>
+                                    <div class="stat-label">Across 70 C/C++ projects</div>
+                                </div>
+                                <div class="result-stat">
+                                    <div class="stat-icon">53</div>
+                                    <div class="stat-value">Fix PRs</div>
+                                    <div class="stat-label">45 verified or merged (85%)</div>
+                                </div>
+                                <div class="result-stat">
+                                    <div class="stat-icon">14</div>
+                                    <div class="stat-value">FP Crashes Caught</div>
+                                    <div class="stat-label">Filtered at audit · never filed</div>
+                                </div>
+                                <div class="result-stat">
+                                    <div class="stat-icon">2</div>
+                                    <div class="stat-value">Latent Bugs Unmasked</div>
+                                    <div class="stat-label">Revealed by harness repair · OpenSSL 25-yr latent</div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Introduction -->
+                    <section>
+                        <h2>The question everyone skipped</h2>
+                        <p>
+                            <strong>"I want an LLM to generate fuzz harnesses for me"</strong> — this goal has been getting heavy attention from both academia and industry over the past couple of years. But look one layer deeper and it rests on a premise almost everyone skips over: <em>what makes a harness "good"?</em> Without that definition, the only way to score what an LLM produces is "does it build" and "does it survive 60 seconds without crashing" — both necessary, neither sufficient. Prior work has measured FP rates as high as <strong>94%</strong>.
+                        </p>
+                        <p>
+                            Open-source projects on GitHub are increasingly being audited by AI tools at scale. Fuzzing has an outsized share of that attention because it ships with its own oracle in the sanitizer. A crash report with a sanitizer trace looks like ground truth, which makes fuzzing the default vehicle for AI-driven bug discovery and reproduction. The trouble shows up one layer down. When the harness itself has bugs, the fuzzer still produces a convincing-looking report. There is a sanitizer trace, a plausible call stack, the whole package. But the trace points at a problem no real caller can reproduce. The result is corrupted signal. Maintainers end up spending their attention separating real library bugs from harness-induced noise, and the "automation" and "scale" that AI research likes to claim quietly gets shifted downstream as triage burden.
+                        </p>
+                        <p>
+                            That reduces the core question to a specification problem. <strong>Write down a source-level, checkable definition of what counts as a "good" fuzz harness.</strong>
+                        </p>
+                        <p>
+                            Our answer is the <strong>Four Principles</strong>. The next section walks through them.
+                        </p>
+                        <p>
+                            A definition by itself isn't enough. We also need to know whether those criteria actually capture "good", and the test we use for that is simple. Apply the criteria to a large sample of production harnesses, and check whether the ones the criteria flag are also the ones real maintainers want fixed. If maintainers consistently accept the resulting repair PRs, the criteria are tracking something real. If they shrug those PRs off, the criteria are noise.
+                        </p>
+                        <p>
+                            So <em>identifying bad harnesses isn't a downstream application of the Four Principles. It's the validation experiment for them.</em>
+                        </p>
+                        <p>
+                            We ran that experiment on OSS-Fuzz across 70 projects and 586 production harnesses. Here is what came back.
+                        </p>
+                        <ul>
+                            <li><strong>53 violations identified.</strong> Each became a fix PR filed upstream.</li>
+                            <li><strong>45 of those 53 (85%) were verified or merged by maintainers.</strong> 35 have already landed; the other 10 were acknowledged as real problems with the PR still in queue.</li>
+                            <li><strong>14 of the 53 would have produced false-positive ASan or LSan crashes if left in place.</strong> The audit caught all 14 before they ever reached upstream.</li>
+                            <li><strong>Two latent library bugs surfaced once the broken harnesses were fixed</strong>, including a 25-year-old OpenSSL DES stack-buffer over-read.</li>
+                        </ul>
+                        <br>
+                        <p>
+                            The rest of this post follows that order. First the criteria themselves, then what the audit found in production, then the two latent bugs the audit unmasked.
+                        </p>
+                        <br>
+                    </section>
+
+                    <!-- Four Principles -->
+                    <section>
+                        <h2>The Four Principles: a source-level definition of a "correct" harness</h2>
+                        <p>
+                            To be accepted, a harness must pass four <strong>source-level checks</strong> at the same time. We call them the Four Principles (P1–P4). Each one targets one of the most common failure modes when an LLM (or a human) writes a harness.
+                        </p>
+
+                        <div class="results-stats" style="margin: 2rem 0;">
+                            <div class="result-stat">
+                                <div class="stat-icon" style="font-size: 2rem;">P1</div>
+                                <div class="stat-value">Logic Correctness</div>
+                                <div class="stat-label">No bugs in the harness code itself</div>
+                            </div>
+                            <div class="result-stat">
+                                <div class="stat-icon" style="font-size: 2rem;">P2</div>
+                                <div class="stat-value">API Protocol Compliance</div>
+                                <div class="stat-label">Call order, object lifetimes, valid parameters</div>
+                            </div>
+                            <div class="result-stat">
+                                <div class="stat-icon" style="font-size: 2rem;">P3</div>
+                                <div class="stat-value">Security Boundary Respect</div>
+                                <div class="stat-label">Public APIs preferred · reproducible from the public side</div>
+                            </div>
+                            <div class="result-stat">
+                                <div class="stat-icon" style="font-size: 2rem;">P4</div>
+                                <div class="stat-value">Entry Point Adequacy</div>
+                                <div class="stat-label">Target sits on a real attack surface</div>
+                            </div>
+                        </div>
+
+                        <h3>P1 — Logic Correctness: no bugs in the harness itself</h3>
+                        <p>
+                            This is the simplest of the four principles and the one most often violated. A harness is a C/C++ program, and it makes the same mistakes any C/C++ program makes.
+                        </p>
+                        <ul>
+                            <li>Variables initialized before use, pointers null-checked before deref.</li>
+                            <li>Every error path releases its resources. No leaks, no double-frees, no use-after-free inside the harness.</li>
+                            <li>Fuzz bytes actually reach the library API arguments. The harness is not a no-op, and it does not silently swap the fuzz input for hard-coded constants.</li>
+                            <li>No static or global state leaks across <code>LLVMFuzzerTestOneInput</code> invocations.</li>
+                            <li>The buffer sizes passed to API calls match the buffer sizes declared in the harness.</li>
+                        </ul>
+                        <br>
+                        <p>
+                            <strong>A P1 violation means the root cause is the harness itself, but the sanitizer trace will not necessarily stop inside the harness.</strong> The more common pattern is the harness pushing bad state into the library. Examples include oversized buffers, NULL pointers, uninitialized structs, and freed objects. The library code is what trips ASan or LSan, the trace looks like a library bug, and the root cause is still the caller violating the contract. That is the most confusing kind of P1 false positive. Wherever the trace lands, if P1 doesn't pass, the report is noise.
+                        </p>
+
+                        <h3>P2 — API Protocol Compliance: the harness must obey the library's contract</h3>
+                        <p>
+                            Every library API comes with its own usage contract. The contract covers when to init, when to destroy, what parameter ranges are valid, which return values must be checked, and which calls must be paired. LLM-generated harnesses violate these contracts a lot, because the LLM cannot infer a full state machine from a single function signature. The eight P2 sub-checks are listed in the P1.1–P2.8 checklist below.
+                        </p>
+                        <p>
+                            Here is a real example. The <code>libyaml_emitter_fuzzer</code> on OSS-Fuzz is meant to do a <em>round-trip check</em>. Parse the fuzz input into a sequence of YAML events, push them through the emitter to get a serialized output, then parse that output back and confirm the event sequence matches. The simplified main control flow looks like this.
+                        </p>
+<pre class="line-numbers"><code class="language-c">int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
+    yaml_parser_t parser;
+    yaml_emitter_t emitter;
+    yaml_event_t event;
+    yaml_event_t events[MAX_EVENTS];
+    size_t event_number = 0;
+
+    yaml_parser_initialize(&parser);
+    yaml_parser_set_input_string(&parser, data, size);
+    yaml_emitter_initialize(&emitter);
+
+    yaml_output_buffer_t out = { NULL, 0, 1000 };
+    yaml_emitter_set_output(&emitter, yaml_write_handler, &out);
+
+    /* ---- Loop 1: parse, save event, emit ---- */
+    bool done = false;
+    while (!done) {
+        if (!yaml_parser_parse(&parser, &event)) goto delete_parser;
+        done = (event.type == YAML_STREAM_END_EVENT);
+
+        if (copy_event(&events[event_number++], &event)) {  // BUG
+            yaml_event_delete(&event);                       //   returns 1 = success,
+            goto delete_parser;                              //   harness reads it as failure
+        }
+
+        yaml_emitter_emit(&emitter, &event);   // never actually reached
+    }
+
+    /* ---- Loop 2: re-parse the output and compare events ---- */
+    /* (entire loop is dead code: Loop 1 always exits at BUG) */
+    yaml_parser_set_input_string(&parser, out.buf, out.size);
+    int count = 0;
+    while (!done) {
+        if (!yaml_parser_parse(&parser, &event)) break;
+        if (events_equal(events + count, &event)) break;
+        yaml_event_delete(&event);
+        count++;
+    }
+
+delete_parser:
+    yaml_parser_delete(&parser);
+    yaml_emitter_delete(&emitter);
+    for (int k = 0; k &lt; event_number; k++) yaml_event_delete(events + k);
+    free(out.buf);
+    return 0;
+}
+</code></pre>
+                        <p>
+                            <strong>What's wrong:</strong> line 21 inverts the check. The helper <code>copy_event()</code> follows the libyaml convention of returning 1 on success and 0 on failure. The harness reads 1 as failure, so every successful copy jumps straight into the error-cleanup <code>goto</code>.
+                        </p>
+                        <p>
+                            <strong>Why it's wrong:</strong> for any valid YAML input the fuzzer short-circuits on the very first event. The <code>yaml_emitter_emit</code> call inside Loop 1 never runs. All of Loop 2 (re-parse plus the <code>events_equal</code> consistency check) is unreachable. Roughly <strong>50% of the harness logic has never been executed</strong>. The harness still compiles, still runs without crashing, and coverage still climbs (in the 50% that does run), which is why it sat on OSS-Fuzz for years without anyone noticing.
+                        </p>
+                        <p>
+                            <strong>The fix is one character:</strong> add a <code>!</code>. <code>if (copy_event(...))</code> becomes <code>if (!copy_event(...))</code>. After the patch landed, edge coverage jumped from 166 to 2479, a <strong>+1393%</strong> gain (about 15×). This is a textbook <strong>P2.4 (Return value handling)</strong> violation, with the harness mistaking success for failure. The full fix PR is at <a href="https://github.com/google/oss-fuzz/pull/15096">google/oss-fuzz#15096</a>, merged.
+                        </p>
+                        <p>
+                            <strong>A P2 violation means the crash is API misuse, not a library vulnerability.</strong> But P2 has a stealthier failure mode than just filing FPs, and the example above is exactly it. The harness compiles, runs, and gains coverage, but a wrong check has silently cleared the target path. The fuzzer looks busy. None of the sanitizer-relevant code on the actual target ever runs. You aren't failing to find bugs. You aren't testing in the first place. The sanitizer reports no crash, just a fuzz cycle that produces zero output. Worse than an FP.
+                        </p>
+
+                        <h3>P3 — Security Boundary Respect: prefer public APIs</h3>
+                        <p>
+                            A real attacker can only enter the library through its public exported API. We <strong>encourage the harness to respect that same boundary</strong>. Pulling a <code>static</code> function out via <code>extern</code>, or feeding bytes straight into an internal chunk handler past the public-entry validation, drives the fuzzer into code that no external caller can ever reach. Whatever crash that produces is hard to map back to a real threat model.
+                        </p>
+                        <p>
+                            P3 is not an absolute ban on internal symbols. If you are <strong>100% certain</strong> the internal use is legitimate, for example the internal state machine's input semantics are equivalent to some public API's intermediate state, or if you can <strong>prove the same crash reproduces through a purely-public-API harness</strong>, the harness is allowed. The acceptance criterion is reproducibility from the public side. If a public-API-only harness can reach the same crash, P3 passes. If not, P3 fails.
+                        </p>
+                        <ul>
+                            <li><strong>Encouraged.</strong> Call functions declared in public headers, and do not skip the public entry-point validation. That validation is part of what the library ships.</li>
+                            <li><strong>Use internals carefully.</strong> If a harness needs <code>static</code> functions, friend access, or internal chunk handlers, the PR has to spell out the justification and attach evidence that the same behaviour reproduces from the public side.</li>
+                            <li><strong>Counter-example.</strong> Calling <code>png_handle_IHDR</code> directly to trigger a crash where no actual PNG file can produce the corresponding internal state. That is a P3 failure, because the public side cannot reproduce it.</li>
+                        </ul>
+                        <br>
+                        <p>
+                            P3 is a judgement call, not a mechanical check. Questions like "is this <code>static</code> function fair to use" or "can the same crash be reached from the public side" need project context. A senior reviewer who has read the library's <code>SECURITY.md</code>, written similar fuzzers, and knows the project history can answer them confidently. <strong>A third-party general-purpose LLM with no project context cannot.</strong> The LLM has not read the <code>SECURITY.md</code>, gives a different rationale each run, and tends to reject any internal-looking symbol on sight. So P3 (and P4 below) is not something our pipeline lets an LLM decide alone. The LLM proposes candidates, the static call graph supplies reachability, every citation has to land on <code>file:line</code>, and a senior reviewer signs off on borderline cases. The LLM is a tool here, not the judge.
+                        </p>
+                        <p>
+                            <strong>A P3 violation means the crash sits on a code path no one can reach from the public side.</strong> Even if the crash itself is real, the fix is hard to land. Upstream will usually close it as NOT_REPRODUCIBLE_FROM_PUBLIC_API.
+                        </p>
+
+                        <h3>P4 — Entry Point Adequacy: the target has to sit on a real attack surface</h3>
+                        <p>
+                            P4 answers a different question. Is this fuzz entry point worth fuzzing in the first place? A harness that pipes every fuzz byte into a logging helper or a trivial accessor will pass P1 through P3 cleanly and still waste every CPU second it gets.
+                        </p>
+                        <ul>
+                            <li>The entry point has to actually reach the target core implementation, not bail out early on validation.</li>
+                            <li>The reachable closure from the entry point has to contain memory-safety-relevant operations (<code>memcpy</code>, <code>malloc</code>, <code>free</code>, <code>strcpy</code>, <code>sprintf</code>, etc.). Otherwise even a successful exploit would be harmless.</li>
+                            <li>The target sits on the library's current public attack surface, not on some deprecated demo function.</li>
+                        </ul>
+                        <br>
+                        <p>
+                            <strong>A P4 violation means the fuzzer can run forever and still find nothing useful.</strong>
+                        </p>
+
+                        <h3>P1.1–P2.8: the 16-item checklist</h3>
+                        <p>
+                            To make P1 and P2 actually engineering-checkable we split each into eight concrete sub-checks. The same checklist drives all three stages (audit, generation, verify), so verdicts from any one stage line up with the others.
+                        </p>
+
+                        <h4>P1 — Logic Correctness · 8 sub-checks</h4>
+                        <div class="vuln-table-wrapper">
+                            <table class="vuln-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 8%;">ID</th>
+                                        <th style="width: 22%;">Sub-check</th>
+                                        <th>What it requires</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td><strong>P1.1</strong></td><td>Resource leaks</td><td>Every exit path releases all <code>alloc</code> / fd / lock / handle</td></tr>
+                                    <tr><td><strong>P1.2</strong></td><td>Use-after-free</td><td>No read or pass of a pointer after free</td></tr>
+                                    <tr><td><strong>P1.3</strong></td><td>Stale state</td><td>No static / global state carried across <code>LLVMFuzzerTestOneInput</code> invocations</td></tr>
+                                    <tr><td><strong>P1.4</strong></td><td>Input flow</td><td>Fuzz bytes actually reach the target API arguments (call not driven by constants)</td></tr>
+                                    <tr><td><strong>P1.5</strong></td><td>Buffer safety</td><td>Bounded fuzz-buffer reads, null-terminated C strings, length-checked indexing</td></tr>
+                                    <tr><td><strong>P1.6</strong></td><td>Size checks</td><td>Early return when input is below the API minimum</td></tr>
+                                    <tr><td><strong>P1.7</strong></td><td>Undefined behaviour</td><td>No OOB / null-deref / signed overflow / unaligned cast</td></tr>
+                                    <tr><td><strong>P1.8</strong></td><td>No reimplementation</td><td>Calls real library code, not an inline local copy</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <h4>P2 — API Protocol Compliance · 8 sub-checks</h4>
+                        <div class="vuln-table-wrapper">
+                            <table class="vuln-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 8%;">ID</th>
+                                        <th style="width: 22%;">Sub-check</th>
+                                        <th>What it requires</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td><strong>P2.1</strong></td><td>Init sequence</td><td>All required predecessors called in order before the target</td></tr>
+                                    <tr><td><strong>P2.2</strong></td><td>Parameter construction</td><td>Each parameter has the right type, range, owner, and lifetime</td></tr>
+                                    <tr><td><strong>P2.3</strong></td><td>Object lifecycle</td><td>Opaque objects go through create → configure → use → destroy</td></tr>
+                                    <tr><td><strong>P2.4</strong></td><td>Return value handling</td><td>Return codes checked, error branches exercised, gated output not reused after failure</td></tr>
+                                    <tr><td><strong>P2.5</strong></td><td>Cleanup sequence</td><td>Resources released in API-documented order on every exit path</td></tr>
+                                    <tr><td><strong>P2.6</strong></td><td>API existence</td><td>Every called function is exported in the pinned build of the library</td></tr>
+                                    <tr><td><strong>P2.7</strong></td><td>Co-call constraints</td><td>Paired APIs co-occur; mutually exclusive APIs do not</td></tr>
+                                    <tr><td><strong>P2.8</strong></td><td>Prerequisite state</td><td>External state (fd / socket / env / thread) set up before the target call and torn down after</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <p>
+                            Implementation details (which sub-checks use LLM-read source with <code>file:line</code> citations, which use GDB breakpoints on the target API, which read ASan / LSan sanitizer traces) and how prober inputs differ across the three stages are covered in the <a href="logic-groups-and-reverse-four-principles.html">next post</a> on the reverse pipeline. This section just lays down the criteria themselves.
+                        </p>
+
+                    </section>
+
+                    <!-- Audit Run -->
+                    <section>
+                        <h2>The audit: 70 projects, 586 harnesses</h2>
+                        <p>
+                            Our actual goal is to use the four principles to <strong>generate</strong> correct harnesses. Before trusting that, we need to prove something more basic. Can the principles reliably identify harness defects, and can they drive a fix that holds up upstream? This section is that proof experiment.
+                        </p>
+                        <p>
+                            The experiment design is straightforward. <strong>We treat each existing production harness as if it were a "first-round LLM output".</strong> The four principles inspect it, the findings get fed back to the LLM to refine, and the loop iterates until the harness passes. That audit-and-refine cycle is exactly the middle of the generation pipeline, isolated and run on real code. If it surfaces defects reliably on production harnesses and produces fixes that maintainers actually accept, it has earned its place inside the full pipeline.
+                        </p>
+                        <p>
+                            The baseline is <strong>70 C/C++ projects on OSS-Fuzz</strong>. Most of these harnesses were written by the project maintainers or senior contributors, reviewed upstream, and have been running on ClusterFuzz for years. From those 70 projects we pulled <strong>586 production harnesses</strong>. The procedure:
+                        </p>
+                        <ul>
+                            <li><strong>Static pass.</strong> An LLM agent reads the harness source plus the library headers and walks the full 16 sub-checks across P1.1–P1.8 and P2.1–P2.8. Note the audit only mechanizes P1 and P2; P3 and P4 are judgement calls that a senior reviewer handles separately. Every claim must cite a <code>file:line</code>.</li>
+                            <li><strong>Dynamic pass.</strong> Adversarial probing builds inputs targeting each suspect point, then runs 60 seconds of libFuzzer with ASan and LSan to confirm the violation actually fires.</li>
+                            <li><strong>Repair and validate.</strong> For each violation we submit a fixed version and run the same 60 seconds to confirm coverage does <strong>not regress</strong>. That gives the upstream maintainer a direct reason to merge.</li>
+                            <li>Average wall-clock cost is about 10 minutes per harness with 10 parallel workers, for a total of roughly <strong>$720</strong>.</li>
+                        </ul>
+                        <br>
+                        <p>
+                            Now the results.
+                        </p>
+
+                        <h3>53 violations across 28 projects</h3>
+                        <p>
+                            We found <strong>53 P1/P2 violations across 586 harnesses</strong>, or 9.0%, spread across 28 projects. The remaining 42 projects produced no violations in this run. One caveat is worth flagging. The four principles are a checklist, not a decision procedure. "Found nothing" does not prove a project is clean. It only proves that none of the 16 sub-checks tripped on those particular harnesses in this audit.
+                        </p>
+                        <p>
+                            All 53 went upstream as PRs or issues. As of this writing.
+                        </p>
+
+                        <div class="results-stats" style="margin: 2rem 0;">
+                            <div class="result-stat">
+                                <div class="stat-icon">53</div>
+                                <div class="stat-value">Violations Filed</div>
+                                <div class="stat-label">Each ships with a fix patch</div>
+                            </div>
+                            <div class="result-stat">
+                                <div class="stat-icon">45</div>
+                                <div class="stat-value">Verified or Merged</div>
+                                <div class="stat-label">85%, includes the 35 below</div>
+                            </div>
+                            <div class="result-stat">
+                                <div class="stat-icon">35</div>
+                                <div class="stat-value">Merged (subset)</div>
+                                <div class="stat-label">66% live on OSS-Fuzz</div>
+                            </div>
+                            <div class="result-stat">
+                                <div class="stat-icon">1</div>
+                                <div class="stat-value">Explicit Rejection</div>
+                                <div class="stat-label">Maintainers really do review each one</div>
+                            </div>
+                        </div>
+
+                    </section>
+
+                    <!-- 2 incidental real bugs (the headline) -->
+                    <section>
+                        <h2>The headline: two real upstream bugs that broken harnesses had been hiding</h2>
+                        <p>
+                            The most interesting result of this audit is not the count of violations. It is the two <strong>real upstream bugs that broken harnesses had been masking for years</strong>. Repairing a P2 violation occasionally re-exposes the library's real behaviour to the sanitizer. That happened twice in this run.
+                        </p>
+
+                        <h3>Case 1: OpenSSL DES stack-buffer over-read, latent 25+ years</h3>
+                        <p>
+                            One OpenSSL harness had a P2 violation in its API call ordering that left the entire cipher path as dead code in the harness execution trace. Once we fixed the order, the fuzzer threw a stack-buffer over-read inside the OpenSSL DES implementation within seconds.
+                        </p>
+                        <p>
+                            The bug itself has been sitting in OpenSSL's DES module for <strong>over 25 years</strong>, older than the name "OpenSSL". It went unnoticed not because it was hard to find but because <strong>every harness that ever walked that path was tripped by the same P2 mistake and never actually entered the function</strong>. One call-order error kept a memory-safety bug on a public API hidden for a quarter century.
+                        </p>
+                        <p>
+                            Upstream issue: <a href="https://github.com/openssl/openssl/issues/30284">openssl/openssl#30284</a>. Fix merged, issue closed.
+                        </p>
+
+                        <h3>Case 2: tidy-html5 memory leak, one missing cleanup call</h3>
+                        <p>
+                            A tidy-html5 harness was missing a required cleanup call, violating P2's paired-API constraint. Once we added the call, the harness immediately tripped <code>LeakSanitizer</code> on the path the missing cleanup had been hiding. The leak lives inside tidy-html5's own lexer code.
+                        </p>
+                        <p>
+                            The root cause matches the OpenSSL case exactly. <strong>A wrong harness usage was masking the library's real behaviour.</strong> Treat these two as the canonical example of P2-driven bug discovery. Fixing the harness is not just about killing false positives; it is about returning the sanitizer's view of the library to ground truth.
+                        </p>
+                        <p>
+                            Upstream issue: <a href="https://github.com/htacg/tidy-html5/issues/1177">htacg/tidy-html5#1177</a>.
+                        </p>
+                    </section>
+
+                    <!-- 14 FPs -->
+                    <section>
+                        <h2>14 false positives that never reached upstream</h2>
+                        <p>
+                            Of the 53 violations, <strong>14 would produce false-positive ASan or LSan crashes</strong> if left in place. If we had skipped the audit and run those harnesses through fuzzing directly, all 14 would have surfaced convincing-looking crashes, gotten packaged into 14 bug reports, and dumped on the maintainers.
+                        </p>
+                        <p>
+                            Not one of the 14 is a real library bug. Each root cause sits inside the harness itself: a dict never freed, an object lifecycle mis-staged, an internal chunk handler driven directly. Every one of them would have cost a maintainer time reading the stack trace, rebuilding a reproducer, walking the source, and eventually closing it NO_VULNERABILITY. And it would leave a "low-quality submitter" stamp on our handle.
+                        </p>
+                        <p>
+                            <strong>The four principles caught all 14 before fuzzing ever ran.</strong> They were not crashes-then-discarded-by-verify. They were source-level violations identified, fixed, and merged upstream as PRs without any of them ever firing a sanitizer in production. Involved projects include:
+                        </p>
+                        <ul>
+                            <li><strong>lcms.</strong> Both <code>dict</code> and <code>transform_ext</code> harnesses had P2 violations producing FP crashes. Clean after the fix.</li>
+                            <li><strong>libarchive / linkify.</strong> P1 resource-lifecycle issue.</li>
+                            <li><strong>libpng / readapi.</strong> P2 call-order mistake.</li>
+                            <li><strong>njs / script.</strong> P1 static state not reset between runs.</li>
+                            <li><strong>openvpn.</strong> Both <code>packet_id</code> and <code>verify_cert</code> had P1 violations producing fake leaks.</li>
+                            <li><strong>wamr / mutator.</strong> P2 protocol violation.</li>
+                        </ul>
+                        <br>
+                        <p>
+                            This is the biggest lever the audit has. <strong>Stop the false positives from leaving the building.</strong> You never have to repair a maintainer's trust if you never wasted their time to begin with.
+                        </p>
+                    </section>
+
+                    <!-- Coverage gain illustration -->
+                    <section>
+                        <h2>Side effect: coverage gains were not the goal, but they were large</h2>
+                        <p>
+                            One thing to be clear about. The audit's goal was <strong>not</strong> coverage. The goal was harness correctness. But in many cases, fixing a P1 or P2 violation also revives dead code, and coverage climbs as a side effect. We attach the coverage delta to each repair PR as a no-regression sanity check for the maintainer. A few representative numbers.
+                        </p>
+                        <ul>
+                            <li><code>opencv/filestorage</code> · <strong>+986%</strong> edges (the original harness was almost entirely dead code).</li>
+                            <li><code>libyaml/emitter</code> — <strong>14×</strong> edges</li>
+                            <li><code>openssl/quic_server</code> — <strong>+65.7%</strong></li>
+                            <li><code>bzip2/bzip2_fd</code> — <strong>+52.4%</strong></li>
+                            <li><code>tidy-html5/general</code> — <strong>+33.5%</strong></li>
+                            <li><code>boost/filesystem</code> — <strong>+21.9%</strong></li>
+                        </ul>
+                        <br>
+                        <p>
+                            Large jumps usually map to a harness that was almost entirely dead code. Small ones usually map to a harness that was already running but carried a non-blocking P1 or P2 violation (jq/parse_stream is the canonical small-jump case). Both kinds are harness-quality problems; they just present differently.
+                        </p>
+                    </section>
+
+                    <!-- Why this matters -->
+                    <section>
+                        <h2>Why this matters more in the LLM era</h2>
+                        <p>
+                            When harnesses were hand-written, quality issues got caught in PR review by other humans. In the LLM era a single overnight run can churn out hundreds of harnesses. Without a source-level quality gate up front, automation translates "speed" into "false-positive throughput".
+                        </p>
+                        <p>
+                            The four principles are not LLM-specific. They are a <strong>source-level definition of harness correctness</strong>, equally applicable to auditing human-written harnesses (the 586 in this post) and to self-checking LLM-generated ones. We use the same four principles inside our generation pipeline too. The next post covers that.
+                        </p>
+                        <p>
+                            If you are working on LLM-driven fuzz harness generation today, our suggestions:
+                        </p>
+                        <ol>
+                            <li>Do not treat "compiles and survives 60 seconds of fuzzing" as a quality signal. Both are necessary, neither is sufficient.</li>
+                            <li>After generation, run the P1.1–P1.8 and P2.1–P2.8 sub-checks. Send violations back to the LLM for a rewrite. Do not park them in a fuzz queue.</li>
+                            <li>Apply P3 and P4 <em>before</em> generation, at target selection. Choosing the wrong entry and then writing code is wasted work.</li>
+                            <li>Every PR upstream needs the root cause, the fix, and a no-regression coverage check. A bare sanitizer trace is not enough.</li>
+                        </ol>
+                        <p>
+                            The pipeline cost is bounded. 586 harnesses, ~10 minutes each at 10 parallel workers, about $720 total. In return: 14 false positives that never become noise reports, 45 maintainer-verified-or-merged PRs (35 already landed), and two real upstream bugs that broken harnesses had been masking for years (including the 25-year-old OpenSSL DES one). The trade is positive either way you score it, in engineering cost or in ecosystem trust.
+                        </p>
+                    </section>
+
+                    <!-- What's Next -->
+                    <section class="future-section">
+                        <h2>Next: turning the principles around</h2>
+                        <p>
+                            This post used the four principles for <strong>audit</strong>. Catch an existing harness, find the violations, ship a fix. The next post flips the direction. Use the principles for <strong>generation</strong>. Given a fresh library, walk P4 down to P1 (start with the attack surface, end at the code), combine that with Logic Group as the semantic-unit slicer, then put every harness through Stage-4 adversarial validation before fuzzing. In two weeks: 472 harnesses across Chromium and its upstream dependencies, 30 vulnerabilities filed upstream (16 acked so far — 9 confirmed + 7 fixed, 3 returned as FP, 3 newly filed), and 52 candidates dropped during our own audit before any could reach a maintainer.
+                        </p>
+                        <div class="next-steps">
+                            <div class="next-step">
+                                <h4>Blog 2 — Adversarial harness generation, on the four principles</h4>
+                                <p>Reverse-direction four principles + Logic Group + Stage-4 adversarial probes. The engineering pipeline that produced 472 harnesses across the Chromium and Google-vendor stack.</p>
+                            </div>
+                            <div class="next-step">
+                                <h4>Blog 3 — After the crash</h4>
+                                <p>The verify pipeline. Re-run the four principles, two-stage reproduction, then Security Proxies aligned with the maintainer's threat model.</p>
+                            </div>
+                            <div class="next-step">
+                                <h4>OpenSSF working group</h4>
+                                <p>Happy to compare notes on LLM-generated harness quality. The thing we worry about most is not the FP flood. It is real bugs getting auto-closed alongside the noise.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <p style="text-align: right; margin-top: 3rem; color: #888; font-style: italic;">
+                        — Ze Sheng · Team FuzzingBrain
+                    </p>
+
+                </div>
+            </div>
+        </article>
+
+        <!-- Footer -->
+        <nav class="post-navigation">
+            <a href="logic-groups-and-reverse-four-principles.html" class="post-nav-link next"><span class="nav-label">Next</span><span class="nav-title">Adversarial harness generation →</span></a>
+        </nav>
+
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-text">
+                    <p>&copy; 2026 All You Need Is A Fuzzing Brain Research Team</p>
+                    <p>Advancing autonomous vulnerability discovery through AI</p>
+                </div>
+                <div class="footer-links">
+                    <a href="https://github.com/fuzzingbrain"><img src="../assets/images/fuzzbrain.jpg" alt="GitHub" class="footer-logo"> GitHub</a>
+                    <a href="https://aicyberchallenge.com/">DARPA AIxCC</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/line-numbers/prism-line-numbers.min.js"></script>
+    <script src="../script.js"></script>
+</body>
+</html>
