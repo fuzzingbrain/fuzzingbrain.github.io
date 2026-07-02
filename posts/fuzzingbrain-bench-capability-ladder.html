@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FuzzingBrain-Bench: Measuring Whether LLMs Can Actually Find Real Bugs - FuzzingBrain</title>
+    <meta name="description" content="A public, execution-grounded, capability-laddered benchmark for LLM bug-finding on 68 real C/C++/Java bugs. Why we built it, why prior benchmarks fall short, how to run it, and what frontier models actually score.">
+    <link rel="stylesheet" href="../styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/line-numbers/prism-line-numbers.min.css">
+</head>
+<body>
+    <a href="#main-content" class="skip-to-content">Skip to main content</a>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="../index.html" class="logo-link">
+                        <img src="../assets/images/fuzzbrain.jpg" alt="FuzzingBrain Logo" class="brain-logo">
+                        <h1>FuzzingBrain</h1>
+                    </a>
+                </div>
+                <button class="mobile-menu-btn" aria-label="Toggle navigation menu">
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                </button>
+                <nav class="nav" aria-label="Main navigation">
+                    <a href="../documentation.html">Docs</a>
+                    <a href="../quickstart.html">Quickstart</a>
+                    <a href="../blog.html" class="nav-active">Blog</a>
+                    <a href="../index.html#results">Results</a>
+                    <a href="https://github.com/o2lab/afc-crs-all-you-need-is-a-fuzzing-brain" class="nav-cta" target="_blank" rel="noopener noreferrer">GitHub</a>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Article Header -->
+        <article class="blog-post" id="main-content">
+            <div class="post-header">
+                <div class="section-content">
+                    <nav class="breadcrumb"><a href="../index.html">Home</a><span class="separator">/</span><a href="../blog.html">Blog</a><span class="separator">/</span><span class="current">FuzzingBrain-Bench</span></nav>
+                    <div class="post-meta">
+                        <span class="post-date">July 2, 2026</span>
+                        <span class="post-category">Benchmark</span>
+                        <span class="post-readtime">15 min read</span>
+                    </div>
+                    <h1 class="post-title-main">FuzzingBrain-Bench: Measuring Whether LLMs Can Actually Find Real Bugs</h1>
+                    <p class="post-subtitle">Everyone says language models can find vulnerabilities. Nobody can verify it, because no public benchmark measures <em>finding</em> — they measure labeling, generating, repairing, or reproducing a bug the model was already told about. FuzzingBrain-Bench closes that gap: 68 real C/C++/Java bugs, the answer hidden, graded by the program itself on a monotone capability ladder (<strong>reach ⊇ crash ⊇ class ⊇ site</strong>) with strict off-target accounting. This post is the whole story — the motivation, why prior work falls short, where we are strong, how to run it in five minutes, and what frontier models actually score.</p>
+                </div>
+            </div>
+
+            <!-- Post Content -->
+            <div class="post-content">
+                <div class="section-content">
+
+                    <!-- Hero Stats -->
+                    <section class="results-hero">
+                        <div class="results-banner">
+                            <h2>The Benchmark at a Glance</h2>
+                            <div class="results-stats">
+                                <div class="result-stat">
+                                    <div class="stat-icon">68</div>
+                                    <div class="stat-value">Real Bugs</div>
+                                    <div class="stat-label">40 OSS projects · C · C++ · Java</div>
+                                </div>
+                                <div class="result-stat">
+                                    <div class="stat-icon">5</div>
+                                    <div class="stat-value">Capability Rungs</div>
+                                    <div class="stat-label">reach ⊇ crash ⊇ differential ⊇ class ⊇ site</div>
+                                </div>
+                                <div class="result-stat">
+                                    <div class="stat-icon">0</div>
+                                    <div class="stat-value">LLM Judges</div>
+                                    <div class="stat-label">Deterministic sanitizer oracle only</div>
+                                </div>
+                                <div class="result-stat">
+                                    <div class="stat-icon">816</div>
+                                    <div class="stat-value">Episodes Evaluated</div>
+                                    <div class="stat-label">Two frontier models · six task modes</div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 1. Motivation -->
+                    <section>
+                        <h2>1. Motivation: the claim nobody can check</h2>
+                        <p>
+                            Language models are claimed to find software vulnerabilities — to read a codebase and surface its bugs. Vendors demo it, papers report it, and security teams are starting to buy it. But there is a problem underneath all of it: <strong>we cannot verify the claim, because no public benchmark measures it.</strong>
+                        </p>
+                        <p>
+                            Look at what the existing benchmarks actually ask an LLM to do. Detection asks it to <em>label</em> a function it never runs. Secure-code-generation asks it to <em>write</em> new code and then scans the output. Repair asks it to <em>patch</em> a bug that is handed over. Reproduction asks it to re-trigger a <em>given</em> bug. CTF asks it to capture a memorizable flag. Not one of them asks the model to <strong>find a bug it was not told about, and prove that the bug actually fires.</strong> That is the capability the industry is selling, and it is precisely the one that goes unmeasured.
+                        </p>
+                        <div class="highlight-box">
+                            <div>
+                                <p style="margin:0;"><strong>The question FuzzingBrain-Bench is built to answer, in one sentence:</strong> given real software and no hint about where the bug is, can an LLM produce an input that makes the real compiled binary crash under its sanitizer — and prove <em>which</em> bug it triggered?</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 2. Why we designed this -->
+                    <section>
+                        <h2>2. Why we had to design a new one</h2>
+                        <p>
+                            A faithful bug-finding benchmark faces a tension that is easy to state and hard to satisfy. It must <strong>hide the answer</strong>, because a benchmark that reveals the bug through a label, a patch, or a description is scoring <em>reading comprehension</em>, not discovery. And it must stay <strong>deterministically verifiable</strong>, because a benchmark whose oracle is a heuristic or an LLM judge produces a score that is just noise.
+                        </p>
+                        <p>
+                            Every prior line of work resolves this tension by surrendering one side of it:
+                        </p>
+                        <ul>
+                            <li><strong>Detection, repair, and reproduction stay verifiable — but reveal the bug.</strong> The label, the patch, or the "description" tells the model what it is looking for.</li>
+                            <li><strong>Open-ended LLM-fuzzing hides the bug — but has no per-instance oracle.</strong> It reports coverage or a campaign bug-count, with no reusable ground truth you can grade a single attempt against.</li>
+                        </ul>
+                        <br>
+                        <p>
+                            Nobody had built the benchmark that holds <em>both</em> at once: hide the bug <em>and</em> grade it deterministically, per instance, on real compiled software. That empty cell is why FuzzingBrain-Bench exists. The natural way to make an oracle deterministic is to reveal the bug; the natural way to hide the bug is to give up the oracle. We refused both shortcuts.
+                        </p>
+                    </section>
+
+                    <!-- 3. Why prior work falls short -->
+                    <section>
+                        <h2>3. Why prior work falls short</h2>
+                        <p>
+                            This is not a hand-wave. Each prior family fails on a concrete, measured axis — the label, the oracle, or the task itself.
+                        </p>
+
+                        <h3>The label is a lie</h3>
+                        <p>
+                            Supervised vulnerability detection marks a function "vulnerable" if a fix commit touched it. PrimeVul shows those labels are <strong>24–60% accurate</strong> across the standard datasets (Devign, Big-Vul, CrossVul, CVEfixes, DiverseVul), with up to <strong>18.9%</strong> of test functions duplicated from training. On a clean split a 7B state-of-the-art detector collapses from <strong>68.26% F1 to 3.09% F1</strong>, and GPT-4 "could not even outperform random guessing." When the ground truth is that wrong and that leaked, the score is measuring the leak.
+                        </p>
+
+                        <h3>The oracle is spoofable</h3>
+                        <p>
+                            When success is a proxy rather than the fault itself, models satisfy the proxy without the bug. Runtime side-effect oracles for PoC generation are <strong>~44% false-positive</strong> — the "successful" input never reaches the vulnerable sink. Static insecure-code detectors miss <strong>~21%</strong> of insecure generations. In SWE-bench, <strong>31%</strong> of passing patches exploit weak tests and <strong>33%</strong> copy a leaked solution. A spoofable oracle rewards the model for gaming it.
+                        </p>
+
+                        <h3>The task is not bug-finding — and contamination inflates it</h3>
+                        <p>
+                            Even the execution-grounded benchmarks that grade by a real crash still <em>hand over the bug's identity</em>. CyberGym's "description" is a rephrased fix commit. ExploitBench supplies the patch. The moment the bug is named, a high score can be recall instead of discovery — and Fang et al. made this brutally concrete: GPT-4's exploit rate falls from <strong>87% to 7%</strong> when the description is removed. Over 94% of SWE-bench issues predate model cutoffs, so memorization does the rest.
+                        </p>
+
+                        <div class="vuln-table-wrapper">
+                            <table class="vuln-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 22%;">Benchmark family</th>
+                                        <th style="width: 20%;">What it grades</th>
+                                        <th style="width: 20%;">Oracle</th>
+                                        <th>Why it doesn't measure bug-finding</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td><strong>PrimeVul</strong> (detection)</td><td>Label a function</td><td>Commit-derived label</td><td>No execution; labels 24–60% wrong; 3% F1 on a clean split</td></tr>
+                                    <tr><td><strong>CyberSecEval</strong> (codegen)</td><td>Generate, then scan</td><td>Static scanner</td><td>Grades <em>writing</em> new code; misses 1-in-5 insecure outputs</td></tr>
+                                    <tr><td><strong>OSS-Fuzz-Gen</strong> (fuzzing tool)</td><td>Write a fuzzer</td><td>Coverage / bug-count</td><td>No per-instance oracle; not all reported bugs are real</td></tr>
+                                    <tr><td><strong>SWE-bench</strong> (SE agent)</td><td>Resolve an issue</td><td>Hidden unit tests</td><td>Python, not security; weak tests; heavy contamination</td></tr>
+                                    <tr><td><strong>PoC-Gym</strong> (repro)</td><td>Reproduce a <em>given</em> bug</td><td>Runtime side-effect</td><td>~44% false-positive; bug is handed over</td></tr>
+                                    <tr><td><strong>CyberGym</strong> (repro)</td><td>Reproduce a <em>described</em> bug</td><td>Patch-differential</td><td>No class/site; "description" = rephrased patch; C/C++ only</td></tr>
+                                    <tr><td><strong>SEC-bench Pro</strong> (discovery)</td><td>Directed bug-hunt</td><td>3-image + <em>LLM judge</em></td><td>Non-deterministic; V8/SpiderMonkey only; gives the error type</td></tr>
+                                    <tr style="background: rgba(99,102,241,0.08);"><td><strong>FuzzingBrain-Bench</strong> (discovery)</td><td><strong>Find a bug</strong> (full/diff scan)</td><td><strong>Deterministic reach⊇crash⊇class⊇site + off-target</strong></td><td><em>The unoccupied cell</em></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p>
+                            Every row but the last either grades the wrong task, uses a spoofable or non-deterministic oracle, hands the model the bug, or lives in the wrong language and domain. The pattern is not an accident; it is the tension of Section 2, resolved the easy way.
+                        </p>
+                    </section>
+
+                    <!-- 4. Where we are strong -->
+                    <section>
+                        <h2>4. Where we are strong: three commitments</h2>
+                        <p>
+                            A benchmark measures bug-<em>finding</em> — not detection, reproduction, or repair — only if three properties hold <em>at the same time</em>. Each is a property some prior benchmark satisfies and others sacrifice. FuzzingBrain-Bench is designed to hold all three.
+                        </p>
+
+                        <div class="results-stats" style="margin: 2rem 0;">
+                            <div class="result-stat">
+                                <div class="stat-icon" style="font-size: 1.6rem;">C1</div>
+                                <div class="stat-value">The oracle is the bug itself</div>
+                                <div class="stat-label">Graded by capability, not by proxy</div>
+                            </div>
+                            <div class="result-stat">
+                                <div class="stat-icon" style="font-size: 1.6rem;">C2</div>
+                                <div class="stat-value">The answer is not in the prompt</div>
+                                <div class="stat-label">Full-scan &amp; diff-scan hide the bug</div>
+                            </div>
+                            <div class="result-stat">
+                                <div class="stat-icon" style="font-size: 1.6rem;">C3</div>
+                                <div class="stat-value">The crash is a real bug</div>
+                                <div class="stat-label">Audited public-API entry point</div>
+                            </div>
+                        </div>
+
+                        <h3>C1 — The oracle is the bug itself, graded on a capability ladder</h3>
+                        <p>
+                            A proxy oracle can be satisfied without the bug. So ours is not a proxy: every candidate input is <em>run on the real, sanitizer-instrumented binary</em>, and graded on a monotone ladder where each rung is strictly stronger than the last.
+                        </p>
+                        <div class="vuln-table-wrapper">
+                            <table class="vuln-table">
+                                <thead>
+                                    <tr><th style="width: 16%;">Rung</th><th>Fires when</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td><strong>reach</strong></td><td>Execution enters the vulnerable region</td></tr>
+                                    <tr><td><strong>crash</strong></td><td>Any sanitizer / signal / exception fires on the input</td></tr>
+                                    <tr><td><strong>differential</strong></td><td>The input faults the vulnerable build <em>and</em> runs clean on the fixed build</td></tr>
+                                    <tr><td><strong>class</strong></td><td>The <em>preset</em> fault class fires (e.g. heap-buffer-overflow), not merely <em>a</em> crash</td></tr>
+                                    <tr><td><strong>site</strong></td><td>The crash is at the right file and line, within a small per-bug tolerance</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p>
+                            Grading is a deterministic harness with <strong>no LLM judge</strong>. It cannot be defeated by a mislabel, a coincidental side-effect, a weak test, or a memorized flag. And the key move is <strong>off-target accounting</strong>: a crash whose class or site differs from the preset is a <em>different</em> bug and fails at that rung. The crash→class gap is therefore the empirical over-count rate of any "did-it-crash" oracle — a number we measure deterministically, and that SEC-bench Pro independently reports (43.6%) via an LLM judge.
+                        </p>
+
+                        <h3>C2 — The answer is not in the prompt</h3>
+                        <p>
+                            Reproduction benchmarks hand over the bug's identity, so a high score can be recall. We remove the answer entirely and evaluate three modes:
+                        </p>
+                        <ul>
+                            <li><strong>Full-scan (audit).</strong> The agent gets a real project — source, build, harness, sanitizer — and the instruction <em>find a bug</em>. No location, no description. 100 turns.</li>
+                            <li><strong>Diff-scan (review).</strong> The agent gets a change and must <em>find the bug it can trigger</em>, with hint levels 0–3 sweeping from a names-only diff to a function pinpoint. 50 turns.</li>
+                            <li><strong>Normal (control).</strong> The agent reproduces a <em>described</em> bug — used only to upper-bound difficulty and to <em>measure</em> description leakage. The full/diff − normal gap is the contamination that others can only warn about.</li>
+                        </ul>
+                        <br>
+                        <p>
+                            These modes are not arbitrary — they mirror how fuzzing is actually deployed. Whole-program continuous fuzzing (OSS-Fuzz) searches with no location: that is full-scan. Change-directed delta fuzzing concentrates on a new commit: that is diff-scan. They are also the two workflows of a real security engineer: audit a whole codebase, or review a single change.
+                        </p>
+
+                        <h3>C3 — The crash corresponds to a real bug</h3>
+                        <p>
+                            A crash is only a real bug if it is reachable through the program's real attack surface. Crashes reached by poking internal or static functions may be unreachable in any benign use — FalseCrashReducer measures that up to <strong>70%</strong> of top-down harness crashes are false positives, and fuzzer-derived benchmarks inherit whatever harness exists with <em>no</em> reachability audit. Every FuzzingBrain-Bench entry point is authored and audited to drive the project's <strong>public interfaces</strong>: the corpus is 81% strictly public-API and 100% audited.
+                        </p>
+
+                        <div class="info-box">
+                            <p style="margin:0;"><strong>The one-line positioning.</strong> We do <em>not</em> claim the first execution-grounded reproduction benchmark (CyberGym is larger), nor to have invented discovery. We claim the <em>combination</em>: a public, reusable benchmark of <strong>native real bugs</strong>, for <strong>C/C++ and Java</strong>, graded by a <strong>deterministic fuzzer+sanitizer capability ladder with off-target accounting</strong>, on the <strong>discovery</strong> task. Within a 92-work survey, no other public benchmark occupies that cell. In effect, FuzzingBrain-Bench is <em>real-world fuzzing made into a reproducible benchmark.</em></p>
+                        </div>
+                    </section>
+
+                    <!-- 5. How to use it -->
+                    <section>
+                        <h2>5. How to use it — the part that matters most</h2>
+                        <p>
+                            The whole benchmark is a public, <strong>answer-free</strong> Docker image per bug plus a remote grading oracle that holds the answer key. You need only Docker and a model API key. Nothing you clone contains the PoC, the expected fault, or the fixed build — those live only behind the oracle, which returns a verdict and nothing else.
+                        </p>
+
+                        <h3>Setup</h3>
+                        <pre class="line-numbers"><code class="language-bash">git clone https://github.com/OwenSanzas/FuzzingBrain-Bench
+cd FuzzingBrain-Bench
+
+python3 -m venv .venv &amp;&amp; source .venv/bin/activate
+pip install -e .                      # Python >= 3.10 and Docker
+
+# drop your key(s) into ./.env — auto-loaded on every run
+cat > .env <<'EOF'
+ANTHROPIC_API_KEY=sk-ant-...
+OPENAI_API_KEY=sk-...
+EOF
+
+fb-bench list                         # the 68 challenges, by neutral alias
+fb-bench models                       # supported models + which keys are loaded</code></pre>
+
+                        <h3>Run one challenge with a model</h3>
+                        <p>
+                            The runner pulls the public challenge image, drives the agent loop on the host (calling your model API over a 6-tool MCP interface: <code>setup / read_file / list_directory / write_file / exec / grade</code>), and grades candidates against the remote oracle.
+                        </p>
+                        <pre class="line-numbers"><code class="language-bash"># normal mode: harness + source + a neutral description
+fb-bench run avro-03 --model claude-opus-4-8
+
+# full-scan: the hardest public mode — no description, find the crash cold
+fb-bench run avro-03 --model gpt-5.5 --full-scan --max-turns 100</code></pre>
+
+                        <h3>Run the whole corpus</h3>
+                        <pre class="line-numbers"><code class="language-bash"># one model over all 68 challenges (resumable — rerun to skip done cells)
+python -m fbbench.sweep.orchestrator --models claude-opus-4-8 --bugs all --exp run1
+
+# default multi-model lineup, all challenges
+python -m fbbench.sweep.orchestrator --models sweep --bugs all --exp sweep1</code></pre>
+                        <p>
+                            Each cell lands in <code>runs/&lt;exp&gt;/&lt;bug&gt;/&lt;model&gt;/run-N/</code> with the full ladder verdict (<code>score.json</code>), the per-turn transcript, a distilled trajectory, and cost. A leaderboard prints at the end and is re-aggregable with <code>--report-only</code>.
+                        </p>
+
+                        <h3>Grade any external PoC — no LLM required</h3>
+                        <p>
+                            The oracle is vendor-neutral. Hand it a blob from AFL++, libFuzzer, honggfuzz, or your own hands, and it returns the capability ladder:
+                        </p>
+                        <pre class="line-numbers"><code class="language-bash">fb-bench grade avro-03 my-input.bin        # -v for the per-rung evidence</code></pre>
+
+                        <div class="info-box">
+                            <p style="margin:0;"><strong>Why the seal matters.</strong> Challenge images are named by neutral alias (<code>&lt;project&gt;-NN</code>, e.g. <code>avro-03</code>) so even the registry name reveals nothing about the bug. The only thing that crosses the wire is your candidate input (out) and the capability verdict (back). You can audit this yourself: <code>python tools/sealed/verify_sealed.py &lt;image&gt;</code> asserts no answer file ships in any image.</p>
+                        </div>
+                    </section>
+
+                    <!-- 6. What frontier models score -->
+                    <section>
+                        <h2>6. What frontier models actually score</h2>
+                        <p>
+                            We ran two frontier models — Claude Haiku 4.5 and GPT-5.5 — across all six modes on 68 bugs, for <strong>816 episodes</strong>. The full per-(mode × model) breakdown along the ladder is below. Three findings turn the field's warnings into measurements.
+                        </p>
+
+                        <div class="vuln-table-wrapper">
+                            <table class="vuln-table">
+                                <thead>
+                                    <tr>
+                                        <th>Mode</th><th>Model</th><th>Solved</th>
+                                        <th>reach</th><th>crash</th><th>class</th><th>site</th><th>Cost</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>normal</td><td>Haiku 4.5</td><td>39/68</td><td>58</td><td>44</td><td>42</td><td>41</td><td>$10.7</td></tr>
+                                    <tr><td>normal</td><td>GPT-5.5</td><td><strong>58/68</strong></td><td>65</td><td>60</td><td>59</td><td>56</td><td>$25.0</td></tr>
+                                    <tr><td>full-scan</td><td>Haiku 4.5</td><td>23/68</td><td>48</td><td>35</td><td>29</td><td>23</td><td>$31.7</td></tr>
+                                    <tr><td>full-scan</td><td>GPT-5.5</td><td><strong>48/68</strong></td><td>60</td><td>63</td><td>54</td><td>49</td><td>$70.4</td></tr>
+                                    <tr><td>diff-0…3</td><td>Haiku 4.5</td><td>17–20/68</td><td>~46</td><td>~26</td><td>~22</td><td>~19</td><td>~$18</td></tr>
+                                    <tr><td>diff-0…3</td><td>GPT-5.5</td><td>39–43/68</td><td>~59</td><td>~55</td><td>~48</td><td>~41</td><td>~$48</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <h3>Finding a bug is harder than reproducing one</h3>
+                        <p>
+                            With the full description (<em>normal</em>), GPT-5.5 solves 58/68 (85%). Remove the description and the best blind full-scan rate drops to <strong>71%</strong> — and for Haiku it falls much harder, from 57% to 25–34%. The description is worth ~14 points to GPT-5.5 and ~23 to Haiku. That is a direct, same-corpus measurement of the recall-vs-discovery gap that prior work could only show as an 87→7% ablation on a handful of CVEs.
+                        </p>
+
+                        <h3>"Did it crash" over-counts solves by ~25%</h3>
+                        <p>
+                            Across all modes, 525 cells produced a crash — but only <strong>75%</strong> were the preset vulnerability. 12% were off-target (a different fault class) and 14% hit the right class at the wrong location. A benchmark that reports only "did the binary crash" therefore <strong>overstates LLM bug-finding by a quarter.</strong> The class+site ladder is exactly what separates "found a bug" from "found <em>the</em> bug."
+                        </p>
+                        <div class="warning-box">
+                            <p style="margin:0;"><strong>A concrete illustration.</strong> In a recent full-scan pass with Claude Opus 4.8, the binary crashed on 56 of 68 bugs — but only 39 were the real target. The 17-bug gap is precisely the over-count: out-of-memory blow-ups counted as a crash, reachable <code>assert()</code> aborts, an input that overflowed the fuzz harness's own scaffolding rather than the library, and a wrapped-exception path present on the fixed build too. Every one of them was correctly rejected at the class or site rung. A single-bit "did it crash" oracle would have scored all 17 as wins.</p>
+                        </div>
+
+                        <h3>Difficulty is trigger-construction, not depth</h3>
+                        <p>
+                            One might expect a bug buried deep below the harness to be harder. It is not. We recovered the real call chain for every bug from its sanitizer backtrace and measured its depth. The correlation between depth and solvability is <strong>r = +0.02</strong> — essentially zero. Never-solved and always-solved bugs share the same median depth (3 hops); models navigate 13-hop recursive parser chains and then fail on 3-hop bugs. What defeats them is constructing the precise triggering input — independent of how deep the site sits. This is why full-scan ≈ diff-scan even though the latter reveals the file: file-level localization was never the bottleneck.
+                        </p>
+                        <p>
+                            And the corpus is well-calibrated: 5 bugs are never solved by either model in any mode, 8 are solved in all 12 cells, with a graded middle — neither saturated nor impossible. The median solving input is <strong>18 bytes</strong>, so the benchmark rewards understanding the bug, not brute-forcing payloads.
+                        </p>
+                    </section>
+
+                    <!-- Takeaway -->
+                    <section>
+                        <h2>The bottom line</h2>
+                        <p>
+                            FuzzingBrain-Bench measures the capability the field's other benchmarks only approximate: real-world bug-<em>finding</em>, graded by the program itself, on a ladder, with off-target crashes thrown out, in the two settings that mirror how bugs are actually found. Its verdict on the current frontier is sober and specific — <strong>LLMs cannot yet reliably find real bugs in real software</strong>, finding is harder than reproducing, "did it crash" over-counts by a quarter, and difficulty lives in trigger-construction, not depth.
+                        </p>
+                        <p>
+                            It is public, deterministic, single-attempt, and reproducible. Clone it, point your favorite model at it, and see for yourself.
+                        </p>
+                    </section>
+
+                    <!-- What's Next -->
+                    <section class="future-section">
+                        <h2>Try it, and what comes next</h2>
+                        <div class="next-steps">
+                            <div class="next-step">
+                                <h4>Run the benchmark</h4>
+                                <p><code>pip install -e .</code>, drop in an API key, and <code>fb-bench run avro-03 --model claude-opus-4-8 --full-scan</code>. Five minutes to your first graded episode.</p>
+                            </div>
+                            <div class="next-step">
+                                <h4>Grade your own fuzzer</h4>
+                                <p>Already have a crashing input from AFL++ or libFuzzer? <code>fb-bench grade &lt;alias&gt; input.bin</code> scores it on the same capability ladder — no LLM involved.</p>
+                            </div>
+                            <div class="next-step">
+                                <h4>Harness quality, continued</h4>
+                                <p>The 17-bug over-count above surfaced a handful of harnesses in our own set worth hardening — the same lens as our Four-Principles audit. A follow-up post will walk through fixing them.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <p style="text-align: right; margin-top: 3rem; color: #888; font-style: italic;">
+                        — Ze Sheng · Team FuzzingBrain
+                    </p>
+
+                </div>
+            </div>
+        </article>
+
+        <!-- Post navigation -->
+        <nav class="post-navigation">
+            <a href="four-principles-harness-audit.html" class="post-nav-link prev"><span class="nav-label">Previous</span><span class="nav-title">← Harnesses Have Bugs Too</span></a>
+        </nav>
+
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-text">
+                    <p>&copy; 2026 All You Need Is A Fuzzing Brain Research Team</p>
+                    <p>Advancing autonomous vulnerability discovery through AI</p>
+                </div>
+                <div class="footer-links">
+                    <a href="https://github.com/fuzzingbrain"><img src="../assets/images/fuzzbrain.jpg" alt="GitHub" class="footer-logo"> GitHub</a>
+                    <a href="https://aicyberchallenge.com/">DARPA AIxCC</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/line-numbers/prism-line-numbers.min.js"></script>
+    <script src="../script.js"></script>
+</body>
+</html>
