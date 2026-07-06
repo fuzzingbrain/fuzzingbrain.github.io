@@ -157,6 +157,19 @@
     .bug-card li::before{content:"›";position:absolute;left:2px;top:7px;font-weight:700}
     .bug-card.pub li::before{color:#818cf8}
     .bug-card.prv li::before{color:#f59e0b}
+    /* bug schema table */
+    .schema-table{width:100%;border-collapse:collapse;border:1px solid var(--border);border-radius:14px;overflow:hidden;font-size:.92rem;margin-top:16px}
+    .schema-table td{padding:11px 18px;border-bottom:1px solid var(--border);vertical-align:middle}
+    .schema-table tr:last-child td{border-bottom:0}
+    .schema-table tr.grp td{background:var(--slate-900);color:var(--text-muted);font-family:var(--font-mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;padding:9px 18px}
+    .schema-table .f{color:var(--text-primary);font-weight:600;width:30%;white-space:nowrap}
+    .schema-table .v{color:var(--text-secondary);font-family:var(--font-mono);font-size:.85rem}
+    .schema-table .v.sl{color:var(--text-faint);font-family:var(--font-sans);font-style:italic}
+    .schema-table .vis{text-align:right;white-space:nowrap;width:1%}
+    .sbadge{display:inline-block;border-radius:999px;padding:3px 12px;font-size:.74rem;font-family:var(--font-mono);border:1px solid transparent}
+    .sbadge.shown{color:#818cf8;border-color:rgba(99,102,241,.45);background:rgba(99,102,241,.09)}
+    .sbadge.sealed{color:#f59e0b;border-color:rgba(245,158,11,.45);background:rgba(245,158,11,.09)}
+    @media(max-width:560px){.schema-table .v{display:none}}
     </style>
 </head>
 <body>
@@ -404,28 +417,25 @@
                 <div class="intro-block">
                     <div class="ib-h"><h4>What a bug is here</h4></div>
                     <p>A bug in FuzzingBrain Bench is one concrete, reproducible fault. It is pinned to a project, a source revision, a sanitizer, a fault class, and a crash site, so a candidate either reproduces that exact fault or it does not. Each bug is stored in two halves. You get one, the oracle keeps the other.</p>
-                    <div class="bug-split">
-                        <div class="bug-card pub">
-                            <div class="bug-card-h">What you get</div>
-                            <ul>
-                                <li>The project and its language</li>
-                                <li>The fuzz harness and its entry point</li>
-                                <li>The project source at the vulnerable revision</li>
-                                <li>The sanitizer and its fault family</li>
-                                <li>A neutral alias, nothing that hints at the bug</li>
-                            </ul>
-                        </div>
-                        <div class="bug-card prv">
-                            <div class="bug-card-h">What the oracle keeps</div>
-                            <ul>
-                                <li>A reference input that triggers the fault</li>
-                                <li>The expected fault class</li>
-                                <li>The crash site, the right file and function</li>
-                                <li>The fixed build, for the differential check</li>
-                                <li>The ladder levels this bug is required to fire</li>
-                            </ul>
-                        </div>
-                    </div>
+                    <table class="schema-table">
+                        <tbody>
+                            <tr class="grp"><td colspan="3">Shown to the agent</td></tr>
+                            <tr><td class="f">Project</td><td class="v">e.g. avro</td><td class="vis"><span class="sbadge shown">visible</span></td></tr>
+                            <tr><td class="f">Language</td><td class="v">C / C++ / JVM</td><td class="vis"><span class="sbadge shown">visible</span></td></tr>
+                            <tr><td class="f">Revision</td><td class="v">the vulnerable commit</td><td class="vis"><span class="sbadge shown">visible</span></td></tr>
+                            <tr><td class="f">Architecture</td><td class="v">x86_64</td><td class="vis"><span class="sbadge shown">visible</span></td></tr>
+                            <tr><td class="f">Fuzzer</td><td class="v">libFuzzer / Jazzer</td><td class="vis"><span class="sbadge shown">visible</span></td></tr>
+                            <tr><td class="f">Sanitizer</td><td class="v">ASan / UBSan / LSan / Jazzer</td><td class="vis"><span class="sbadge shown">visible</span></td></tr>
+                            <tr><td class="f">Harness entry</td><td class="v">the fuzzer entry function</td><td class="vis"><span class="sbadge shown">visible</span></td></tr>
+                            <tr class="grp"><td colspan="3">Sealed in the oracle</td></tr>
+                            <tr><td class="f">Fault class</td><td class="v sl">the exact sanitizer fault</td><td class="vis"><span class="sbadge sealed">sealed</span></td></tr>
+                            <tr><td class="f">Crash site</td><td class="v sl">the file and function</td><td class="vis"><span class="sbadge sealed">sealed</span></td></tr>
+                            <tr><td class="f">Reach region</td><td class="v sl">the buggy lines</td><td class="vis"><span class="sbadge sealed">sealed</span></td></tr>
+                            <tr><td class="f">Reference PoC</td><td class="v sl">an input that triggers it</td><td class="vis"><span class="sbadge sealed">sealed</span></td></tr>
+                            <tr><td class="f">Fixed build</td><td class="v sl">the patched binary</td><td class="vis"><span class="sbadge sealed">sealed</span></td></tr>
+                            <tr><td class="f">Required levels</td><td class="v sl">which of the five must fire</td><td class="vis"><span class="sbadge sealed">sealed</span></td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </section>
