@@ -105,6 +105,15 @@
     .lb-model{font-weight:600;color:var(--text-primary)}
     .lb-sub{color:var(--text-muted);font-size:.8rem;font-family:var(--font-mono)}
     .lb-note{color:var(--text-muted);font-size:.9rem;margin-top:18px}
+    /* design choices table */
+    .design-table{width:100%;border-collapse:collapse;border:1px solid var(--border);border-radius:14px;overflow:hidden;font-size:.94rem}
+    .design-table thead th{text-align:left;background:var(--surface);color:var(--text-muted);font-weight:600;font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;padding:12px 20px;border-bottom:1px solid var(--border)}
+    .design-table td{padding:16px 20px;border-bottom:1px solid var(--border);color:var(--text-secondary);line-height:1.55;vertical-align:top}
+    .design-table tbody tr:last-child td{border-bottom:0}
+    .design-table tbody tr:hover{background:var(--surface)}
+    .design-table .dt-name{white-space:nowrap;color:var(--text-primary);font-weight:600;width:1%}
+    .design-table .dt-ic{margin-right:6px}
+    @media(max-width:640px){.design-table .dt-name{white-space:normal}}
     </style>
 </head>
 <body>
@@ -178,23 +187,23 @@
         <section class="bench-section">
             <div class="section-content">
                 <p class="sub" style="max-width:72ch">Most reports of models finding bugs count a crash. A crash is not a solve. FuzzingBrain Bench is built so the program itself decides whether a model found the exact documented bug or merely tripped some other fault. Three design choices make that possible.</p>
-                <div class="pillars">
-                    <div class="pillar">
-                        <div class="ic">🔒</div>
-                        <h4>Answer-free by construction</h4>
-                        <p>Every challenge is a sealed Docker image named by a neutral alias. No patch, no fix commit, no target line. The PoC and the expected fault live only behind a remote oracle, so a model cannot read the answer off disk.</p>
-                    </div>
-                    <div class="pillar">
-                        <div class="ic">⚖️</div>
-                        <h4>A deterministic oracle</h4>
-                        <p>No LLM judge. The candidate input runs through the real sanitizer-instrumented harness on a private grading service, which returns only a verdict. The same input always grades the same way.</p>
-                    </div>
-                    <div class="pillar">
-                        <div class="ic">🪜</div>
-                        <h4>A capability ladder</h4>
-                        <p>Grading is five nested levels from reach to crash to differential to class to site. A model earns partial credit for getting close, and a full solve only when it lands the exact documented fault at the exact place.</p>
-                    </div>
-                </div>
+                <table class="design-table">
+                    <thead><tr><th>Design choice</th><th>What it means</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td class="dt-name"><span class="dt-ic">🔒</span> Answer-free by construction</td>
+                            <td>Every challenge is a sealed Docker image named by a neutral alias. No patch, no fix commit, no target line. The PoC and the expected fault live only behind a remote oracle, so a model cannot read the answer off disk.</td>
+                        </tr>
+                        <tr>
+                            <td class="dt-name"><span class="dt-ic">⚖️</span> A deterministic oracle</td>
+                            <td>No LLM judge. The candidate input runs through the real sanitizer-instrumented harness on a private grading service, which returns only a verdict. The same input always grades the same way.</td>
+                        </tr>
+                        <tr>
+                            <td class="dt-name"><span class="dt-ic">🪜</span> A capability ladder</td>
+                            <td>Grading is five nested levels from reach to crash to differential to class to site. A model earns partial credit for getting close, and a full solve only when it lands the exact documented fault at the exact place.</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </section>
 
