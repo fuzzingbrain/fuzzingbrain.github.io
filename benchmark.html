@@ -59,6 +59,13 @@
     .bottomline h3{margin:0 0 10px;color:#fff}
     .bottomline p{margin:0;color:rgba(255,255,255,.92);line-height:1.6;max-width:66ch}
 
+    /* know-more scroll cue */
+    .know-more{text-align:center;padding:2px 0 30px}
+    .know-more a{display:inline-flex;flex-direction:column;align-items:center;gap:9px;color:var(--text-muted);font-size:.92rem;font-weight:500;text-decoration:none;transition:color .15s}
+    .know-more a:hover{color:var(--indigo-400)}
+    .know-more .chev{animation:kmbob 1.8s ease-in-out infinite}
+    @keyframes kmbob{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+
     /* system requirements spec sheet */
     .reqs{padding-top:26px;padding-bottom:4px}
     .reqs-title{font-size:1.05rem;margin:0 0 12px;color:var(--text-primary)}
@@ -142,8 +149,16 @@
             </div>
         </section>
 
+        <!-- Know more cue -->
+        <div class="know-more">
+            <a href="#explore">
+                <span>Know more about FuzzingBrain Bench</span>
+                <svg class="chev" width="22" height="14" viewBox="0 0 22 14" fill="none" aria-hidden="true"><path d="M2 2l9 9 9-9" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+        </div>
+
         <!-- Sub-tabs -->
-        <div class="bench-tabnav">
+        <div class="bench-tabnav" id="explore">
             <div class="section-content">
                 <div class="bench-tabs">
                     <button class="tab-btn active" data-tab="intro">Introduction</button>
