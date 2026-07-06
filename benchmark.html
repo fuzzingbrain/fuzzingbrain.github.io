@@ -166,8 +166,8 @@
                     <div class="bench-stat"><div class="n">0</div><div class="l">Answers shipped</div></div>
                 </div>
                 <div class="bench-cta">
-                    <a href="https://github.com/OwenSanzas/FuzzingBrain-Bench" class="btn btn-primary"><span>📂</span> Get the Benchmark</a>
-                    <a href="#run" class="btn btn-secondary" data-tabjump="quickstart"><span>⚡</span> Run in 5 Minutes</a>
+                    <a href="https://github.com/OwenSanzas/FuzzingBrain-Bench" class="btn btn-primary">Get the Benchmark</a>
+                    <a href="#run" class="btn btn-secondary" data-tabjump="quickstart">Run in 5 Minutes</a>
                 </div>
             </div>
         </section>
@@ -198,17 +198,17 @@
                 <p class="sub" style="max-width:74ch">Most reports of models finding bugs count a crash. A crash is not a solve. FuzzingBrain Bench is built so the program itself decides whether a model found the exact documented bug or merely tripped some other fault. Three things make that work.</p>
 
                 <div class="intro-block">
-                    <div class="ib-h"><span class="ib-ic">🔒</span><h4>An easy but cheat-proof setup</h4></div>
+                    <div class="ib-h"><h4>An easy but cheat-proof setup</h4></div>
                     <p>Every challenge runs inside its own sandbox, a sealed Docker image. Inside the container the agent gets the fuzz harness and the project source at the vulnerable revision, plus a small tool set to work with, list a directory, read a file, write a candidate input, run a shell command, and grade. Cheating is designed out. The image ships no patch, no fix commit, and no target line, only a neutral alias, so there is nothing to read off disk. The agent can call these bench tools and nothing else, and the model key never enters the container. To get a verdict it calls grade, which uploads the candidate over an API to a remote oracle that holds the answer key and returns only the result.</p>
                 </div>
 
                 <div class="intro-block">
-                    <div class="ib-h"><span class="ib-ic">⚖️</span><h4>A real-harness, real-sanitizer oracle</h4></div>
+                    <div class="ib-h"><h4>A real-harness, real-sanitizer oracle</h4></div>
                     <p>The oracle is not a language model. The candidate input is fed to the project's own fuzz harness, and the sanitizer decides the verdict. This is where FuzzingBrain Bench differs from prior work. We put the harness entry point itself under strict quality control, following our <a href="posts/four-principles-harness-audit.html">four principles</a>. A weak harness manufactures crashes that are not real bugs. Every harness here is audited so it introduces no false-positive faults of its own, which means a crash is always a property of the target code, not of the test wrapper.</p>
                 </div>
 
                 <div class="intro-block">
-                    <div class="ib-h"><span class="ib-ic">🪜</span><h4>A strict capability ladder</h4></div>
+                    <div class="ib-h"><h4>A strict capability ladder</h4></div>
                     <p>A candidate is graded on five nested levels, each strictly stronger than the one before, so passing a level means every level above it also passed. A bug counts as solved only when every level in its required set fires, and each challenge declares which levels it requires.</p>
                     <table class="design-table" style="margin-top:14px">
                         <thead><tr><th>Level</th><th>Fires when the candidate input&hellip;</th></tr></thead>
@@ -232,9 +232,9 @@
                     <div class="spec-row">
                         <div class="spec-k">Operating system</div>
                         <div class="spec-v">
-                            <span class="chip">🐧 Linux</span>
-                            <span class="chip">🍎 macOS</span>
-                            <span class="chip">🪟 Windows · WSL2</span>
+                            <span class="chip">Linux</span>
+                            <span class="chip">macOS</span>
+                            <span class="chip">Windows · WSL2</span>
                         </div>
                     </div>
                     <div class="spec-row">
@@ -515,7 +515,7 @@ python -m fbbench.sweep.orchestrator --models gpt-5.5 --bugs all --exp run1</cod
                 </div>
                 <div class="footer-links">
                     <a href="https://github.com/OwenSanzas/FuzzingBrain-Bench"><img src="assets/images/fuzzbrain.jpg" alt="GitHub" class="footer-logo"> GitHub</a>
-                    <a href="https://aicyberchallenge.com/">🏆 DARPA AIxCC</a>
+                    <a href="https://aicyberchallenge.com/">DARPA AIxCC</a>
                 </div>
             </div>
         </footer>
