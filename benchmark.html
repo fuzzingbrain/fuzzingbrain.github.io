@@ -142,6 +142,21 @@
     .parts-list li.pub::before{background:#6366f1}
     .parts-list li.prv::before{background:#f59e0b}
     .parts-list .pn{color:var(--text-primary);font-weight:600;font-family:var(--font-mono);margin-right:8px}
+    /* bug anatomy split */
+    .bug-split{display:grid;grid-template-columns:1fr;gap:16px;margin-top:18px}
+    @media(min-width:720px){.bug-split{grid-template-columns:1fr 1fr}}
+    .bug-card{border:1px solid var(--border);border-radius:14px;background:var(--surface);padding:6px 20px 14px}
+    .bug-card.pub{border-top:3px solid #6366f1}
+    .bug-card.prv{border-top:3px solid #f59e0b}
+    .bug-card-h{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;font-family:var(--font-mono);margin:14px 0 4px}
+    .bug-card.pub .bug-card-h{color:#818cf8}
+    .bug-card.prv .bug-card-h{color:#f59e0b}
+    .bug-card ul{list-style:none;margin:0;padding:0}
+    .bug-card li{position:relative;padding:8px 0 8px 18px;border-bottom:1px solid var(--border);color:var(--text-secondary);font-size:.9rem;line-height:1.45}
+    .bug-card li:last-child{border-bottom:0}
+    .bug-card li::before{content:"›";position:absolute;left:2px;top:7px;font-weight:700}
+    .bug-card.pub li::before{color:#818cf8}
+    .bug-card.prv li::before{color:#f59e0b}
     </style>
 </head>
 <body>
@@ -382,6 +397,35 @@
                         </g>
                     </svg>
                     <p style="color:var(--text-muted);font-size:.86rem;margin:12px 0 0;max-width:74ch">The model key stays with your agent. It never enters the sandbox and never reaches the oracle, so the grading service only ever sees a candidate input and returns a verdict on the ladder.</p>
+                </div>
+
+                <hr class="intro-hr">
+
+                <div class="intro-block">
+                    <div class="ib-h"><h4>What a bug is here</h4></div>
+                    <p>A bug in FuzzingBrain Bench is one concrete, reproducible fault. It is pinned to a project, a source revision, a sanitizer, a fault class, and a crash site, so a candidate either reproduces that exact fault or it does not. Each bug is stored in two halves. You get one, the oracle keeps the other.</p>
+                    <div class="bug-split">
+                        <div class="bug-card pub">
+                            <div class="bug-card-h">What you get</div>
+                            <ul>
+                                <li>The project and its language</li>
+                                <li>The fuzz harness and its entry point</li>
+                                <li>The project source at the vulnerable revision</li>
+                                <li>The sanitizer and its fault family</li>
+                                <li>A neutral alias, nothing that hints at the bug</li>
+                            </ul>
+                        </div>
+                        <div class="bug-card prv">
+                            <div class="bug-card-h">What the oracle keeps</div>
+                            <ul>
+                                <li>A reference input that triggers the fault</li>
+                                <li>The expected fault class</li>
+                                <li>The crash site, the right file and function</li>
+                                <li>The fixed build, for the differential check</li>
+                                <li>The ladder levels this bug is required to fire</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
