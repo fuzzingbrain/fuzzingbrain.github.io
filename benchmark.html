@@ -60,7 +60,7 @@
     .bottomline p{margin:0;color:rgba(255,255,255,.92);line-height:1.6;max-width:66ch}
 
     /* system requirements spec sheet */
-    .reqs{padding-top:6px;padding-bottom:20px}
+    .reqs{padding-top:26px;padding-bottom:4px}
     .reqs-title{font-size:1.05rem;margin:0 0 12px;color:var(--text-primary)}
     .specsheet{border:1px solid var(--border);border-radius:14px;background:var(--surface);overflow:hidden}
     .spec-row{display:grid;grid-template-columns:170px 1fr;gap:18px;padding:15px 22px;align-items:center}
@@ -142,8 +142,44 @@
             </div>
         </section>
 
+        <!-- Sub-tabs -->
+        <div class="bench-tabnav">
+            <div class="section-content">
+                <div class="bench-tabs">
+                    <button class="tab-btn active" data-tab="intro">Introduction</button>
+                    <button class="tab-btn" data-tab="quickstart">Quick Start</button>
+                    <button class="tab-btn" data-tab="stats">Statistics</button>
+                    <button class="tab-btn" data-tab="leaderboard">Leaderboard</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-panel active" data-panel="intro">
+        <section class="bench-section">
+            <div class="section-content">
+                <p class="sub" style="max-width:72ch">Most reports of models finding bugs count a crash. A crash is not a solve. FuzzingBrain Bench is built so the program itself decides whether a model found the exact documented bug or merely tripped some other fault. Three design choices make that possible.</p>
+                <div class="pillars">
+                    <div class="pillar">
+                        <div class="ic">🔒</div>
+                        <h4>Answer-free by construction</h4>
+                        <p>Every challenge is a sealed Docker image named by a neutral alias. No patch, no fix commit, no target line. The PoC and the expected fault live only behind a remote oracle, so a model cannot read the answer off disk.</p>
+                    </div>
+                    <div class="pillar">
+                        <div class="ic">⚖️</div>
+                        <h4>A deterministic oracle</h4>
+                        <p>No LLM judge. The candidate input runs through the real sanitizer-instrumented harness on a private grading service, which returns only a verdict. The same input always grades the same way.</p>
+                    </div>
+                    <div class="pillar">
+                        <div class="ic">🪜</div>
+                        <h4>A capability ladder</h4>
+                        <p>Grading is five nested levels from reach to crash to differential to class to site. A model earns partial credit for getting close, and a full solve only when it lands the exact documented fault at the exact place.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- System requirements -->
-        <section class="bench-section reqs" style="border-top:0">
+        <section class="bench-section reqs">
             <div class="section-content">
                 <h3 class="reqs-title">Recommended setup</h3>
                 <div class="specsheet">
@@ -188,42 +224,6 @@
                             <span class="chip">google-genai <span class="cv">&ge; 0.3</span></span>
                             <span class="chip">pyyaml <span class="cv">&ge; 6.0</span></span>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Sub-tabs -->
-        <div class="bench-tabnav">
-            <div class="section-content">
-                <div class="bench-tabs">
-                    <button class="tab-btn active" data-tab="intro">Introduction</button>
-                    <button class="tab-btn" data-tab="quickstart">Quick Start</button>
-                    <button class="tab-btn" data-tab="stats">Statistics</button>
-                    <button class="tab-btn" data-tab="leaderboard">Leaderboard</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="tab-panel active" data-panel="intro">
-        <section class="bench-section">
-            <div class="section-content">
-                <p class="sub" style="max-width:72ch">Most reports of models finding bugs count a crash. A crash is not a solve. FuzzingBrain Bench is built so the program itself decides whether a model found the exact documented bug or merely tripped some other fault. Three design choices make that possible.</p>
-                <div class="pillars">
-                    <div class="pillar">
-                        <div class="ic">🔒</div>
-                        <h4>Answer-free by construction</h4>
-                        <p>Every challenge is a sealed Docker image named by a neutral alias. No patch, no fix commit, no target line. The PoC and the expected fault live only behind a remote oracle, so a model cannot read the answer off disk.</p>
-                    </div>
-                    <div class="pillar">
-                        <div class="ic">⚖️</div>
-                        <h4>A deterministic oracle</h4>
-                        <p>No LLM judge. The candidate input runs through the real sanitizer-instrumented harness on a private grading service, which returns only a verdict. The same input always grades the same way.</p>
-                    </div>
-                    <div class="pillar">
-                        <div class="ic">🪜</div>
-                        <h4>A capability ladder</h4>
-                        <p>Grading is five nested levels from reach to crash to differential to class to site. A model earns partial credit for getting close, and a full solve only when it lands the exact documented fault at the exact place.</p>
                     </div>
                 </div>
             </div>
