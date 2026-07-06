@@ -9,7 +9,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
     <style>
     /* ---- benchmark page scoped styles ---- */
-    .bench-hero{padding:72px 0 24px;text-align:center}
+    /* the site's .section-content carries 6rem vertical padding; neutralize it here
+       so our own .bench-section / .bench-hero paddings are the only vertical rhythm */
+    .bench-hero .section-content,
+    .bench-section .section-content,
+    .bench-tabnav .section-content{padding-top:0;padding-bottom:0;max-width:var(--width-content)}
+    .bench-hero{padding:68px 0 20px;text-align:center}
     .bench-kicker{font-family:var(--font-mono);font-size:.8rem;letter-spacing:.18em;text-transform:uppercase;color:var(--indigo-400);margin-bottom:14px}
     .bench-hero h2{font-size:2.9rem;line-height:1.12;margin:0 auto 16px;letter-spacing:-.5px}
     .bench-hero .lede{max-width:60ch;margin:0 auto;color:var(--text-secondary);font-size:1.12rem;line-height:1.6}
