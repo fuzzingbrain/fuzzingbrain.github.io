@@ -97,7 +97,7 @@
                 <div class="bench-statrow">
                     <div class="bench-stat"><div class="n">68</div><div class="l">Real bugs</div></div>
                     <div class="bench-stat"><div class="n">40</div><div class="l">OSS projects</div></div>
-                    <div class="bench-stat"><div class="n">5</div><div class="l">Capability rungs</div></div>
+                    <div class="bench-stat"><div class="n">5</div><div class="l">Capability levels</div></div>
                     <div class="bench-stat"><div class="n">0</div><div class="l">Answers shipped</div></div>
                 </div>
                 <div class="bench-cta">
@@ -126,7 +126,7 @@
                     <div class="pillar">
                         <div class="ic">🪜</div>
                         <h4>A capability ladder</h4>
-                        <p>Grading is five nested rungs from reach to crash to differential to class to site. A model earns partial credit for getting close, and a full solve only when it lands the exact documented fault at the exact place.</p>
+                        <p>Grading is five nested levels from reach to crash to differential to class to site. A model earns partial credit for getting close, and a full solve only when it lands the exact documented fault at the exact place.</p>
                     </div>
                 </div>
             </div>
@@ -139,7 +139,7 @@
                 <p class="sub">Reaching the buggy code is navigation. Turning that into the exact crash is exploitation. The gap between the two is where models differ most.</p>
                 <div class="chart-card">
                     <h4>How far each model gets down the ladder</h4>
-                    <p class="cap">Share of all runs that fire each rung, pooled over every task mode. Both models reach the code often. Only the stronger one keeps landing the exact crash at the exact site.</p>
+                    <p class="cap">Share of all runs that reach each level, pooled over every task mode. Both models reach the code often. Only the stronger one keeps landing the exact crash at the exact site.</p>
                     <svg class="chart-svg" viewBox="0 0 760 250" role="img" aria-label="Capability ladder funnel">
                         <!-- rows -->
                         <!-- reach -->
@@ -253,7 +253,7 @@
         <section class="bench-section">
             <div class="section-content">
                 <h3 class="hd">A crash is not a solve</h3>
-                <p class="sub">The oracle fires the crash rung for any fault, but class and site require the documented one. That gap is why crash-counting overstates real skill.</p>
+                <p class="sub">The oracle fires the crash level for any fault, but class and site require the documented one. That gap is why crash-counting overstates real skill.</p>
                 <div class="grid-2">
                     <div class="chart-card">
                         <h4>Of every run that crashed the harness</h4>
@@ -277,7 +277,7 @@
                         <h4>Why strict grading matters</h4>
                         <ul class="takeaways">
                             <li><b>64%</b> of runs produced some crash, but many were the wrong fault.</li>
-                            <li>The <b>class</b> and <b>site</b> rungs cleanly split found a bug from found the bug.</li>
+                            <li>The <b>class</b> and <b>site</b> levels cleanly split found a bug from found the bug.</li>
                             <li>The weaker model goes off-target more often, so it thinks it won when it did not.</li>
                             <li>A deterministic oracle makes this call the same way every single time.</li>
                         </ul>
