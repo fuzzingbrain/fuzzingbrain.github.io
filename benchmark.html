@@ -114,6 +114,15 @@
     .design-table .dt-name{white-space:nowrap;color:var(--text-primary);font-weight:600;width:1%}
     .design-table .dt-ic{margin-right:6px}
     @media(max-width:640px){.design-table .dt-name{white-space:normal}}
+    /* intro sub-blocks */
+    .intro-block{margin-top:32px}
+    .intro-block .ib-h{display:flex;align-items:center;gap:10px;margin:0 0 8px}
+    .intro-block .ib-h .ib-ic{font-size:1.15rem}
+    .intro-block .ib-h h4{font-size:1.18rem;margin:0;color:var(--text-primary)}
+    .intro-block>p{margin:0;color:var(--text-secondary);line-height:1.62;max-width:76ch}
+    .intro-block a{color:var(--indigo-400);text-decoration:none;border-bottom:1px solid rgba(129,140,248,.4)}
+    .intro-block a:hover{border-bottom-color:var(--indigo-400)}
+    .design-table .lv{display:inline-block;min-width:20px;color:var(--text-faint);font-family:var(--font-mono);margin-right:8px}
     </style>
 </head>
 <body>
@@ -186,24 +195,32 @@
         <div class="tab-panel active" data-panel="intro">
         <section class="bench-section">
             <div class="section-content">
-                <p class="sub" style="max-width:72ch">Most reports of models finding bugs count a crash. A crash is not a solve. FuzzingBrain Bench is built so the program itself decides whether a model found the exact documented bug or merely tripped some other fault. Three design choices make that possible.</p>
-                <table class="design-table">
-                    <thead><tr><th>Design choice</th><th>What it means</th></tr></thead>
-                    <tbody>
-                        <tr>
-                            <td class="dt-name"><span class="dt-ic">🔒</span> Answer-free by construction</td>
-                            <td>Every challenge is a sealed Docker image named by a neutral alias. No patch, no fix commit, no target line. The PoC and the expected fault live only behind a remote oracle, so a model cannot read the answer off disk.</td>
-                        </tr>
-                        <tr>
-                            <td class="dt-name"><span class="dt-ic">⚖️</span> A deterministic oracle</td>
-                            <td>No LLM judge. The candidate input runs through the real sanitizer-instrumented harness on a private grading service, which returns only a verdict. The same input always grades the same way.</td>
-                        </tr>
-                        <tr>
-                            <td class="dt-name"><span class="dt-ic">🪜</span> A capability ladder</td>
-                            <td>Grading is five nested levels from reach to crash to differential to class to site. A model earns partial credit for getting close, and a full solve only when it lands the exact documented fault at the exact place.</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <p class="sub" style="max-width:74ch">Most reports of models finding bugs count a crash. A crash is not a solve. FuzzingBrain Bench is built so the program itself decides whether a model found the exact documented bug or merely tripped some other fault. Three things make that work.</p>
+
+                <div class="intro-block">
+                    <div class="ib-h"><span class="ib-ic">🔒</span><h4>An easy but cheat-proof setup</h4></div>
+                    <p>Every challenge runs inside its own sandbox, a sealed Docker image. Inside the container the agent gets the fuzz harness and the project source at the vulnerable revision, plus a small tool set to work with, list a directory, read a file, write a candidate input, run a shell command, and grade. Cheating is designed out. The image ships no patch, no fix commit, and no target line, only a neutral alias, so there is nothing to read off disk. The agent can call these bench tools and nothing else, and the model key never enters the container. To get a verdict it calls grade, which uploads the candidate over an API to a remote oracle that holds the answer key and returns only the result.</p>
+                </div>
+
+                <div class="intro-block">
+                    <div class="ib-h"><span class="ib-ic">⚖️</span><h4>A real-harness, real-sanitizer oracle</h4></div>
+                    <p>The oracle is not a language model. The candidate input is fed to the project's own fuzz harness, and the sanitizer decides the verdict. This is where FuzzingBrain Bench differs from prior work. We put the harness entry point itself under strict quality control, following our <a href="posts/four-principles-harness-audit.html">four principles</a>. A weak harness manufactures crashes that are not real bugs. Every harness here is audited so it introduces no false-positive faults of its own, which means a crash is always a property of the target code, not of the test wrapper.</p>
+                </div>
+
+                <div class="intro-block">
+                    <div class="ib-h"><span class="ib-ic">🪜</span><h4>A strict capability ladder</h4></div>
+                    <p>A candidate is graded on five nested levels, each strictly stronger than the one before, so passing a level means every level above it also passed. A bug counts as solved only when every level in its required set fires, and each challenge declares which levels it requires.</p>
+                    <table class="design-table" style="margin-top:14px">
+                        <thead><tr><th>Level</th><th>Fires when the candidate input&hellip;</th></tr></thead>
+                        <tbody>
+                            <tr><td class="dt-name"><span class="lv">1</span>reach</td><td>drives execution into the buggy region of code</td></tr>
+                            <tr><td class="dt-name"><span class="lv">2</span>crash</td><td>makes the sanitizer-instrumented build fault at all</td></tr>
+                            <tr><td class="dt-name"><span class="lv">3</span>differential</td><td>faults the vulnerable build but runs clean on the patched build, so the crash is this bug and not a pre-existing one</td></tr>
+                            <tr><td class="dt-name"><span class="lv">4</span>class</td><td>triggers the same fault class the bug is documented as, for example heap-overflow or use-after-free</td></tr>
+                            <tr><td class="dt-name"><span class="lv">5</span>site</td><td>crashes at the documented location, the right file and function</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </section>
 
