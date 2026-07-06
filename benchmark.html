@@ -134,6 +134,14 @@
     .ladder-list .ln{color:var(--text-primary);font-weight:600;font-family:var(--font-mono);margin-right:8px}
     /* architecture diagram */
     .arch-svg{width:100%;height:auto;display:block;margin-top:16px}
+    .intro-hr{border:0;border-top:1px solid var(--border);margin:38px 0 0}
+    .parts-list{list-style:none;margin:14px 0 18px;padding:0}
+    .parts-list li{position:relative;padding:9px 0 9px 24px;border-bottom:1px solid var(--border);color:var(--text-secondary);line-height:1.5;font-size:.93rem}
+    .parts-list li:last-child{border-bottom:0}
+    .parts-list li::before{content:"";position:absolute;left:3px;top:15px;width:10px;height:10px;border-radius:50%}
+    .parts-list li.pub::before{background:#6366f1}
+    .parts-list li.prv::before{background:#f59e0b}
+    .parts-list .pn{color:var(--text-primary);font-weight:600;font-family:var(--font-mono);margin-right:8px}
     </style>
 </head>
 <body>
@@ -315,9 +323,18 @@
                     </div>
                 </div>
 
+                <hr class="intro-hr">
+
                 <div class="intro-block">
-                    <div class="ib-h"><h4>How the four parts connect</h4></div>
-                    <p>Everything the agent can touch is public and answer-free. The answers live on the other side of one API call, so the only way to score is to actually make the bug fire.</p>
+                    <div class="ib-h"><h4>The four parts</h4></div>
+                    <p>FuzzingBrain Bench has four parts. Two are public and answer-free, two are private and hold the answers.</p>
+                    <ul class="parts-list">
+                        <li class="pub"><span class="pn">Public entry</span> the sealed image and the MCP tools your agent talks to</li>
+                        <li class="pub"><span class="pn">Sandbox</span> the isolated workspace with the harness and the vulnerable-revision source</li>
+                        <li class="prv"><span class="pn">Grading system</span> the remote oracle that runs your candidate through the real sanitizer harness</li>
+                        <li class="prv"><span class="pn">Answer storage</span> the private key the oracle checks against, never shipped in any image</li>
+                    </ul>
+                    <p>The answers live on the other side of a single API call, so the only way to score is to actually make the bug fire. Here is how the four connect.</p>
                     <svg class="arch-svg" viewBox="0 0 720 392" role="img" aria-label="FuzzingBrain Bench architecture">
                         <defs>
                             <marker id="ah" markerWidth="9" markerHeight="9" refX="6.2" refY="3" orient="auto"><path d="M0,0 L6.2,3 L0,6 z" fill="#94a3b8"/></marker>
