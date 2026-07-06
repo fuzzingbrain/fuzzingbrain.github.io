@@ -59,18 +59,17 @@
     .bottomline h3{margin:0 0 10px;color:#fff}
     .bottomline p{margin:0;color:rgba(255,255,255,.92);line-height:1.6;max-width:66ch}
 
-    /* system requirements band */
+    /* system requirements spec sheet */
     .reqs{padding-top:10px}
-    .reqs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
-    .req-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 20px}
-    .req-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);font-family:var(--font-mono);margin-bottom:13px}
-    .req-chips{display:flex;flex-wrap:wrap;gap:8px}
-    .chip{background:var(--slate-900);border:1px solid var(--border);border-radius:999px;padding:6px 13px;font-size:.86rem;color:var(--text-secondary)}
-    .req-list{list-style:none;margin:0;padding:0}
-    .req-list li{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:7px 0;border-bottom:1px solid var(--border);font-size:.9rem}
-    .req-list li:last-child{border-bottom:0}
-    .req-list .dep{color:var(--text-primary);font-family:var(--font-mono);font-size:.86rem}
-    .req-list .ver{color:var(--text-muted);font-size:.82rem;font-family:var(--font-mono);white-space:nowrap}
+    .specsheet{border:1px solid var(--border);border-radius:14px;background:var(--surface);overflow:hidden}
+    .spec-row{display:grid;grid-template-columns:170px 1fr;gap:18px;padding:15px 22px;align-items:center}
+    .spec-row+.spec-row{border-top:1px solid var(--border)}
+    .spec-k{font-size:.76rem;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);font-family:var(--font-mono)}
+    .spec-v{display:flex;flex-wrap:wrap;gap:8px}
+    .chip{display:inline-flex;align-items:center;gap:6px;background:var(--slate-900);border:1px solid var(--border);border-radius:999px;padding:5px 13px;font-size:.85rem;color:var(--text-secondary);font-family:var(--font-sans)}
+    .chip .cv{color:var(--text-faint);font-family:var(--font-mono);font-size:.78rem}
+    .chip.opt{color:var(--text-faint);border-style:dashed}
+    @media(max-width:640px){.spec-row{grid-template-columns:1fr;gap:9px}}
 
     /* sub-tabs */
     .bench-tabnav{margin-top:6px}
@@ -145,32 +144,32 @@
         <!-- System requirements -->
         <section class="bench-section reqs" style="border-top:0">
             <div class="section-content">
-                <div class="reqs-grid">
-                    <div class="req-card">
-                        <div class="req-label">Operating system</div>
-                        <div class="req-chips">
+                <div class="specsheet">
+                    <div class="spec-row">
+                        <div class="spec-k">Operating system</div>
+                        <div class="spec-v">
                             <span class="chip">🐧 Linux</span>
                             <span class="chip">🍎 macOS</span>
                             <span class="chip">🪟 Windows · WSL2</span>
                         </div>
                     </div>
-                    <div class="req-card">
-                        <div class="req-label">Core requirements</div>
-                        <ul class="req-list">
-                            <li><span class="dep">Docker</span><span class="ver">engine, running</span></li>
-                            <li><span class="dep">Python</span><span class="ver">&ge; 3.10</span></li>
-                            <li><span class="dep">Node.js</span><span class="ver">optional · Codex arm</span></li>
-                        </ul>
+                    <div class="spec-row">
+                        <div class="spec-k">Requires</div>
+                        <div class="spec-v">
+                            <span class="chip">Docker <span class="cv">running</span></span>
+                            <span class="chip">Python <span class="cv">&ge; 3.10</span></span>
+                            <span class="chip opt">Node.js · optional</span>
+                        </div>
                     </div>
-                    <div class="req-card">
-                        <div class="req-label">Python packages</div>
-                        <ul class="req-list">
-                            <li><span class="dep">anthropic</span><span class="ver">&ge; 0.40</span></li>
-                            <li><span class="dep">openai</span><span class="ver">&ge; 1.40</span></li>
-                            <li><span class="dep">google-genai</span><span class="ver">&ge; 0.3</span></li>
-                            <li><span class="dep">pyyaml</span><span class="ver">&ge; 6.0</span></li>
-                            <li><span class="dep">rich</span><span class="ver">&ge; 13.0</span></li>
-                        </ul>
+                    <div class="spec-row">
+                        <div class="spec-k">Python packages</div>
+                        <div class="spec-v">
+                            <span class="chip">anthropic <span class="cv">&ge; 0.40</span></span>
+                            <span class="chip">openai <span class="cv">&ge; 1.40</span></span>
+                            <span class="chip">google-genai <span class="cv">&ge; 0.3</span></span>
+                            <span class="chip">pyyaml <span class="cv">&ge; 6.0</span></span>
+                            <span class="chip">rich <span class="cv">&ge; 13.0</span></span>
+                        </div>
                     </div>
                 </div>
             </div>
