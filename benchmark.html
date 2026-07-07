@@ -117,6 +117,20 @@
     .lb-fill{height:100%;border-radius:5px}
     .lb-pct{font-family:var(--font-mono);font-size:.88rem;color:var(--text-primary);white-space:nowrap;min-width:36px;text-align:right}
     .lb-cnt{display:block;font-family:var(--font-mono);font-size:.74rem;color:var(--text-muted);margin-top:5px}
+    .lb-wrap{overflow-x:auto}
+    .lb-table th.sortable{cursor:pointer;user-select:none;white-space:nowrap}
+    .lb-table th.sortable:hover{color:var(--text-secondary)}
+    .lb-table th.sortable::after{content:'\2195';opacity:.3;margin-left:5px;font-size:.85em}
+    .lb-table th.sortable.sorted-asc::after{content:'\25B2';opacity:.85}
+    .lb-table th.sortable.sorted-desc::after{content:'\25BC';opacity:.85}
+    .lb-score{display:flex;align-items:center;gap:10px;min-width:120px}
+    .lb-score .lb-track{min-width:56px}
+    .lb-score b{font-family:var(--font-mono);font-size:.94rem;color:var(--text-primary);min-width:22px;text-align:right}
+    .lb-method{margin:22px 0 0;padding:16px 18px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:.9rem;color:var(--text-secondary);line-height:1.65}
+    .lb-method b{color:var(--text-primary)}
+    .lb-method .fx{font-family:var(--font-mono);color:var(--indigo-400)}
+    .lb-method .defs{margin:10px 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px 20px;font-size:.84rem;color:var(--text-muted)}
+    .lb-method .defs b{color:var(--text-secondary)}
     /* design choices table */
     .design-table{width:100%;border-collapse:collapse;border:1px solid var(--border);border-radius:14px;overflow:hidden;font-size:.94rem}
     .design-table thead th{text-align:left;background:var(--surface);color:var(--text-muted);font-weight:600;font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;padding:12px 20px;border-bottom:1px solid var(--border)}
@@ -978,7 +992,7 @@ python -m fbbench.sweep.claudecode sweep --bugs all --model sonnet --auth api</c
         </section>
 
         <!-- Difficulty pyramid -->
-        <section class="bench-section">
+        <section class="bench-section" id="difficulty">
             <div class="section-content">
                 <h3 class="hd">Difficulty</h3>
                 <p class="sub">A dynamic ranking. Each bug is scored by how many frontier model runs actually solve it, then placed into one of five levels.</p>
@@ -1218,20 +1232,32 @@ python -m fbbench.sweep.claudecode sweep --bugs all --model sonnet --auth api</c
         <section class="bench-section">
             <div class="section-content">
                 <h3 class="hd">Leaderboard</h3>
-                <p class="sub">Solve rate on all 68 bugs, one full-scan pass per model. A solve means the run found the documented bug on its own and pinned both its class and its exact site &mdash; off-target crashes do not count. Cost is the average spend per bug.</p>
+                <p class="sub">Ranked by difficulty-weighted score on all 68 bugs, one full-scan pass per model. A solve means the run found the documented bug on its own and pinned both its class and its exact site &mdash; off-target crashes do not count. Time is the median per bug; tools, inputs and cost are per-bug means. Click any column to sort.</p>
+                <div class="lb-wrap">
                 <table class="lb-table">
-                    <thead><tr><th>#</th><th>Model</th><th>Solve rate</th><th class="num">$ / bug</th></tr></thead>
+                    <thead><tr><th>#</th><th class="sortable" data-type="str">Model</th><th class="sortable sorted-desc">Score</th><th class="sortable num">Solved</th><th class="sortable num">Med time</th><th class="sortable num">Avg tools</th><th class="sortable num">Avg inputs</th><th class="sortable num">$ / bug</th></tr></thead>
                     <tbody>
-                        <tr><td><span class="lb-rank gold">1</span></td><td class="lb-model">Claude Code &middot; Opus 4.8<span class="lb-arm agent">agent</span></td><td><div class="lb-bar"><div class="lb-track"><div class="lb-fill" style="width:56%;background:#d97757"></div></div><span class="lb-pct">56%</span></div><span class="lb-cnt">38 / 68 solved</span></td><td class="num">$6.40</td></tr>
-                        <tr><td><span class="lb-rank">2</span></td><td class="lb-model">Codex &middot; GPT-5.5<span class="lb-arm agent">agent</span></td><td><div class="lb-bar"><div class="lb-track"><div class="lb-fill" style="width:53%;background:#10a37f"></div></div><span class="lb-pct">53%</span></div><span class="lb-cnt">36 / 68 solved</span></td><td class="num">$1.31</td></tr>
-                        <tr><td><span class="lb-rank">3</span></td><td class="lb-model">Opus 4.8<span class="lb-arm api">API</span></td><td><div class="lb-bar"><div class="lb-track"><div class="lb-fill" style="width:53%;background:#d97757"></div></div><span class="lb-pct">53%</span></div><span class="lb-cnt">36 / 68 solved</span></td><td class="num">$1.44</td></tr>
-                        <tr><td><span class="lb-rank">4</span></td><td class="lb-model">DeepSeek V4 Pro<span class="lb-arm api">API</span></td><td><div class="lb-bar"><div class="lb-track"><div class="lb-fill" style="width:52%;background:#4d6bfe"></div></div><span class="lb-pct">52%</span></div><span class="lb-cnt">34 / 65 solved</span></td><td class="num">$0.60</td></tr>
-                        <tr><td><span class="lb-rank">5</span></td><td class="lb-model">GPT-5.5<span class="lb-arm api">API</span></td><td><div class="lb-bar"><div class="lb-track"><div class="lb-fill" style="width:51%;background:#10a37f"></div></div><span class="lb-pct">51%</span></div><span class="lb-cnt">35 / 68 solved</span></td><td class="num">$0.70</td></tr>
-                        <tr><td><span class="lb-rank">6</span></td><td class="lb-model">DeepSeek V4 Flash<span class="lb-arm api">API</span></td><td><div class="lb-bar"><div class="lb-track"><div class="lb-fill" style="width:37%;background:#4d6bfe"></div></div><span class="lb-pct">37%</span></div><span class="lb-cnt">25 / 68 solved</span></td><td class="num">$0.39</td></tr>
-                        <tr><td><span class="lb-rank">7</span></td><td class="lb-model">Claude Code &middot; Haiku 4.5<span class="lb-arm agent">agent</span></td><td><div class="lb-bar"><div class="lb-track"><div class="lb-fill" style="width:32%;background:#d97757"></div></div><span class="lb-pct">32%</span></div><span class="lb-cnt">22 / 68 solved</span></td><td class="num">$0.99</td></tr>
-                        <tr><td><span class="lb-rank">8</span></td><td class="lb-model">Haiku 4.5<span class="lb-arm api">API</span></td><td><div class="lb-bar"><div class="lb-track"><div class="lb-fill" style="width:32%;background:#d97757"></div></div><span class="lb-pct">32%</span></div><span class="lb-cnt">22 / 68 solved</span></td><td class="num">$0.40</td></tr>
+                        <tr><td class="rk"><span class="lb-rank gold">1</span></td><td class="lb-model" data-v="Claude Code Opus">Claude Code &middot; Opus 4.8<span class="lb-arm agent">agent</span></td><td data-v="77"><div class="lb-score"><div class="lb-track"><div class="lb-fill" style="width:100%;background:#d97757"></div></div><b>77</b></div></td><td class="num" data-v="56">56%<span class="lb-cnt">38 / 68</span></td><td class="num" data-v="16.1">16.1m</td><td class="num" data-v="56">56</td><td class="num" data-v="15.7">15.7</td><td class="num" data-v="6.40">$6.40</td></tr>
+                        <tr><td class="rk"><span class="lb-rank">2</span></td><td class="lb-model" data-v="Codex GPT-5.5">Codex &middot; GPT-5.5<span class="lb-arm agent">agent</span></td><td data-v="75"><div class="lb-score"><div class="lb-track"><div class="lb-fill" style="width:97%;background:#10a37f"></div></div><b>75</b></div></td><td class="num" data-v="53">53%<span class="lb-cnt">36 / 68</span></td><td class="num" data-v="4.8">4.8m</td><td class="num" data-v="49">49</td><td class="num" data-v="10.6">10.6</td><td class="num" data-v="1.31">$1.31</td></tr>
+                        <tr><td class="rk"><span class="lb-rank">3</span></td><td class="lb-model" data-v="Opus API">Opus 4.8<span class="lb-arm api">API</span></td><td data-v="70"><div class="lb-score"><div class="lb-track"><div class="lb-fill" style="width:91%;background:#d97757"></div></div><b>70</b></div></td><td class="num" data-v="53">53%<span class="lb-cnt">36 / 68</span></td><td class="num" data-v="2.4">2.4m</td><td class="num" data-v="41">41</td><td class="num" data-v="7.5">7.5</td><td class="num" data-v="1.44">$1.44</td></tr>
+                        <tr><td class="rk"><span class="lb-rank">4</span></td><td class="lb-model" data-v="GPT-5.5 API">GPT-5.5<span class="lb-arm api">API</span></td><td data-v="65"><div class="lb-score"><div class="lb-track"><div class="lb-fill" style="width:84%;background:#10a37f"></div></div><b>65</b></div></td><td class="num" data-v="51">51%<span class="lb-cnt">35 / 68</span></td><td class="num" data-v="1.3">1.3m</td><td class="num" data-v="28">28</td><td class="num" data-v="3.1">3.1</td><td class="num" data-v="0.70">$0.70</td></tr>
+                        <tr><td class="rk"><span class="lb-rank">5</span></td><td class="lb-model" data-v="DeepSeek V4 Pro">DeepSeek V4 Pro<span class="lb-arm api">API</span></td><td data-v="62"><div class="lb-score"><div class="lb-track"><div class="lb-fill" style="width:81%;background:#4d6bfe"></div></div><b>62</b></div></td><td class="num" data-v="52">52%<span class="lb-cnt">34 / 65</span></td><td class="num" data-v="27.4">27.4m</td><td class="num" data-v="68">68</td><td class="num" data-v="7.4">7.4</td><td class="num" data-v="0.60">$0.60</td></tr>
+                        <tr><td class="rk"><span class="lb-rank">6</span></td><td class="lb-model" data-v="DeepSeek V4 Flash">DeepSeek V4 Flash<span class="lb-arm api">API</span></td><td data-v="36"><div class="lb-score"><div class="lb-track"><div class="lb-fill" style="width:47%;background:#4d6bfe"></div></div><b>36</b></div></td><td class="num" data-v="37">37%<span class="lb-cnt">25 / 68</span></td><td class="num" data-v="17.2">17.2m</td><td class="num" data-v="99">99</td><td class="num" data-v="24.4">24.4</td><td class="num" data-v="0.39">$0.39</td></tr>
+                        <tr><td class="rk"><span class="lb-rank">7</span></td><td class="lb-model" data-v="Haiku API">Haiku 4.5<span class="lb-arm api">API</span></td><td data-v="34"><div class="lb-score"><div class="lb-track"><div class="lb-fill" style="width:44%;background:#d97757"></div></div><b>34</b></div></td><td class="num" data-v="32">32%<span class="lb-cnt">22 / 68</span></td><td class="num" data-v="3.9">3.9m</td><td class="num" data-v="73">73</td><td class="num" data-v="16.4">16.4</td><td class="num" data-v="0.40">$0.40</td></tr>
+                        <tr><td class="rk"><span class="lb-rank">8</span></td><td class="lb-model" data-v="Claude Code Haiku">Claude Code &middot; Haiku 4.5<span class="lb-arm agent">agent</span></td><td data-v="31"><div class="lb-score"><div class="lb-track"><div class="lb-fill" style="width:40%;background:#d97757"></div></div><b>31</b></div></td><td class="num" data-v="32">32%<span class="lb-cnt">22 / 68</span></td><td class="num" data-v="6.1">6.1m</td><td class="num" data-v="108">108</td><td class="num" data-v="34.8">34.8</td><td class="num" data-v="0.99">$0.99</td></tr>
                     </tbody>
                 </table>
+                </div>
+                <div class="lb-method">
+                    <b>How the score works.</b> Each solved bug is worth its difficulty level &mdash; a D1 bug earns <span class="fx">1</span> point, a D5 earns <span class="fx">5</span> &mdash; so a model's <b>Score</b> is <span class="fx">&Sigma; D(solved bug)</span>, summed over every bug it cracked. Cracking the rare hard bugs counts for far more than piling up easy ones. Difficulty (D1&ndash;D5) is the same dynamic ranking from the <a href="#difficulty" data-tabjump="stats" class="xlink">Difficulty section</a>.
+                    <ul class="defs">
+                        <li><b>Solved</b> &mdash; bugs cleared, of those run</li>
+                        <li><b>Med time</b> &mdash; median wall-clock per bug</li>
+                        <li><b>Avg tools</b> &mdash; tool calls per bug</li>
+                        <li><b>Avg inputs</b> &mdash; candidate inputs generated &amp; graded per bug</li>
+                        <li><b>$ / bug</b> &mdash; mean spend per bug</li>
+                    </ul>
+                </div>
                 <p class="lb-note">One pass per model (seed 0). Agent rows wrap the same base model in a coding agent (Codex, Claude Code); API rows call the model directly. Gemini and further models are being added.</p>
             </div>
         </section>
@@ -1283,6 +1309,39 @@ python -m fbbench.sweep.claudecode sweep --bugs all --model sonnet --auth api</c
       // keep tab and URL in sync so a refresh or shared link restores the tab
       window.addEventListener('hashchange',function(){setTab(location.hash.slice(1));});
       setTab(location.hash.slice(1));
+    })();
+    // sortable leaderboard
+    (function(){
+      var table=document.querySelector('.lb-table');
+      if(!table||!table.tHead) return;
+      var tbody=table.tBodies[0];
+      var ths=table.tHead.rows[0].cells;
+      var curCol=2, curDir=-1;
+      function sortBy(col,dir,isStr){
+        var rows=[].slice.call(tbody.rows);
+        rows.sort(function(a,b){
+          var x=a.cells[col].dataset.v, y=b.cells[col].dataset.v;
+          if(isStr){x=(x||'').toLowerCase();y=(y||'').toLowerCase();return dir*(x<y?-1:x>y?1:0);}
+          return dir*(parseFloat(x)-parseFloat(y));
+        });
+        rows.forEach(function(r,i){
+          tbody.appendChild(r);
+          var rk=r.cells[0].querySelector('.lb-rank');
+          if(rk){rk.textContent=i+1;rk.classList.toggle('gold',i===0);}
+        });
+        for(var j=0;j<ths.length;j++){ths[j].classList.remove('sorted-asc','sorted-desc');}
+        ths[col].classList.add(dir<0?'sorted-desc':'sorted-asc');
+        curCol=col;curDir=dir;
+      }
+      for(var i=0;i<ths.length;i++){
+        (function(th,col){
+          if(!th.classList.contains('sortable')) return;
+          var isStr=th.dataset.type==='str';
+          th.addEventListener('click',function(){
+            sortBy(col,(curCol===col)?-curDir:(isStr?1:-1),isStr);
+          });
+        })(ths[i],i);
+      }
     })();
     </script>
 </body>
