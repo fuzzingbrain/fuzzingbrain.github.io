@@ -215,6 +215,13 @@
     .qs-hint code{font-family:var(--font-mono);font-size:.86em}
     .provider-name{display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:.8rem;letter-spacing:.04em;color:var(--text-secondary);margin:18px 0 6px}
     .provider-name .pdot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+    .compat-grid{display:grid;grid-template-columns:1fr;gap:14px;margin:14px 0 4px}
+    @media(min-width:720px){.compat-grid{grid-template-columns:repeat(3,1fr)}}
+    .compat-card{border:1px solid var(--border);border-radius:14px;background:var(--surface);padding:18px}
+    .compat-card .ci{width:32px;height:32px;margin-bottom:10px;display:block}
+    .compat-card h5{margin:0 0 5px;font-size:1rem;color:var(--text-primary)}
+    .compat-card p{margin:0;color:var(--text-secondary);font-size:.88rem;line-height:1.55}
+    .compat-card code{font-family:var(--font-mono);font-size:.84em}
     .models-table{width:100%;border-collapse:collapse;margin-top:12px;font-size:.9rem}
     .models-table th{text-align:left;color:var(--text-muted);font-family:var(--font-mono);font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;padding:6px 12px;border-bottom:1px solid var(--border)}
     .models-table td{padding:7px 12px;border-bottom:1px solid var(--border);color:var(--text-secondary)}
@@ -705,6 +712,26 @@ READ of size 4 at <span class="dim">0x60200000eff4</span> thread T0
             <div class="section-content">
                 <h3 class="hd">Run it in five minutes</h3>
                 <p class="sub">Only Docker and a model key are needed. No build, no answer key, nothing to download but the sealed image.</p>
+
+                <h4 class="qs-step">Works with</h4>
+                <p class="qs-hint">The bench is just a sealed harness and a grader, so three kinds of systems plug straight in.</p>
+                <div class="compat-grid">
+                    <div class="compat-card">
+                        <svg class="ci" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 L13.6 9.4 L21 12 L13.6 14.6 L12 22 L10.4 14.6 L3 12 L10.4 9.4 Z" fill="#818cf8"/></svg>
+                        <h5>LLM models</h5>
+                        <p>Plug in a model API. Anthropic, OpenAI, Google, DeepSeek.</p>
+                    </div>
+                    <div class="compat-card">
+                        <svg class="ci" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="#34d399" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="3.5" x2="12" y2="6"/><circle cx="12" cy="2.6" r="1" fill="#34d399" stroke="none"/><rect x="5" y="6" width="14" height="12" rx="3"/><circle cx="9.5" cy="12" r="1.3" fill="#34d399" stroke="none"/><circle cx="14.5" cy="12" r="1.3" fill="#34d399" stroke="none"/><line x1="3" y1="10" x2="3" y2="14"/><line x1="21" y1="10" x2="21" y2="14"/></g></svg>
+                        <h5>Agents</h5>
+                        <p>Drive a coding-agent CLI over the bench MCP. Codex and Claude Code today.</p>
+                    </div>
+                    <div class="compat-card">
+                        <svg class="ci" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="#fbbf24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,7 4,12 9,17"/><polyline points="15,7 20,12 15,17"/></g></svg>
+                        <h5>Your bug-finding system</h5>
+                        <p>Bring your own. Anything that reads the harness and submits a candidate input works.</p>
+                    </div>
+                </div>
 
                 <h4 class="qs-step">1. Install</h4>
                 <div class="runbox">
