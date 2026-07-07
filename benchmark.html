@@ -170,6 +170,14 @@
     .sbadge.shown{color:#818cf8;border-color:rgba(99,102,241,.45);background:rgba(99,102,241,.09)}
     .sbadge.sealed{color:#f59e0b;border-color:rgba(245,158,11,.45);background:rgba(245,158,11,.09)}
     @media(max-width:560px){.schema-table .v{display:none}}
+    /* sanitizer output examples */
+    .ex-grid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:14px}
+    @media(min-width:820px){.ex-grid{grid-template-columns:1fr 1fr}}
+    .ex-label{font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);font-family:var(--font-mono);margin:0 0 6px}
+    .ex-out{background:var(--slate-950);border:1px solid var(--border);border-radius:10px;padding:13px 15px;overflow-x:auto;font-family:var(--font-mono);font-size:.78rem;line-height:1.6;color:var(--text-secondary);margin:0;white-space:pre}
+    .ex-out .er{color:#f87171;font-weight:600}
+    .ex-out .fr{color:#818cf8}
+    .ex-out .dim{color:var(--text-faint)}
     </style>
 </head>
 <body>
@@ -417,6 +425,26 @@
                 <div class="intro-block">
                     <div class="ib-h"><h4>What a bug is here</h4></div>
                     <p>A bug in FuzzingBrain Bench is one concrete, reproducible fault. It is pinned to a project, a source revision, a sanitizer, a fault class, and a crash site, so a candidate either reproduces that exact fault or it does not. Each bug is stored in two halves. You get one, the oracle keeps the other.</p>
+                    <p style="margin-top:18px">Every fault surfaces as a sanitizer report. A native target prints an AddressSanitizer trace, a JVM target throws through Jazzer.</p>
+                    <div class="ex-grid">
+                        <div>
+                            <div class="ex-label">AddressSanitizer &middot; native</div>
+<pre class="ex-out"><span class="er">==17==ERROR: AddressSanitizer: heap-buffer-overflow</span>
+READ of size 4 at <span class="dim">0x60200000eff4</span> thread T0
+    #0 <span class="fr">decode_frame</span>      <span class="dim">src/decoder.c:212</span>
+    #1 <span class="fr">process_input</span>     <span class="dim">src/decoder.c:71</span>
+    #2 <span class="fr">LLVMFuzzerTestOneInput</span> <span class="dim">fuzz/harness.c:29</span></pre>
+                        </div>
+                        <div>
+                            <div class="ex-label">Jazzer &middot; JVM</div>
+<pre class="ex-out"><span class="er">== Java Exception: java.lang.ArrayIndexOutOfBoundsException:</span>
+   Index 12 out of bounds for length 8
+    at <span class="fr">com.example.Reader.readField</span> <span class="dim">Reader.java:143</span>
+    at <span class="fr">com.example.Reader.parse</span>     <span class="dim">Reader.java:64</span>
+    at <span class="fr">Harness.fuzzerTestOneInput</span>  <span class="dim">Harness.java:27</span></pre>
+                        </div>
+                    </div>
+                    <p style="margin-top:16px">The sealed half of a bug is read straight off that report. The <b>fault class</b> is the category on the first line, for example <code>heap-buffer-overflow</code>. The <b>crash site</b> is the crashing frame, its file and function, not the whole stack.</p>
                     <table class="schema-table">
                         <tbody>
                             <tr class="grp"><td colspan="3">Shown to the agent</td></tr>
@@ -428,9 +456,9 @@
                             <tr><td class="f">Sanitizer</td><td class="v">ASan / UBSan / LSan / Jazzer</td><td class="vis"><span class="sbadge shown">visible</span></td></tr>
                             <tr><td class="f">Harness code</td><td class="v">the full fuzz-target source</td><td class="vis"><span class="sbadge shown">visible</span></td></tr>
                             <tr class="grp"><td colspan="3">Sealed in the oracle</td></tr>
-                            <tr><td class="f">Fault class</td><td class="v sl">the exact sanitizer fault</td><td class="vis"><span class="sbadge sealed">sealed</span></td></tr>
-                            <tr><td class="f">Crash site</td><td class="v sl">the file and function</td><td class="vis"><span class="sbadge sealed">sealed</span></td></tr>
-                            <tr><td class="f">Reach region</td><td class="v sl">the buggy lines</td><td class="vis"><span class="sbadge sealed">sealed</span></td></tr>
+                            <tr><td class="f">Fault class</td><td class="v sl">the category on line 1, e.g. heap-buffer-overflow</td><td class="vis"><span class="sbadge sealed">sealed</span></td></tr>
+                            <tr><td class="f">Crash site</td><td class="v sl">the crashing frame, its file and function</td><td class="vis"><span class="sbadge sealed">sealed</span></td></tr>
+                            <tr><td class="f">Reach region</td><td class="v sl">the buggy lines that must run</td><td class="vis"><span class="sbadge sealed">sealed</span></td></tr>
                             <tr><td class="f">Reference PoC</td><td class="v sl">an input that triggers it</td><td class="vis"><span class="sbadge sealed">sealed</span></td></tr>
                             <tr><td class="f">Fixed build</td><td class="v sl">the patched binary</td><td class="vis"><span class="sbadge sealed">sealed</span></td></tr>
                             <tr><td class="f">Required levels</td><td class="v sl">which of the five must fire</td><td class="vis"><span class="sbadge sealed">sealed</span></td></tr>
