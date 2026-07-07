@@ -381,7 +381,7 @@
                     <a href="blog.html">Blog</a>
                     <a href="disclosures.html">Disclosures</a>
                     <a href="index.html#results">Results</a>
-                    <a href="https://github.com/OwenSanzas/FuzzingBrain-Bench" class="nav-cta" target="_blank" rel="noopener noreferrer">GitHub</a>
+                    <a href="https://github.com/fuzzingbrain/FuzzingBrain-Bench" class="nav-cta" target="_blank" rel="noopener noreferrer">GitHub</a>
                 </nav>
             </div>
         </header>
@@ -391,7 +391,7 @@
             <div class="section-content">
                 <div class="bench-kicker">Can LLMs actually find real bugs?</div>
                 <h2>FuzzingBrain Bench</h2>
-                <p class="lede">Everyone says language models can find vulnerabilities. No public benchmark measures this ability well. FuzzingBrain Bench ships 68 real bugs across 40 projects, hides the answer, and lets the program itself decide whether the model found the bug or just found a bug.</p>
+                <p class="lede">Everyone says language models can find vulnerabilities. But no public benchmark measures this well. FuzzingBrain Bench tests models on 68 real-world bugs from 40 open-source projects. The answers are hidden, and success requires concrete evidence: an OSS-Fuzz crashing input that reproduces the bug.</p>
                 <div class="bench-statrow">
                     <a class="bench-stat" href="#challenges" data-tabjump="stats"><div class="n">68</div><div class="l">Real bugs</div></a>
                     <a class="bench-stat" href="#challenges" data-tabjump="stats"><div class="n">40</div><div class="l">OSS projects</div></a>
@@ -399,7 +399,7 @@
                     <a class="bench-stat" href="#challenges" data-tabjump="stats"><div class="n">3</div><div class="l">Languages</div></a>
                 </div>
                 <div class="bench-cta">
-                    <a href="https://github.com/OwenSanzas/FuzzingBrain-Bench" class="btn btn-primary">Get the Benchmark</a>
+                    <a href="https://github.com/fuzzingbrain/FuzzingBrain-Bench" class="btn btn-primary">Get the Benchmark</a>
                     <a href="#run" class="btn btn-secondary" data-tabjump="quickstart">Run in 5 Minutes</a>
                 </div>
             </div>
@@ -830,10 +830,9 @@ READ of size 4 at <span class="dim">0x60200000eff4</span> thread T0
             <div class="section-content">
                 <h3 class="hd">Run it in five minutes</h3>
                 <p class="sub">Only Docker and a model key are needed. No build, no answer key, nothing to download but the sealed image.</p>
-                <a class="qs-repo" href="https://github.com/OwenSanzas/FuzzingBrain-Bench" target="_blank" rel="noopener"><svg width="17" height="17" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>github.com/OwenSanzas/FuzzingBrain-Bench<span class="arw">&rarr;</span></a>
+                <a class="qs-repo" href="https://github.com/fuzzingbrain/FuzzingBrain-Bench" target="_blank" rel="noopener"><svg width="17" height="17" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>github.com/fuzzingbrain/FuzzingBrain-Bench<span class="arw">&rarr;</span></a>
 
                 <h4 class="qs-step">Works with</h4>
-                <p class="qs-hint">The bench is just a sealed harness and a grader, so three kinds of systems plug straight in.</p>
                 <div class="compat-grid">
                     <div class="compat-card">
                         <svg class="ci" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 L13.6 9.4 L21 12 L13.6 14.6 L12 22 L10.4 14.6 L3 12 L10.4 9.4 Z" fill="#818cf8"/></svg>
@@ -854,7 +853,7 @@ READ of size 4 at <span class="dim">0x60200000eff4</span> thread T0
 
                 <h4 class="qs-step">1. Install</h4>
                 <div class="runbox">
-<pre><code class="language-bash">git clone https://github.com/OwenSanzas/FuzzingBrain-Bench
+<pre><code class="language-bash">git clone https://github.com/fuzzingbrain/FuzzingBrain-Bench
 cd FuzzingBrain-Bench && pip install -e .</code></pre>
                 </div>
 
@@ -1279,7 +1278,7 @@ python -m fbbench.sweep.claudecode sweep --bugs all --model sonnet --auth api</c
                     <p>Advancing autonomous vulnerability discovery through AI</p>
                 </div>
                 <div class="footer-links">
-                    <a href="https://github.com/OwenSanzas/FuzzingBrain-Bench"><img src="assets/images/fuzzbrain.jpg" alt="GitHub" class="footer-logo"> GitHub</a>
+                    <a href="https://github.com/fuzzingbrain/FuzzingBrain-Bench"><img src="assets/images/fuzzbrain.jpg" alt="GitHub" class="footer-logo"> GitHub</a>
                     <a href="https://aicyberchallenge.com/">DARPA AIxCC</a>
                 </div>
             </div>
