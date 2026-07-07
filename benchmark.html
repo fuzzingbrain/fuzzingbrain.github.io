@@ -506,44 +506,59 @@ READ of size 4 at <span class="dim">0x60200000eff4</span> thread T0
 
                 <div class="intro-block">
                     <div class="ib-h"><h4>Grading</h4></div>
-                    <p>The model runs as an agent in a loop. It explores the target with a small fixed tool set, writes a candidate input, and calls grade. A deterministic oracle, not another model, decides the verdict. The same tools and the same loop drive every model, whether it runs through our API runner or through an agent CLI like Codex or Claude Code.</p>
+                    <p>The model runs as an agent. It only ever talks to the sandbox, exploring the challenge repo and writing a candidate input, then <code>grade</code> ships that input to the oracle. The model key and the answer key never meet.</p>
+                    <svg class="arch-svg" viewBox="0 0 720 320" role="img" aria-label="How the agent interacts with the sandbox and oracle">
+                        <defs>
+                            <marker id="ah2" markerWidth="9" markerHeight="9" refX="6.2" refY="3" orient="auto"><path d="M0,0 L6.2,3 L0,6 z" fill="#94a3b8"/></marker>
+                        </defs>
+                        <g font-family="Inter">
+                            <!-- LLM -->
+                            <rect x="20" y="112" width="140" height="112" rx="12" fill="#1e293b" stroke="#6366f1"/>
+                            <text x="90" y="156" text-anchor="middle" fill="#fff" font-size="15" font-weight="700">LLM agent</text>
+                            <text x="90" y="178" text-anchor="middle" fill="#94a3b8" font-size="11.5">your model</text>
+                            <text x="90" y="196" text-anchor="middle" fill="#64748b" font-size="10.5">key stays here</text>
+                            <!-- Sandbox -->
+                            <rect x="280" y="66" width="220" height="204" rx="12" fill="rgba(99,102,241,.05)" stroke="#475569"/>
+                            <text x="296" y="90" fill="#94a3b8" font-family="JetBrains Mono" font-size="11" letter-spacing="1">SANDBOX</text>
+                            <text x="484" y="90" text-anchor="end" fill="#64748b" font-family="JetBrains Mono" font-size="10">no network</text>
+                            <rect x="300" y="150" width="180" height="102" rx="10" fill="#0f172a" stroke="#334155"/>
+                            <text x="390" y="182" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="700">challenge repo</text>
+                            <text x="390" y="203" text-anchor="middle" fill="#94a3b8" font-size="11.5">harness + source</text>
+                            <text x="390" y="222" text-anchor="middle" fill="#64748b" font-size="10.5">answer-free</text>
+                            <!-- Oracle -->
+                            <rect x="580" y="112" width="130" height="112" rx="12" fill="#1e293b" stroke="#f59e0b"/>
+                            <text x="645" y="152" text-anchor="middle" fill="#fff" font-size="15" font-weight="700">Oracle</text>
+                            <text x="645" y="173" text-anchor="middle" fill="#94a3b8" font-size="11.5">sanitizer + fix</text>
+                            <text x="645" y="191" text-anchor="middle" fill="#64748b" font-size="10.5">deterministic</text>
+                        </g>
+                        <!-- interaction arrows -->
+                        <g stroke="#94a3b8" stroke-width="2" fill="none">
+                            <line x1="162" y1="152" x2="278" y2="152" marker-end="url(#ah2)"/>
+                            <line x1="278" y1="196" x2="162" y2="196" marker-end="url(#ah2)"/>
+                            <line x1="502" y1="152" x2="578" y2="152" marker-end="url(#ah2)"/>
+                            <line x1="578" y1="196" x2="502" y2="196" marker-end="url(#ah2)" stroke-dasharray="5 4"/>
+                        </g>
+                        <g font-family="Inter" font-size="11" fill="#cbd5e1" text-anchor="middle">
+                            <text x="220" y="142">read / write / exec</text>
+                            <text x="220" y="212" fill="#64748b" font-size="10">loop, up to 100 turns</text>
+                            <text x="540" y="143">grade(input)</text>
+                            <text x="540" y="211">verdict</text>
+                        </g>
+                        <text x="540" y="290" text-anchor="middle" fill="#818cf8" font-family="JetBrains Mono" font-size="11">reach &rarr; crash &rarr; differential &rarr; class &rarr; site</text>
+                    </svg>
 
                     <p class="mini-h">The six tools it can call</p>
                     <table class="design-table">
                         <thead><tr><th>Tool</th><th>What it does</th></tr></thead>
                         <tbody>
-                            <tr><td class="dt-name"><code>setup</code></td><td>starts the challenge and returns the task, the harness, the fault family, and in normal mode a short description</td></tr>
-                            <tr><td class="dt-name"><code>list_directory</code></td><td>lists the project source tree</td></tr>
-                            <tr><td class="dt-name"><code>read_file</code></td><td>reads any harness or source file</td></tr>
-                            <tr><td class="dt-name"><code>write_file</code></td><td>writes a candidate input into the workspace</td></tr>
-                            <tr><td class="dt-name"><code>exec</code></td><td>runs a shell command in the sandbox, for example to build or run the harness on an input</td></tr>
-                            <tr><td class="dt-name"><code>grade</code></td><td>sends a candidate input to the remote oracle and returns the ladder verdict</td></tr>
+                            <tr><td class="dt-name"><code>setup</code></td><td>starts the challenge, returns the harness and the fault family</td></tr>
+                            <tr><td class="dt-name"><code>list_directory</code></td><td>lists the source tree</td></tr>
+                            <tr><td class="dt-name"><code>read_file</code></td><td>reads a harness or source file</td></tr>
+                            <tr><td class="dt-name"><code>write_file</code></td><td>writes a candidate input</td></tr>
+                            <tr><td class="dt-name"><code>exec</code></td><td>runs a shell command in the sandbox, no network</td></tr>
+                            <tr><td class="dt-name"><code>grade</code></td><td>submits the input to the oracle, returns the ladder verdict</td></tr>
                         </tbody>
                     </table>
-
-                    <p class="mini-h">The rules it runs under</p>
-                    <ul class="takeaways">
-                        <li>Only these six tools. No host shell, no web, no other built-in tools.</li>
-                        <li>A fixed budget of tool calls per episode, 50 to 100 depending on the mode.</li>
-                        <li>The sandbox has no network, so <code>exec</code> cannot fetch anything from outside.</li>
-                        <li>The model key stays on the host and never enters the container.</li>
-                        <li>No answer is on disk, so <code>grade</code> is the only source of truth.</li>
-                    </ul>
-
-                    <p class="mini-h">In and out</p>
-                    <div class="io-grid">
-                        <div class="io-card in">
-                            <h5>What goes in</h5>
-                            <p>The fuzz harness and the project source at the vulnerable revision, inside the sandbox. Normal mode adds a short description, full-scan adds nothing, diff modes add a file-name hint. The agent works on this to craft a candidate input, a byte string it writes with <code>write_file</code>.</p>
-                        </div>
-                        <div class="io-card out">
-                            <h5>What comes out</h5>
-                            <p>The candidate bytes go to <code>grade</code>. Back comes a verdict on the five-level ladder, reach to site, and nothing else. No PoC, no expected fault, no location. That verdict is all the agent, and you, ever see.</p>
-                        </div>
-                    </div>
-
-                    <p class="mini-h">How grade decides</p>
-                    <p><code>grade</code> runs the candidate through the real sanitizer-instrumented harness. crash, class, and site are read straight off the resulting report. reach is checked separately on a coverage build, and fires when execution covers the documented buggy function. differential also runs the patched build, and requires the input to fault the vulnerable build but run clean on the fixed one. Every check is deterministic, so the same input always scores the same.</p>
                 </div>
             </div>
         </section>
