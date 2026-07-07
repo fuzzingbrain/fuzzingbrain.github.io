@@ -507,77 +507,85 @@ READ of size 4 at <span class="dim">0x60200000eff4</span> thread T0
                 <div class="intro-block">
                     <div class="ib-h"><h4>Grading</h4></div>
                     <p>The model runs as an agent. It only ever talks to the sandbox, exploring the challenge repo and writing a candidate input, then <code>grade</code> ships that input to the oracle. The model key and the answer key never meet.</p>
-                    <svg class="arch-svg" viewBox="0 0 760 300" role="img" aria-label="How the agent interacts with the sandbox and oracle">
+                    <svg class="arch-svg" viewBox="0 0 760 336" role="img" aria-label="Which machine each part runs on, and how they interact">
                         <defs>
                             <marker id="ah3" markerWidth="10" markerHeight="10" refX="6.4" refY="3" orient="auto"><path d="M0,0 L6.4,3 L0,6 z" fill="#94a3b8"/></marker>
                         </defs>
+                        <!-- Machine zones (dashed) -->
+                        <rect x="12" y="46" width="496" height="252" rx="18" fill="rgba(99,102,241,.03)" stroke="#6366f1" stroke-opacity="0.55" stroke-width="1.5" stroke-dasharray="8 6"/>
+                        <text x="30" y="70" fill="#818cf8" font-family="JetBrains Mono" font-size="11" letter-spacing="1.5">YOUR MACHINE</text>
+                        <text x="150" y="70" fill="#64748b" font-family="Inter" font-size="10.5">runs locally, holds your model key, no answers</text>
+                        <rect x="556" y="46" width="192" height="252" rx="18" fill="rgba(245,158,11,.035)" stroke="#f59e0b" stroke-opacity="0.55" stroke-width="1.5" stroke-dasharray="8 6"/>
+                        <text x="574" y="70" fill="#fbbf24" font-family="JetBrains Mono" font-size="11" letter-spacing="1.5">REMOTE ORACLE</text>
+                        <text x="574" y="86" fill="#64748b" font-family="Inter" font-size="10.5">our server, holds the answers</text>
                         <!-- Agent card + robot -->
-                        <rect x="24" y="100" width="160" height="140" rx="14" fill="#1e293b" stroke="#334155"/>
-                        <rect x="38" y="100" width="132" height="4" rx="2" fill="#6366f1"/>
+                        <rect x="32" y="104" width="150" height="140" rx="14" fill="#1e293b" stroke="#334155"/>
+                        <rect x="46" y="104" width="122" height="4" rx="2" fill="#6366f1"/>
                         <g stroke="#818cf8" stroke-width="2" fill="none" stroke-linecap="round">
-                            <line x1="104" y1="118" x2="104" y2="126"/>
-                            <circle cx="104" cy="115" r="2.6" fill="#818cf8" stroke="none"/>
-                            <rect x="88" y="126" width="32" height="26" rx="6" fill="#0f172a"/>
-                            <rect x="83" y="133" width="4" height="10" rx="2" fill="#818cf8" stroke="none"/>
-                            <rect x="121" y="133" width="4" height="10" rx="2" fill="#818cf8" stroke="none"/>
-                            <circle cx="97" cy="137" r="2.4" fill="#818cf8" stroke="none"/>
-                            <circle cx="111" cy="137" r="2.4" fill="#818cf8" stroke="none"/>
-                            <line x1="98" y1="146" x2="110" y2="146"/>
+                            <line x1="107" y1="120" x2="107" y2="128"/>
+                            <circle cx="107" cy="117" r="2.6" fill="#818cf8" stroke="none"/>
+                            <rect x="91" y="128" width="32" height="26" rx="6" fill="#0f172a"/>
+                            <rect x="86" y="135" width="4" height="10" rx="2" fill="#818cf8" stroke="none"/>
+                            <rect x="124" y="135" width="4" height="10" rx="2" fill="#818cf8" stroke="none"/>
+                            <circle cx="100" cy="139" r="2.4" fill="#818cf8" stroke="none"/>
+                            <circle cx="114" cy="139" r="2.4" fill="#818cf8" stroke="none"/>
+                            <line x1="101" y1="148" x2="113" y2="148"/>
                         </g>
                         <g font-family="Inter" text-anchor="middle">
-                            <text x="104" y="176" fill="#fff" font-size="15" font-weight="700">LLM agent</text>
-                            <text x="104" y="196" fill="#94a3b8" font-size="11">your model</text>
-                            <text x="104" y="214" fill="#64748b" font-size="10">holds the API key</text>
+                            <text x="107" y="180" fill="#fff" font-size="14.5" font-weight="700">LLM agent</text>
+                            <text x="107" y="199" fill="#94a3b8" font-size="10.5">runner + your model</text>
+                            <text x="107" y="215" fill="#64748b" font-size="10">holds the API key</text>
                         </g>
-                        <!-- Sandbox + box icon -->
-                        <rect x="284" y="80" width="192" height="180" rx="16" fill="rgba(148,163,184,.045)" stroke="#475569" stroke-dasharray="6 5"/>
+                        <!-- Sandbox (container) + box icon -->
+                        <rect x="286" y="86" width="196" height="180" rx="16" fill="rgba(148,163,184,.05)" stroke="#475569" stroke-width="1.3"/>
                         <g stroke="#94a3b8" stroke-width="1.6" fill="none">
-                            <rect x="298" y="92" width="13" height="13" rx="2"/>
-                            <line x1="298" y1="97" x2="311" y2="97"/>
+                            <rect x="300" y="97" width="13" height="13" rx="2"/>
+                            <line x1="300" y1="102" x2="313" y2="102"/>
                         </g>
-                        <text x="320" y="102" fill="#94a3b8" font-family="JetBrains Mono" font-size="11" letter-spacing="1.2">SANDBOX</text>
-                        <rect x="304" y="138" width="152" height="86" rx="11" fill="#0f172a" stroke="#6366f1" stroke-opacity="0.5"/>
+                        <text x="322" y="108" fill="#94a3b8" font-family="JetBrains Mono" font-size="11" letter-spacing="1.2">SANDBOX &middot; container</text>
+                        <rect x="304" y="142" width="160" height="84" rx="11" fill="#0f172a" stroke="#6366f1" stroke-opacity="0.5"/>
                         <g font-family="Inter" text-anchor="middle">
-                            <text x="380" y="168" fill="#fff" font-size="13" font-weight="700">challenge repo</text>
-                            <text x="380" y="188" fill="#94a3b8" font-size="11">harness + source</text>
-                            <text x="380" y="206" fill="#64748b" font-size="10">answer-free</text>
+                            <text x="384" y="170" fill="#fff" font-size="13" font-weight="700">challenge repo</text>
+                            <text x="384" y="190" fill="#94a3b8" font-size="11">harness + source</text>
+                            <text x="384" y="207" fill="#64748b" font-size="10">answer-free</text>
                         </g>
-                        <text x="380" y="246" text-anchor="middle" fill="#64748b" font-family="JetBrains Mono" font-size="9.5">exec has no internet</text>
+                        <text x="384" y="250" text-anchor="middle" fill="#64748b" font-family="JetBrains Mono" font-size="9.5">exec has no internet</text>
                         <!-- Oracle card + shield-check -->
-                        <rect x="576" y="100" width="160" height="140" rx="14" fill="#1e293b" stroke="#334155"/>
-                        <rect x="590" y="100" width="132" height="4" rx="2" fill="#f59e0b"/>
+                        <rect x="580" y="104" width="140" height="140" rx="14" fill="#1e293b" stroke="#334155"/>
+                        <rect x="594" y="104" width="112" height="4" rx="2" fill="#f59e0b"/>
                         <g stroke="#fbbf24" stroke-width="2" fill="none" stroke-linejoin="round" stroke-linecap="round">
-                            <path d="M656,116 L670,121 L670,133 C670,143 663,148 656,151 C649,148 642,143 642,133 L642,121 Z" fill="#0f172a"/>
-                            <polyline points="649,132 654,137 663,126"/>
+                            <path d="M650,116 L664,121 L664,133 C664,143 657,148 650,151 C643,148 636,143 636,133 L636,121 Z" fill="#0f172a"/>
+                            <polyline points="643,132 648,137 657,126"/>
                         </g>
                         <g font-family="Inter" text-anchor="middle">
-                            <text x="656" y="176" fill="#fff" font-size="15" font-weight="700">Oracle</text>
-                            <text x="656" y="196" fill="#94a3b8" font-size="11">sanitizer + fix</text>
-                            <text x="656" y="214" fill="#64748b" font-size="10">remote, deterministic</text>
+                            <text x="650" y="180" fill="#fff" font-size="14.5" font-weight="700">Oracle</text>
+                            <text x="650" y="199" fill="#94a3b8" font-size="10.5">sanitizer + fix</text>
+                            <text x="650" y="215" fill="#64748b" font-size="10">deterministic</text>
                         </g>
                         <!-- connectors -->
                         <g stroke="#94a3b8" stroke-width="2.2" fill="none" stroke-linecap="round">
-                            <line x1="186" y1="150" x2="280" y2="150" marker-end="url(#ah3)"/>
-                            <line x1="280" y1="188" x2="186" y2="188" marker-end="url(#ah3)"/>
-                            <line x1="480" y1="150" x2="572" y2="150" marker-end="url(#ah3)"/>
-                            <line x1="572" y1="188" x2="480" y2="188" marker-end="url(#ah3)" stroke-dasharray="5 4"/>
+                            <line x1="184" y1="160" x2="284" y2="160" marker-end="url(#ah3)"/>
+                            <line x1="284" y1="196" x2="184" y2="196" marker-end="url(#ah3)"/>
+                            <line x1="484" y1="160" x2="578" y2="160" marker-end="url(#ah3)"/>
+                            <line x1="578" y1="196" x2="484" y2="196" marker-end="url(#ah3)" stroke-dasharray="5 4"/>
                         </g>
                         <g font-family="Inter" text-anchor="middle">
-                            <rect x="188" y="159" width="92" height="20" rx="10" fill="#0f172a" stroke="#334155"/>
-                            <text x="234" y="173" fill="#cbd5e1" font-size="9.5">read &middot; write &middot; exec</text>
-                            <text x="526" y="143" fill="#cbd5e1" font-size="10.5">grade(input)</text>
-                            <text x="526" y="204" fill="#64748b" font-size="10.5">verdict</text>
+                            <rect x="186" y="168" width="96" height="20" rx="10" fill="#0f172a" stroke="#334155"/>
+                            <text x="234" y="182" fill="#cbd5e1" font-size="9.5">read &middot; write &middot; exec</text>
+                            <text x="531" y="152" fill="#cbd5e1" font-size="10">grade(input)</text>
+                            <text x="531" y="211" fill="#64748b" font-size="10">verdict</text>
+                            <text x="531" y="183" fill="#64748b" font-family="JetBrains Mono" font-size="8">over network</text>
                         </g>
                         <!-- parameter chips -->
                         <g font-family="JetBrains Mono" font-size="10" text-anchor="middle">
-                            <rect x="174" y="268" width="72" height="22" rx="11" fill="#0f172a" stroke="#334155"/>
-                            <text x="210" y="283" fill="#94a3b8">6 tools</text>
-                            <rect x="256" y="268" width="96" height="22" rx="11" fill="#0f172a" stroke="#334155"/>
-                            <text x="304" y="283" fill="#94a3b8">&le; 100 turns</text>
-                            <rect x="362" y="268" width="116" height="22" rx="11" fill="#0f172a" stroke="#334155"/>
-                            <text x="420" y="283" fill="#94a3b8">5-level verdict</text>
-                            <rect x="488" y="268" width="104" height="22" rx="11" fill="#0f172a" stroke="#334155"/>
-                            <text x="540" y="283" fill="#94a3b8">deterministic</text>
+                            <rect x="174" y="308" width="72" height="22" rx="11" fill="#0f172a" stroke="#334155"/>
+                            <text x="210" y="323" fill="#94a3b8">6 tools</text>
+                            <rect x="256" y="308" width="96" height="22" rx="11" fill="#0f172a" stroke="#334155"/>
+                            <text x="304" y="323" fill="#94a3b8">&le; 100 turns</text>
+                            <rect x="362" y="308" width="116" height="22" rx="11" fill="#0f172a" stroke="#334155"/>
+                            <text x="420" y="323" fill="#94a3b8">5-level verdict</text>
+                            <rect x="488" y="308" width="104" height="22" rx="11" fill="#0f172a" stroke="#334155"/>
+                            <text x="540" y="323" fill="#94a3b8">deterministic</text>
                         </g>
                     </svg>
 
