@@ -491,7 +491,7 @@ READ of size 4 at <span class="dim">0x60200000eff4</span> thread T0
                             <tr><td class="f">Fuzz engine</td><td class="v">libFuzzer / Jazzer</td><td class="vis"><span class="sbadge shown">visible</span></td></tr>
                             <tr><td class="f">Fault detector</td><td class="v">ASan / UBSan / LSan, or Jazzer for JVM</td><td class="vis"><span class="sbadge shown">visible</span></td></tr>
                             <tr><td class="f">Harness code</td><td class="v">the full fuzz-target source</td><td class="vis"><span class="sbadge shown">visible</span></td></tr>
-                            <tr class="grp"><td colspan="3">Sealed in the oracle</td></tr>
+                            <tr class="grp"><td colspan="3">Sealed in the answer storage</td></tr>
                             <tr><td class="f">Fault class</td><td class="v sl">the category on line 1, e.g. heap-buffer-overflow</td><td class="vis"><span class="sbadge sealed">sealed</span></td></tr>
                             <tr><td class="f">Crash site</td><td class="v sl">the file and line, near the top of the stack</td><td class="vis"><span class="sbadge sealed">sealed</span></td></tr>
                             <tr><td class="f">Reach region</td><td class="v sl">the buggy lines that must run</td><td class="vis"><span class="sbadge sealed">sealed</span></td></tr>
@@ -506,7 +506,54 @@ READ of size 4 at <span class="dim">0x60200000eff4</span> thread T0
 
                 <div class="intro-block">
                     <div class="ib-h"><h4>Grading</h4></div>
-                    <p>The model runs as an agent. It only ever talks to the sandbox, exploring the challenge repo and writing a candidate input, then <code>grade</code> ships that input to the oracle. The model key and the answer key never meet.</p>
+                    <p>At its core the task is simple. The agent is generating a fuzz input. It writes some bytes, the harness runs them, and the output is a crash or a clean run.</p>
+                    <svg class="arch-svg" style="max-width:540px;margin:6px auto 2px;display:block" viewBox="0 0 560 124" role="img" aria-label="the agent's input runs through the harness and produces output">
+                        <defs>
+                            <marker id="ah4" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#94a3b8"/></marker>
+                        </defs>
+                        <!-- input -->
+                        <rect x="30" y="42" width="140" height="60" rx="12" fill="#1e293b" stroke="#334155"/>
+                        <rect x="44" y="42" width="112" height="4" rx="2" fill="#6366f1"/>
+                        <g stroke="#818cf8" stroke-width="1.8" fill="none" stroke-linejoin="round">
+                            <path d="M52,60 L52,86 L70,86 L70,66 L64,60 Z"/>
+                            <path d="M64,60 L64,66 L70,66"/>
+                        </g>
+                        <g font-family="Inter" text-anchor="middle">
+                            <text x="116" y="72" fill="#fff" font-size="12.5" font-weight="700">fuzz input</text>
+                            <text x="116" y="88" fill="#94a3b8" font-size="9.5">the bytes you write</text>
+                        </g>
+                        <line x1="172" y1="72" x2="208" y2="72" stroke="#94a3b8" stroke-width="2.2" stroke-linecap="round" marker-end="url(#ah4)"/>
+                        <!-- harness (chip glyph = program under test) -->
+                        <rect x="210" y="34" width="140" height="76" rx="12" fill="#1e293b" stroke="#475569"/>
+                        <g stroke="#94a3b8" stroke-width="1.6" fill="none">
+                            <rect x="272" y="46" width="16" height="16" rx="2"/>
+                            <rect x="276" y="50" width="8" height="8" rx="1"/>
+                            <line x1="272" y1="51" x2="268" y2="51"/><line x1="272" y1="57" x2="268" y2="57"/>
+                            <line x1="288" y1="51" x2="292" y2="51"/><line x1="288" y1="57" x2="292" y2="57"/>
+                            <line x1="277" y1="46" x2="277" y2="42"/><line x1="283" y1="46" x2="283" y2="42"/>
+                            <line x1="277" y1="62" x2="277" y2="66"/><line x1="283" y1="62" x2="283" y2="66"/>
+                        </g>
+                        <g font-family="Inter" text-anchor="middle">
+                            <text x="280" y="84" fill="#fff" font-size="13" font-weight="700">Harness</text>
+                            <text x="280" y="99" fill="#94a3b8" font-size="9.5">sanitizer build</text>
+                        </g>
+                        <line x1="352" y1="72" x2="388" y2="72" stroke="#94a3b8" stroke-width="2.2" stroke-linecap="round" marker-end="url(#ah4)"/>
+                        <!-- output -->
+                        <rect x="390" y="42" width="140" height="60" rx="12" fill="#1e293b" stroke="#334155"/>
+                        <rect x="404" y="42" width="112" height="4" rx="2" fill="#34d399"/>
+                        <g stroke="#34d399" stroke-width="1.8" fill="none" stroke-linecap="round">
+                            <line x1="408" y1="62" x2="424" y2="62"/>
+                            <line x1="408" y1="68" x2="420" y2="68"/>
+                            <line x1="408" y1="74" x2="424" y2="74"/>
+                        </g>
+                        <g font-family="Inter" text-anchor="middle">
+                            <text x="470" y="72" fill="#fff" font-size="12.5" font-weight="700">output</text>
+                            <text x="470" y="88" fill="#94a3b8" font-size="9.5">crash or clean</text>
+                        </g>
+                    </svg>
+
+                    <p class="mini-h">Everything else is how that one run gets scored</p>
+                    <p>The agent only ever talks to the sandbox, and <code>grade</code> ships its input to a remote oracle for scoring. The model key and the answer key never meet.</p>
                     <svg class="arch-svg" viewBox="0 0 760 336" role="img" aria-label="Which machine each part runs on, and how they interact">
                         <defs>
                             <marker id="ah3" markerWidth="10" markerHeight="10" refX="6.4" refY="3" orient="auto"><path d="M0,0 L6.4,3 L0,6 z" fill="#94a3b8"/></marker>
@@ -588,52 +635,6 @@ READ of size 4 at <span class="dim">0x60200000eff4</span> thread T0
                             <text x="420" y="323" fill="#94a3b8">5-level score</text>
                             <rect x="488" y="308" width="104" height="22" rx="11" fill="#0f172a" stroke="#334155"/>
                             <text x="540" y="323" fill="#94a3b8">deterministic</text>
-                        </g>
-                    </svg>
-
-                    <p class="mini-h">In essence, the agent is generating a fuzz input</p>
-                    <svg class="arch-svg" style="max-width:540px;margin:4px auto 0;display:block" viewBox="0 0 560 124" role="img" aria-label="the agent's input runs through the harness and produces output">
-                        <defs>
-                            <marker id="ah4" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#94a3b8"/></marker>
-                        </defs>
-                        <!-- input -->
-                        <rect x="30" y="42" width="140" height="60" rx="12" fill="#1e293b" stroke="#334155"/>
-                        <rect x="44" y="42" width="112" height="4" rx="2" fill="#6366f1"/>
-                        <g stroke="#818cf8" stroke-width="1.8" fill="none" stroke-linejoin="round">
-                            <path d="M52,60 L52,86 L70,86 L70,66 L64,60 Z"/>
-                            <path d="M64,60 L64,66 L70,66"/>
-                        </g>
-                        <g font-family="Inter" text-anchor="middle">
-                            <text x="116" y="72" fill="#fff" font-size="12.5" font-weight="700">fuzz input</text>
-                            <text x="116" y="88" fill="#94a3b8" font-size="9.5">the bytes you write</text>
-                        </g>
-                        <line x1="172" y1="72" x2="208" y2="72" stroke="#94a3b8" stroke-width="2.2" stroke-linecap="round" marker-end="url(#ah4)"/>
-                        <!-- harness (chip glyph = program under test) -->
-                        <rect x="210" y="34" width="140" height="76" rx="12" fill="#1e293b" stroke="#475569"/>
-                        <g stroke="#94a3b8" stroke-width="1.6" fill="none">
-                            <rect x="272" y="46" width="16" height="16" rx="2"/>
-                            <rect x="276" y="50" width="8" height="8" rx="1"/>
-                            <line x1="272" y1="51" x2="268" y2="51"/><line x1="272" y1="57" x2="268" y2="57"/>
-                            <line x1="288" y1="51" x2="292" y2="51"/><line x1="288" y1="57" x2="292" y2="57"/>
-                            <line x1="277" y1="46" x2="277" y2="42"/><line x1="283" y1="46" x2="283" y2="42"/>
-                            <line x1="277" y1="62" x2="277" y2="66"/><line x1="283" y1="62" x2="283" y2="66"/>
-                        </g>
-                        <g font-family="Inter" text-anchor="middle">
-                            <text x="280" y="84" fill="#fff" font-size="13" font-weight="700">Harness</text>
-                            <text x="280" y="99" fill="#94a3b8" font-size="9.5">sanitizer build</text>
-                        </g>
-                        <line x1="352" y1="72" x2="388" y2="72" stroke="#94a3b8" stroke-width="2.2" stroke-linecap="round" marker-end="url(#ah4)"/>
-                        <!-- output -->
-                        <rect x="390" y="42" width="140" height="60" rx="12" fill="#1e293b" stroke="#334155"/>
-                        <rect x="404" y="42" width="112" height="4" rx="2" fill="#34d399"/>
-                        <g stroke="#34d399" stroke-width="1.8" fill="none" stroke-linecap="round">
-                            <line x1="408" y1="62" x2="424" y2="62"/>
-                            <line x1="408" y1="68" x2="420" y2="68"/>
-                            <line x1="408" y1="74" x2="424" y2="74"/>
-                        </g>
-                        <g font-family="Inter" text-anchor="middle">
-                            <text x="470" y="72" fill="#fff" font-size="12.5" font-weight="700">output</text>
-                            <text x="470" y="88" fill="#94a3b8" font-size="9.5">crash or clean</text>
                         </g>
                     </svg>
 
