@@ -229,6 +229,14 @@
     .models-table td.tier{font-family:var(--font-mono);font-size:.74rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em}
     .models-table tr.grp td{background:rgba(148,163,184,.06);color:var(--text-primary);font-weight:600;font-size:.82rem}
     .models-table tr.grp .pdot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;vertical-align:middle}
+    .chall-table{width:100%;border-collapse:collapse;margin-top:6px;font-size:.9rem}
+    .chall-table th{text-align:left;color:var(--text-muted);font-family:var(--font-mono);font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;padding:8px 12px;border-bottom:1px solid var(--border)}
+    .chall-table td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+    .chall-table td.pj{color:var(--text-primary);font-weight:600;white-space:nowrap}
+    .chall-table td.lg{color:var(--text-secondary);white-space:nowrap;font-size:.82rem;font-family:var(--font-mono)}
+    .chall-table td.ch code{font-family:var(--font-mono);font-size:.76rem;background:#0f172a;border:1px solid var(--border);border-radius:6px;padding:2px 7px;margin:2px 5px 2px 0;display:inline-block;color:var(--indigo-400)}
+    .xlink{color:var(--indigo-400);text-decoration:none;font-weight:600;border-bottom:1px solid transparent}
+    .xlink:hover{border-bottom-color:var(--indigo-400)}
     .io-grid{display:grid;grid-template-columns:1fr;gap:16px;margin-top:14px}
     @media(min-width:720px){.io-grid{grid-template-columns:1fr 1fr}}
     .io-card{border:1px solid var(--border);border-radius:14px;background:var(--surface);padding:6px 20px 14px}
@@ -531,6 +539,7 @@ READ of size 4 at <span class="dim">0x60200000eff4</span> thread T0
                             <tr><td class="f">Required levels</td><td class="v sl">which of the five must fire</td><td class="vis"><span class="sbadge sealed">sealed</span></td></tr>
                         </tbody>
                     </table>
+                    <p style="margin-top:16px">The corpus has 68 of these. <a href="#challenges" data-tabjump="stats" class="xlink">Browse every challenge &rarr;</a></p>
                 </div>
 
                 <hr class="intro-hr">
@@ -1008,6 +1017,61 @@ python -m fbbench.sweep.claudecode sweep --bugs all --model sonnet --auth api</c
                         <div class="cbar-row"><div class="k">UBSan</div><div class="cbar-track"><div class="cbar-fill" style="width:9%;background:#34d399"></div></div><div class="v">4</div></div>
                         <div class="cbar-row"><div class="k">LSan</div><div class="cbar-track"><div class="cbar-fill" style="width:7%;background:#10b981"></div></div><div class="v">3</div></div>
                     </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- All challenges -->
+        <section class="bench-section" id="challenges">
+            <div class="section-content">
+                <h3 class="hd">Every challenge</h3>
+                <p class="sub">All 68 bugs across 40 projects, each shipped as a sealed image under a neutral alias. Project and language are public. The fault, its crash site, and the required levels stay sealed.</p>
+                <div style="overflow-x:auto">
+                <table class="chall-table">
+                    <thead><tr><th>Project</th><th>Lang</th><th>Challenges</th></tr></thead>
+                    <tbody>
+                        <tr><td class="pj">avro</td><td class="lg">C, Java</td><td class="ch"><code>avro-01</code> <code>avro-02</code> <code>avro-03</code></td></tr>
+                        <tr><td class="pj">binutils</td><td class="lg">C</td><td class="ch"><code>binutils-01</code></td></tr>
+                        <tr><td class="pj">cups</td><td class="lg">C</td><td class="ch"><code>cups-01</code></td></tr>
+                        <tr><td class="pj">dtc</td><td class="lg">C</td><td class="ch"><code>dtc-01</code></td></tr>
+                        <tr><td class="pj">flatbuffers</td><td class="lg">C++</td><td class="ch"><code>flatbuffers-01</code> <code>flatbuffers-02</code> <code>flatbuffers-03</code></td></tr>
+                        <tr><td class="pj">freerdp</td><td class="lg">C</td><td class="ch"><code>freerdp-01</code></td></tr>
+                        <tr><td class="pj">freetype</td><td class="lg">C</td><td class="ch"><code>freetype-01</code></td></tr>
+                        <tr><td class="pj">fwupd</td><td class="lg">C</td><td class="ch"><code>fwupd-01</code> <code>fwupd-02</code> <code>fwupd-03</code> <code>fwupd-04</code></td></tr>
+                        <tr><td class="pj">ghidra</td><td class="lg">C</td><td class="ch"><code>ghidra-01</code></td></tr>
+                        <tr><td class="pj">graal</td><td class="lg">Java</td><td class="ch"><code>graal-01</code></td></tr>
+                        <tr><td class="pj">graaljs</td><td class="lg">Java</td><td class="ch"><code>graaljs-01</code></td></tr>
+                        <tr><td class="pj">harfbuzz</td><td class="lg">C++</td><td class="ch"><code>harfbuzz-01</code></td></tr>
+                        <tr><td class="pj">hunspell</td><td class="lg">C++</td><td class="ch"><code>hunspell-01</code></td></tr>
+                        <tr><td class="pj">icu</td><td class="lg">C++</td><td class="ch"><code>icu-01</code> <code>icu-02</code></td></tr>
+                        <tr><td class="pj">imagemagick</td><td class="lg">C, C++</td><td class="ch"><code>imagemagick-01</code> <code>imagemagick-02</code> <code>imagemagick-03</code></td></tr>
+                        <tr><td class="pj">jq</td><td class="lg">C</td><td class="ch"><code>jq-01</code></td></tr>
+                        <tr><td class="pj">json-java</td><td class="lg">Java</td><td class="ch"><code>json-java-01</code> <code>json-java-02</code> <code>json-java-03</code></td></tr>
+                        <tr><td class="pj">libaom</td><td class="lg">C++</td><td class="ch"><code>libaom-01</code> <code>libaom-02</code> <code>libaom-03</code></td></tr>
+                        <tr><td class="pj">libavif</td><td class="lg">C++</td><td class="ch"><code>libavif-01</code></td></tr>
+                        <tr><td class="pj">libheif</td><td class="lg">C++</td><td class="ch"><code>libheif-01</code></td></tr>
+                        <tr><td class="pj">libpng</td><td class="lg">C</td><td class="ch"><code>libpng-01</code></td></tr>
+                        <tr><td class="pj">libvpx</td><td class="lg">C, C++</td><td class="ch"><code>libvpx-01</code> <code>libvpx-02</code> <code>libvpx-03</code> <code>libvpx-04</code></td></tr>
+                        <tr><td class="pj">libwebp</td><td class="lg">C, C++</td><td class="ch"><code>libwebp-01</code> <code>libwebp-02</code> <code>libwebp-03</code></td></tr>
+                        <tr><td class="pj">libwebsockets</td><td class="lg">C</td><td class="ch"><code>libwebsockets-01</code></td></tr>
+                        <tr><td class="pj">mongoose</td><td class="lg">C</td><td class="ch"><code>mongoose-01</code> <code>mongoose-02</code></td></tr>
+                        <tr><td class="pj">ndpi</td><td class="lg">C</td><td class="ch"><code>ndpi-01</code></td></tr>
+                        <tr><td class="pj">net-snmp</td><td class="lg">C</td><td class="ch"><code>net-snmp-01</code> <code>net-snmp-02</code></td></tr>
+                        <tr><td class="pj">opc-ua</td><td class="lg">C</td><td class="ch"><code>opc-ua-01</code></td></tr>
+                        <tr><td class="pj">opencv</td><td class="lg">C++</td><td class="ch"><code>opencv-01</code></td></tr>
+                        <tr><td class="pj">openh264</td><td class="lg">C++</td><td class="ch"><code>openh264-01</code></td></tr>
+                        <tr><td class="pj">openldap</td><td class="lg">C</td><td class="ch"><code>openldap-01</code> <code>openldap-02</code></td></tr>
+                        <tr><td class="pj">openscreen</td><td class="lg">C++</td><td class="ch"><code>openscreen-01</code> <code>openscreen-02</code></td></tr>
+                        <tr><td class="pj">openssl</td><td class="lg">C</td><td class="ch"><code>openssl-01</code></td></tr>
+                        <tr><td class="pj">ots</td><td class="lg">C++</td><td class="ch"><code>ots-01</code></td></tr>
+                        <tr><td class="pj">pdfbox</td><td class="lg">Java</td><td class="ch"><code>pdfbox-01</code> <code>pdfbox-02</code> <code>pdfbox-03</code></td></tr>
+                        <tr><td class="pj">simdutf</td><td class="lg">C++</td><td class="ch"><code>simdutf-01</code></td></tr>
+                        <tr><td class="pj">skia</td><td class="lg">C++</td><td class="ch"><code>skia-01</code></td></tr>
+                        <tr><td class="pj">spirv-tools</td><td class="lg">C++</td><td class="ch"><code>spirv-tools-01</code> <code>spirv-tools-02</code></td></tr>
+                        <tr><td class="pj">systemd</td><td class="lg">C</td><td class="ch"><code>systemd-01</code> <code>systemd-02</code></td></tr>
+                        <tr><td class="pj">upx</td><td class="lg">C++</td><td class="ch"><code>upx-01</code> <code>upx-02</code></td></tr>
+                    </tbody>
+                </table>
                 </div>
             </div>
         </section>
