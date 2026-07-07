@@ -132,6 +132,8 @@
     .lb-method .defs{margin:10px 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px 20px;font-size:.84rem;color:var(--text-muted)}
     .lb-method .defs b{color:var(--text-secondary)}
     .lb-table td.dash{color:var(--text-muted)}
+    .lb-cond{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 20px}
+    .lb-cond span{font-size:.75rem;color:var(--text-secondary);background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:3px 11px;font-family:var(--font-mono);white-space:nowrap}
     /* design choices table */
     .design-table{width:100%;border-collapse:collapse;border:1px solid var(--border);border-radius:14px;overflow:hidden;font-size:.94rem}
     .design-table thead th{text-align:left;background:var(--surface);color:var(--text-muted);font-weight:600;font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;padding:12px 20px;border-bottom:1px solid var(--border)}
@@ -1233,7 +1235,8 @@ python -m fbbench.sweep.claudecode sweep --bugs all --model sonnet --auth api</c
         <section class="bench-section">
             <div class="section-content">
                 <h3 class="hd">Leaderboard</h3>
-                <p class="sub">Ranked by difficulty-weighted score on all 68 bugs, one full-scan pass per model. A solve means the run found the documented bug on its own and pinned both its class and its exact site &mdash; off-target crashes do not count. Time is the median per bug; tools, inputs and cost are per-bug means. Click any column to sort.</p>
+                <p class="sub">Ranked by difficulty-weighted score on all 68 bugs, one full-scan pass per model. A solve means the run found the documented bug on its own and cleared all five ladder rungs &mdash; reach, crash, differential, class and site &mdash; so off-target crashes do not count. Time is the median per bug; tools, inputs and cost are per-bug means. Click any column to sort.</p>
+                <div class="lb-cond"><span>100 turns max</span><span>full-scan &middot; blind</span><span>seed 0</span><span>5-rung ladder</span><span>off-target excluded</span><span>remote oracle</span></div>
                 <div class="lb-wrap">
                 <table class="lb-table">
                     <thead><tr><th>#</th><th class="sortable" data-type="str">Model</th><th class="sortable sorted-desc">Score</th><th class="sortable num">Solved</th><th class="sortable num">Med time</th><th class="sortable num">Avg tools</th><th class="sortable num">Avg inputs</th><th class="sortable num">$ / bug</th></tr></thead>
