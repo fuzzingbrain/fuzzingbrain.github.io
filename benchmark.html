@@ -251,6 +251,16 @@
     .chall-table td.ch code{font-family:var(--font-mono);font-size:.76rem;background:#0f172a;border:1px solid var(--border);border-radius:6px;padding:2px 7px;margin:2px 5px 2px 0;display:inline-block;color:var(--indigo-400)}
     .xlink{color:var(--indigo-400);text-decoration:none;font-weight:600;border-bottom:1px solid transparent}
     .xlink:hover{border-bottom-color:var(--indigo-400)}
+    .diff-wrap{display:grid;grid-template-columns:minmax(280px,1fr) 1fr;gap:30px;align-items:center;margin-top:18px}
+    @media(max-width:720px){.diff-wrap{grid-template-columns:1fr;gap:20px}}
+    .diff-svg{width:100%;height:auto;max-width:440px;margin:0 auto;display:block}
+    .diff-list{list-style:none;margin:0;padding:0}
+    .diff-list li{display:flex;gap:11px;align-items:baseline;padding:11px 0;border-bottom:1px solid var(--border)}
+    .diff-list li:last-child{border-bottom:0}
+    .diff-list .dl{width:11px;height:11px;border-radius:3px;flex:0 0 auto;position:relative;top:2px}
+    .diff-list .dn{font-weight:700;color:var(--text-primary);white-space:nowrap;min-width:96px}
+    .diff-list .dd{color:var(--text-secondary);font-size:.9rem}
+    .diff-list .dc{color:var(--text-muted);font-family:var(--font-mono);font-size:.82rem;margin-left:auto;white-space:nowrap}
     .io-grid{display:grid;grid-template-columns:1fr;gap:16px;margin-top:14px}
     @media(min-width:720px){.io-grid{grid-template-columns:1fr 1fr}}
     .io-card{border:1px solid var(--border);border-radius:14px;background:var(--surface);padding:6px 20px 14px}
@@ -943,6 +953,40 @@ python -m fbbench.sweep.claudecode sweep --bugs all --model sonnet --auth api</c
                     <div class="cbar-row fc"><div class="k">memory-leak</div><div class="cbar-track"><div class="cbar-fill" style="width:14%;background:#6366f1"></div></div><div class="v">3</div></div>
                     <div class="cbar-row fc"><div class="k">stack-exhaustion</div><div class="cbar-track"><div class="cbar-fill" style="width:9%;background:#6366f1"></div></div><div class="v">2</div></div>
                     <div class="cbar-row fc"><div class="k">excessive-computation</div><div class="cbar-track"><div class="cbar-fill" style="width:5%;background:#6366f1"></div></div><div class="v">1</div></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Difficulty pyramid -->
+        <section class="bench-section">
+            <div class="section-content">
+                <h3 class="hd">Difficulty pyramid</h3>
+                <p class="sub">A dynamic ranking. Each bug is placed by how many of eight frontier model runs solved it, from D1 (nearly all solved) up to D5 (none solved). It shifts as the models improve, and today it leaves a hard tail of 17 bugs no model has cracked.</p>
+                <div class="diff-wrap">
+                    <svg class="diff-svg" viewBox="0 0 460 316" role="img" aria-label="Difficulty pyramid, D1 easiest at the base to D5 hardest at the apex">
+                        <g stroke="#0f172a" stroke-width="2" stroke-linejoin="round" font-family="Inter" text-anchor="middle">
+                            <path d="M185,20 L275,20 L308,76 L152,76 Z" fill="#ef4444"/>
+                            <path d="M152,76 L308,76 L341,132 L119,132 Z" fill="#f97316"/>
+                            <path d="M119,132 L341,132 L374,188 L86,188 Z" fill="#f59e0b"/>
+                            <path d="M86,188 L374,188 L407,244 L53,244 Z" fill="#84cc16"/>
+                            <path d="M53,244 L407,244 L440,300 L20,300 Z" fill="#10b981"/>
+                        </g>
+                        <g font-family="Inter" text-anchor="middle" fill="#0a0f1e" font-weight="700" font-size="14">
+                            <text x="230" y="53" fill="#fff">D5 &middot; 17</text>
+                            <text x="230" y="109" fill="#fff">D4 &middot; 10</text>
+                            <text x="230" y="165">D3 &middot; 13</text>
+                            <text x="230" y="221">D2 &middot; 13</text>
+                            <text x="230" y="277">D1 &middot; 15</text>
+                        </g>
+                        <text x="230" y="314" text-anchor="middle" fill="#64748b" font-family="JetBrains Mono" font-size="10">wider = easier &nbsp;&middot;&nbsp; higher = harder</text>
+                    </svg>
+                    <ul class="diff-list">
+                        <li><span class="dl" style="background:#10b981"></span><span class="dn">D1 &middot; easy</span><span class="dd">7&ndash;8 of 8 runs solved it</span><span class="dc">15 bugs</span></li>
+                        <li><span class="dl" style="background:#84cc16"></span><span class="dn">D2 &middot; moderate</span><span class="dd">5&ndash;6 runs solved it</span><span class="dc">13 bugs</span></li>
+                        <li><span class="dl" style="background:#f59e0b"></span><span class="dn">D3 &middot; hard</span><span class="dd">3&ndash;4 runs solved it</span><span class="dc">13 bugs</span></li>
+                        <li><span class="dl" style="background:#f97316"></span><span class="dn">D4 &middot; very hard</span><span class="dd">1&ndash;2 runs solved it</span><span class="dc">10 bugs</span></li>
+                        <li><span class="dl" style="background:#ef4444"></span><span class="dn">D5 &middot; unsolved</span><span class="dd">no run has solved it yet</span><span class="dc">17 bugs</span></li>
+                    </ul>
                 </div>
             </div>
         </section>
