@@ -215,6 +215,13 @@
     .qs-hint code{font-family:var(--font-mono);font-size:.86em}
     .provider-name{display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:.8rem;letter-spacing:.04em;color:var(--text-secondary);margin:18px 0 6px}
     .provider-name .pdot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+    .models-table{width:100%;border-collapse:collapse;margin-top:12px;font-size:.9rem}
+    .models-table th{text-align:left;color:var(--text-muted);font-family:var(--font-mono);font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;padding:6px 12px;border-bottom:1px solid var(--border)}
+    .models-table td{padding:7px 12px;border-bottom:1px solid var(--border);color:var(--text-secondary)}
+    .models-table td.m{font-family:var(--font-mono);color:var(--text-primary);font-size:.86rem}
+    .models-table td.tier{font-family:var(--font-mono);font-size:.74rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em}
+    .models-table tr.grp td{background:rgba(148,163,184,.06);color:var(--text-primary);font-weight:600;font-size:.82rem}
+    .models-table tr.grp .pdot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;vertical-align:middle}
     .io-grid{display:grid;grid-template-columns:1fr;gap:16px;margin-top:14px}
     @media(min-width:720px){.io-grid{grid-template-columns:1fr 1fr}}
     .io-card{border:1px solid var(--border);border-radius:14px;background:var(--surface);padding:6px 20px 14px}
@@ -711,36 +718,63 @@ cd FuzzingBrain-Bench && pip install -e .</code></pre>
                 <div class="provider-name"><span class="pdot" style="background:#d97757"></span>Anthropic</div>
                 <div class="runbox">
 <pre><code class="language-bash">echo "ANTHROPIC_API_KEY=sk-ant-..." >> .env
-fb-bench run avro-03 --model claude-opus-4-8
-# swap: claude-sonnet-4-6, claude-haiku-4-5</code></pre>
+fb-bench run avro-03 --model claude-haiku-4-5
+# swap: claude-sonnet-4-6, claude-opus-4-7</code></pre>
                 </div>
 
                 <div class="provider-name"><span class="pdot" style="background:#10a37f"></span>OpenAI</div>
                 <div class="runbox">
 <pre><code class="language-bash">echo "OPENAI_API_KEY=sk-..." >> .env
-fb-bench run avro-03 --model gpt-5.5
-# swap: gpt-5.4, gpt-5.4-mini, gpt-5</code></pre>
+fb-bench run avro-03 --model gpt-5.4-mini
+# swap: gpt-5, gpt-5.4, gpt-5.5</code></pre>
                 </div>
 
                 <div class="provider-name"><span class="pdot" style="background:#4285f4"></span>Google</div>
                 <div class="runbox">
 <pre><code class="language-bash">echo "GEMINI_API_KEY=..." >> .env
-fb-bench run avro-03 --model gemini-3.1-pro-preview
-# swap: gemini-3.5-flash, gemini-2.5-pro</code></pre>
+fb-bench run avro-03 --model gemini-2.5-flash
+# swap: gemini-2.5-pro, gemini-3.5-flash, gemini-3.1-pro-preview</code></pre>
                 </div>
 
                 <div class="provider-name"><span class="pdot" style="background:#4d6bfe"></span>DeepSeek</div>
                 <div class="runbox">
 <pre><code class="language-bash">echo "DEEPSEEK_API_KEY=sk-..." >> .env
-fb-bench run avro-03 --model deepseek-v4-pro
-# swap: deepseek-v4-flash</code></pre>
+fb-bench run avro-03 --model deepseek-v4-flash
+# swap: deepseek-v4-pro</code></pre>
                 </div>
 
                 <h4 class="qs-step">3. Sweep the whole corpus</h4>
                 <p class="qs-hint">Run one model across all 68 bugs. Each cell lands under <code>runs/&lt;bug&gt;/&lt;model&gt;/</code>.</p>
                 <div class="runbox">
-<pre><code class="language-bash">python -m fbbench.sweep.orchestrator --models gpt-5.5 --bugs all --exp run1</code></pre>
+<pre><code class="language-bash">python -m fbbench.sweep.orchestrator --models claude-haiku-4-5 --bugs all --exp run1</code></pre>
                 </div>
+
+                <h4 class="qs-step">Supported models</h4>
+                <p class="qs-hint">The tested lineup. Flagship is strongest, fast is cheapest. Any other model from these providers is routed by prefix and works too.</p>
+                <table class="models-table">
+                    <thead><tr><th>Model</th><th>Tier</th></tr></thead>
+                    <tbody>
+                        <tr class="grp"><td colspan="2"><span class="pdot" style="background:#d97757"></span>Anthropic</td></tr>
+                        <tr><td class="m">claude-opus-4-7</td><td class="tier">flagship</td></tr>
+                        <tr><td class="m">claude-sonnet-4-6</td><td class="tier">mid</td></tr>
+                        <tr><td class="m">claude-haiku-4-5</td><td class="tier">fast</td></tr>
+                        <tr class="grp"><td colspan="2"><span class="pdot" style="background:#10a37f"></span>OpenAI</td></tr>
+                        <tr><td class="m">gpt-5.5</td><td class="tier">flagship</td></tr>
+                        <tr><td class="m">gpt-5.4</td><td class="tier">mid</td></tr>
+                        <tr><td class="m">gpt-5</td><td class="tier">mid</td></tr>
+                        <tr><td class="m">gpt-5.4-mini</td><td class="tier">fast</td></tr>
+                        <tr class="grp"><td colspan="2"><span class="pdot" style="background:#4285f4"></span>Google</td></tr>
+                        <tr><td class="m">gemini-3.1-pro-preview</td><td class="tier">flagship</td></tr>
+                        <tr><td class="m">gemini-3-pro-preview</td><td class="tier">flagship</td></tr>
+                        <tr><td class="m">gemini-3.5-flash</td><td class="tier">mid</td></tr>
+                        <tr><td class="m">gemini-2.5-pro</td><td class="tier">mid</td></tr>
+                        <tr><td class="m">gemini-2.5-flash</td><td class="tier">fast</td></tr>
+                        <tr><td class="m">gemini-2.5-flash-lite</td><td class="tier">fast</td></tr>
+                        <tr class="grp"><td colspan="2"><span class="pdot" style="background:#4d6bfe"></span>DeepSeek</td></tr>
+                        <tr><td class="m">deepseek-v4-pro</td><td class="tier">flagship</td></tr>
+                        <tr><td class="m">deepseek-v4-flash</td><td class="tier">fast</td></tr>
+                    </tbody>
+                </table>
             </div>
         </section>
 
