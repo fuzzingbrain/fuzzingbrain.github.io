@@ -1010,14 +1010,30 @@ fb-bench run json-java-02 --model deepseek-v4-flash
     (function(){
       var tabs=document.querySelectorAll('.tab-btn');
       var panels=document.querySelectorAll('.tab-panel');
-      function activate(name){
+      var names={};
+      panels.forEach(function(p){names[p.dataset.panel]=1;});
+      function setTab(name){
+        if(!names[name]) return false;
         tabs.forEach(function(b){b.classList.toggle('active',b.dataset.tab===name);});
         panels.forEach(function(p){p.classList.toggle('active',p.dataset.panel===name);});
+        return true;
       }
+      function activate(name){ if(setTab(name)) history.replaceState(null,'','#'+name); }
       tabs.forEach(function(b){b.addEventListener('click',function(){activate(b.dataset.tab);});});
       document.querySelectorAll('[data-tabjump]').forEach(function(a){
-        a.addEventListener('click',function(){activate(a.dataset.tabjump);});
+        a.addEventListener('click',function(e){
+          activate(a.dataset.tabjump);
+          var href=a.getAttribute('href')||'';
+          if(href.charAt(0)==='#' && href.length>1){
+            e.preventDefault();
+            var el=document.querySelector(href);
+            if(el) el.scrollIntoView({behavior:'smooth'});
+          }
+        });
       });
+      // keep tab and URL in sync so a refresh or shared link restores the tab
+      window.addEventListener('hashchange',function(){setTab(location.hash.slice(1));});
+      setTab(location.hash.slice(1));
     })();
     </script>
 </body>
