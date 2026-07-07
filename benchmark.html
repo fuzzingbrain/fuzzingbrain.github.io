@@ -968,8 +968,20 @@ python -m fbbench.sweep.claudecode sweep --bugs all --model sonnet --auth api</c
         <!-- Difficulty pyramid -->
         <section class="bench-section">
             <div class="section-content">
-                <h3 class="hd">Difficulty pyramid</h3>
-                <p class="sub">A dynamic ranking. Each bug is placed by how many of eight frontier model runs solved it, from D1 (nearly all solved) up to D5 (none solved). It shifts as the models improve, and today it leaves a hard tail of 17 bugs no model has cracked.</p>
+                <h3 class="hd">Difficulty</h3>
+                <p class="sub">A dynamic ranking. Each bug is scored by how many frontier model runs actually solve it, then placed into one of five levels.</p>
+
+                <div class="diff-formula">
+                    <p class="fh">The formula</p>
+                    <ol>
+                        <li><span class="fx"><b>solved</b>(bug, run) = 1</span><span>the run fires <em>every</em> applicable rung of the ladder (reach &rarr; crash &rarr; differential &rarr; class &rarr; site) &mdash; a full solve; otherwise 0.</span></li>
+                        <li><span class="fx"><b>S</b> = &Sigma; solved(bug, run)</span><span>how many of the <b>N&nbsp;=&nbsp;8</b> model runs solved the bug (0&nbsp;&le;&nbsp;S&nbsp;&le;&nbsp;8).</span></li>
+                        <li><span class="fx"><b>D</b> = 5 &minus; &lceil;S / 2&rceil;</span><span>the difficulty level, from <b>D1</b> (easiest, 7&ndash;8 solved) to <b>D5</b> (hardest, 0 solved).</span></li>
+                    </ol>
+                </div>
+
+                <p class="sub" style="margin-top:18px">The <b>N&nbsp;=&nbsp;8</b> runs are the frontier models and agents on <a href="#leaderboard" data-tabjump="leaderboard" class="xlink">the leaderboard &rarr;</a>, each a single full-scan pass over all 68 bugs. Because the score depends on the current lineup, difficulty is not fixed &mdash; it drops as the models improve. We tally <b>S</b> for every bug, apply the formula, and the counts fall out as the pyramid below: a broad middle with a hard tail of 17 bugs no run has cracked yet.</p>
+
                 <div class="diff-wrap">
                     <svg class="diff-svg" viewBox="0 0 460 316" role="img" aria-label="Difficulty pyramid, D1 easiest at the base to D5 hardest at the apex">
                         <g stroke="#0f172a" stroke-width="2" stroke-linejoin="round" font-family="Inter" text-anchor="middle">
@@ -995,15 +1007,6 @@ python -m fbbench.sweep.claudecode sweep --bugs all --model sonnet --auth api</c
                         <li><span class="dl" style="background:#f97316"></span><span class="dn">D4 &middot; very hard</span><span class="dd">1&ndash;2 runs solved it</span><span class="dc">10 bugs</span></li>
                         <li><span class="dl" style="background:#ef4444"></span><span class="dn">D5 &middot; unsolved</span><span class="dd">no run has solved it yet</span><span class="dc">17 bugs</span></li>
                     </ul>
-                </div>
-                <div class="diff-formula">
-                    <p class="fh">How each bug's difficulty is scored</p>
-                    <ol>
-                        <li><span class="fx"><b>solved</b>(bug, run) = 1</span><span>the run fires <em>every</em> applicable rung of the ladder (reach &rarr; crash &rarr; differential &rarr; class &rarr; site) &mdash; a full solve; otherwise 0.</span></li>
-                        <li><span class="fx"><b>S</b> = &Sigma; solved(bug, run)</span><span>how many of the <b>N&nbsp;=&nbsp;8</b> model runs solved the bug (0&nbsp;&le;&nbsp;S&nbsp;&le;&nbsp;8).</span></li>
-                        <li><span class="fx"><b>D</b> = 5 &minus; &lceil;S / 2&rceil;</span><span>the difficulty level, from <b>D1</b> (easiest, 7&ndash;8 solved) to <b>D5</b> (hardest, 0 solved).</span></li>
-                    </ol>
-                    <p class="fn">Dynamic: recomputed whenever the set of model runs changes, so difficulty drops as models improve. Today N&nbsp;=&nbsp;8 runs (Opus, GPT-5.5, Haiku, DeepSeek plus the Codex and Claude Code agents), each a single full-scan pass over all 68 bugs.</p>
                 </div>
             </div>
         </section>
