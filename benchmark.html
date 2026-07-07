@@ -196,6 +196,18 @@
     .anno-legend .sw-cls{background:#fbbf24}
     .anno-legend .sw-site{background:#38bdf8}
     .anno-legend b{color:var(--text-primary)}
+    /* grading section sub-headings + in/out */
+    .mini-h{font-size:.8rem;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);font-family:var(--font-mono);margin:24px 0 2px}
+    .io-grid{display:grid;grid-template-columns:1fr;gap:16px;margin-top:14px}
+    @media(min-width:720px){.io-grid{grid-template-columns:1fr 1fr}}
+    .io-card{border:1px solid var(--border);border-radius:14px;background:var(--surface);padding:6px 20px 14px}
+    .io-card.in{border-top:3px solid #6366f1}
+    .io-card.out{border-top:3px solid #34d399}
+    .io-card h5{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;font-family:var(--font-mono);margin:14px 0 6px}
+    .io-card.in h5{color:#818cf8}
+    .io-card.out h5{color:#34d399}
+    .io-card p{margin:0;color:var(--text-secondary);font-size:.9rem;line-height:1.55}
+    .io-card code{font-family:var(--font-mono);font-size:.82rem}
     </style>
 </head>
 <body>
@@ -488,6 +500,50 @@ READ of size 4 at <span class="dim">0x60200000eff4</span> thread T0
                             <tr><td class="f">Required levels</td><td class="v sl">which of the five must fire</td><td class="vis"><span class="sbadge sealed">sealed</span></td></tr>
                         </tbody>
                     </table>
+                </div>
+
+                <hr class="intro-hr">
+
+                <div class="intro-block">
+                    <div class="ib-h"><h4>Grading</h4></div>
+                    <p>The model runs as an agent in a loop. It explores the target with a small fixed tool set, writes a candidate input, and calls grade. A deterministic oracle, not another model, decides the verdict. The same tools and the same loop drive every model, whether it runs through our API runner or through an agent CLI like Codex or Claude Code.</p>
+
+                    <p class="mini-h">The six tools it can call</p>
+                    <table class="design-table">
+                        <thead><tr><th>Tool</th><th>What it does</th></tr></thead>
+                        <tbody>
+                            <tr><td class="dt-name"><code>setup</code></td><td>starts the challenge and returns the task, the harness, the fault family, and in normal mode a short description</td></tr>
+                            <tr><td class="dt-name"><code>list_directory</code></td><td>lists the project source tree</td></tr>
+                            <tr><td class="dt-name"><code>read_file</code></td><td>reads any harness or source file</td></tr>
+                            <tr><td class="dt-name"><code>write_file</code></td><td>writes a candidate input into the workspace</td></tr>
+                            <tr><td class="dt-name"><code>exec</code></td><td>runs a shell command in the sandbox, for example to build or run the harness on an input</td></tr>
+                            <tr><td class="dt-name"><code>grade</code></td><td>sends a candidate input to the remote oracle and returns the ladder verdict</td></tr>
+                        </tbody>
+                    </table>
+
+                    <p class="mini-h">The rules it runs under</p>
+                    <ul class="takeaways">
+                        <li>Only these six tools. No host shell, no web, no other built-in tools.</li>
+                        <li>A fixed budget of tool calls per episode, 50 to 100 depending on the mode.</li>
+                        <li>The sandbox has no network, so <code>exec</code> cannot fetch anything from outside.</li>
+                        <li>The model key stays on the host and never enters the container.</li>
+                        <li>No answer is on disk, so <code>grade</code> is the only source of truth.</li>
+                    </ul>
+
+                    <p class="mini-h">In and out</p>
+                    <div class="io-grid">
+                        <div class="io-card in">
+                            <h5>What goes in</h5>
+                            <p>The fuzz harness and the project source at the vulnerable revision, inside the sandbox. Normal mode adds a short description, full-scan adds nothing, diff modes add a file-name hint. The agent works on this to craft a candidate input, a byte string it writes with <code>write_file</code>.</p>
+                        </div>
+                        <div class="io-card out">
+                            <h5>What comes out</h5>
+                            <p>The candidate bytes go to <code>grade</code>. Back comes a verdict on the five-level ladder, reach to site, and nothing else. No PoC, no expected fault, no location. That verdict is all the agent, and you, ever see.</p>
+                        </div>
+                    </div>
+
+                    <p class="mini-h">How grade decides</p>
+                    <p><code>grade</code> runs the candidate through the real sanitizer-instrumented harness. crash, class, and site are read straight off the resulting report. reach is checked separately on a coverage build, and fires when execution covers the documented buggy function. differential also runs the patched build, and requires the input to fault the vulnerable build but run clean on the fixed one. Every check is deterministic, so the same input always scores the same.</p>
                 </div>
             </div>
         </section>
