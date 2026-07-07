@@ -472,8 +472,8 @@
                 </div>
 
                 <div class="intro-block">
-                    <div class="ib-h"><h4>The model works as if the bug were real</h4></div>
-                    <p>We want the model to behave as if it were doing real vulnerability research, not sitting a benchmark. Nothing in the task tells it that it is being scored. The bug carries only a neutral alias, and although a strict five-level ladder runs behind the scenes, the model never gets to read it. Every grade returns only the raw harness output, the same thing a fuzzer would show, so the model has no scoreboard to game and no sense of how close it is.</p>
+                    <div class="ib-h"><h4>The most realistic bug-hunting task</h4></div>
+                    <p>We build the task to look and feel like real vulnerability research, not a benchmark. Nothing in it tells the model it is being scored. The bug carries only a neutral alias, and although a strict five-level ladder runs behind the scenes, the model never gets to read it. Every grade returns only the raw harness output, the same thing a fuzzer would show, so there is no scoreboard to game and no sense of how close it is.</p>
                     <div class="ladder-wrap">
                         <div>
                             <svg class="ladder-svg" viewBox="-24 0 508 320" role="img" aria-label="Capability ladder pyramid">
@@ -1147,9 +1147,8 @@ python -m fbbench.sweep.claudecode sweep --bugs all --model sonnet --auth api</c
         <!-- Solve rate by category and language -->
         <section class="bench-section">
             <div class="section-content">
-                <h3 class="hd">What's easy, what's hard</h3>
-                <p class="sub">Solve rate pooled over the eight model runs, split by fault category and by language. One pattern runs through it: a bug that fires on a single malformed input is easy, while a bug that needs the model to construct a condition &mdash; free-then-use, exhaust memory, leak &mdash; is hard.</p>
-                <h4 class="mini-h">By category</h4>
+                <h3 class="hd">Solve rate by vulnerability category</h3>
+                <p class="sub">Pooled over the eight model runs, broken out by fault category and by language. One pattern runs through it: a bug that fires on a single malformed input is easy, while a bug that needs the model to construct a condition &mdash; free-then-use, exhaust memory, leak &mdash; is hard.</p>
                 <div class="sr-wrap">
                     <div class="sr-row"><div class="sr-k">uncaught-exception</div><div class="sr-track"><div class="sr-fill" style="width:67%;background:#10b981"></div></div><div class="sr-v">67%</div><div class="sr-n">8 bugs</div></div>
                     <div class="sr-row sm"><div class="sr-k">out-of-bounds-write</div><div class="sr-track"><div class="sr-fill" style="width:59%;background:#10b981"></div></div><div class="sr-v">59%</div><div class="sr-n">4 bugs</div></div>
