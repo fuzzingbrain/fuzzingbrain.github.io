@@ -1060,7 +1060,7 @@ python -m fbbench.sweep.claudecode sweep --bugs all --model sonnet --auth api</c
         </section>
 
         <!-- Difficulty x model heatmap -->
-        <section class="bench-section">
+        <section class="bench-section" id="climb">
             <div class="section-content">
                 <h3 class="hd">How far each model climbs</h3>
                 <p class="sub">The same five difficulty tiers, now split by model: how many bugs each run solved at each level. Everyone clears the easy floor, nobody cracks the D5 tail, and the field fans out in the middle &mdash; that is where the score is really won.</p>
@@ -1365,7 +1365,7 @@ python -m fbbench.sweep.claudecode sweep --bugs all --model sonnet --auth api</c
                     </tbody>
                 </table>
                 </div>
-                <p class="lb-note">One pass per model (seed 0). Agent rows wrap the same base model in a coding agent (Codex, Claude Code); API rows call the model directly. Grade calls are shown for API runs only &mdash; the agent harnesses do not expose reliable per-tool telemetry, so those cells read &mdash;. Gemini and further models are being added.</p>
+                <p class="lb-note">One pass per model (seed 0). Agent rows wrap the same base model in a coding agent (Codex, Claude Code); API rows call the model directly. Grade calls are shown for API runs only &mdash; the agent harnesses do not expose reliable per-tool telemetry, so those cells read &mdash;. Gemini and further models are being added. See <a href="#climb" data-tabjump="stats" class="xlink">how each model&rsquo;s score breaks down by difficulty &rarr;</a></p>
             </div>
         </section>
         </div>
