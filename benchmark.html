@@ -1235,11 +1235,11 @@ python -m fbbench.sweep.claudecode sweep --bugs all --model sonnet --auth api</c
         <section class="bench-section">
             <div class="section-content">
                 <h3 class="hd">Leaderboard</h3>
-                <p class="sub">Ranked by difficulty-weighted score on all 68 bugs, one full-scan pass per model. A solve means the run found the documented bug on its own and cleared all five ladder rungs &mdash; reach, crash, differential, class and site &mdash; so off-target crashes do not count. Time is the median per bug; tools, inputs and cost are per-bug means. Click any column to sort.</p>
+                <p class="sub">Ranked by difficulty-weighted score on all 68 bugs, one full-scan pass per model. A solve means the run found the documented bug on its own and cleared all five ladder rungs &mdash; reach, crash, differential, class and site &mdash; so off-target crashes do not count. Time is the median per bug; tools, grade calls and cost are per-bug means. Click any column to sort.</p>
                 <div class="lb-cond"><span>100 turns max</span><span>full-scan &middot; blind</span><span>seed 0</span><span>5-rung ladder</span><span>off-target excluded</span><span>remote oracle</span></div>
                 <div class="lb-wrap">
                 <table class="lb-table">
-                    <thead><tr><th>#</th><th class="sortable" data-type="str">Model</th><th class="sortable sorted-desc">Score</th><th class="sortable num">Solved</th><th class="sortable num">Med time</th><th class="sortable num">Avg tools</th><th class="sortable num">Avg inputs</th><th class="sortable num">$ / bug</th></tr></thead>
+                    <thead><tr><th>#</th><th class="sortable" data-type="str">Model</th><th class="sortable sorted-desc">Score</th><th class="sortable num">Solved</th><th class="sortable num">Med time</th><th class="sortable num">Avg tools</th><th class="sortable num">Grade calls</th><th class="sortable num">$ / bug</th></tr></thead>
                     <tbody>
                         <tr><td class="rk"><span class="lb-rank gold">1</span></td><td class="lb-model" data-v="Claude Code Opus">Claude Code &middot; Opus 4.8<span class="lb-arm agent">agent</span></td><td data-v="77"><div class="lb-score"><div class="lb-track"><div class="lb-fill" style="width:100%;background:#d97757"></div></div><b>77</b></div></td><td class="num" data-v="56">56%<span class="lb-cnt">38 / 68</span></td><td class="num" data-v="16.1">16.1m</td><td class="num dash" data-v="">&mdash;</td><td class="num dash" data-v="">&mdash;</td><td class="num" data-v="6.40">$6.40</td></tr>
                         <tr><td class="rk"><span class="lb-rank">2</span></td><td class="lb-model" data-v="Codex GPT-5.5">Codex &middot; GPT-5.5<span class="lb-arm agent">agent</span></td><td data-v="75"><div class="lb-score"><div class="lb-track"><div class="lb-fill" style="width:97%;background:#10a37f"></div></div><b>75</b></div></td><td class="num" data-v="53">53%<span class="lb-cnt">36 / 68</span></td><td class="num" data-v="4.8">4.8m</td><td class="num dash" data-v="">&mdash;</td><td class="num dash" data-v="">&mdash;</td><td class="num" data-v="1.31">$1.31</td></tr>
@@ -1258,7 +1258,7 @@ python -m fbbench.sweep.claudecode sweep --bugs all --model sonnet --auth api</c
                         <li><b>Solved</b> &mdash; bugs cleared, of those run</li>
                         <li><b>Med time</b> &mdash; median wall-clock per bug</li>
                         <li><b>Avg tools</b> &mdash; tool calls per bug</li>
-                        <li><b>Avg inputs</b> &mdash; candidate inputs graded per bug</li>
+                        <li><b>Grade calls</b> &mdash; candidate inputs submitted to the oracle per bug</li>
                         <li><b>$ / bug</b> &mdash; mean spend per bug</li>
                     </ul>
                 </div>
