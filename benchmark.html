@@ -591,6 +591,52 @@ READ of size 4 at <span class="dim">0x60200000eff4</span> thread T0
                         </g>
                     </svg>
 
+                    <p class="mini-h">In essence, the agent is generating a fuzz input</p>
+                    <svg class="arch-svg" style="max-width:540px;margin:4px auto 0;display:block" viewBox="0 0 560 124" role="img" aria-label="the agent's input runs through the harness and produces output">
+                        <defs>
+                            <marker id="ah4" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#94a3b8"/></marker>
+                        </defs>
+                        <!-- input -->
+                        <rect x="30" y="42" width="140" height="60" rx="12" fill="#1e293b" stroke="#334155"/>
+                        <rect x="44" y="42" width="112" height="4" rx="2" fill="#6366f1"/>
+                        <g stroke="#818cf8" stroke-width="1.8" fill="none" stroke-linejoin="round">
+                            <path d="M52,60 L52,86 L70,86 L70,66 L64,60 Z"/>
+                            <path d="M64,60 L64,66 L70,66"/>
+                        </g>
+                        <g font-family="Inter" text-anchor="middle">
+                            <text x="116" y="72" fill="#fff" font-size="12.5" font-weight="700">fuzz input</text>
+                            <text x="116" y="88" fill="#94a3b8" font-size="9.5">the bytes you write</text>
+                        </g>
+                        <line x1="172" y1="72" x2="208" y2="72" stroke="#94a3b8" stroke-width="2.2" stroke-linecap="round" marker-end="url(#ah4)"/>
+                        <!-- harness (chip glyph = program under test) -->
+                        <rect x="210" y="34" width="140" height="76" rx="12" fill="#1e293b" stroke="#475569"/>
+                        <g stroke="#94a3b8" stroke-width="1.6" fill="none">
+                            <rect x="272" y="46" width="16" height="16" rx="2"/>
+                            <rect x="276" y="50" width="8" height="8" rx="1"/>
+                            <line x1="272" y1="51" x2="268" y2="51"/><line x1="272" y1="57" x2="268" y2="57"/>
+                            <line x1="288" y1="51" x2="292" y2="51"/><line x1="288" y1="57" x2="292" y2="57"/>
+                            <line x1="277" y1="46" x2="277" y2="42"/><line x1="283" y1="46" x2="283" y2="42"/>
+                            <line x1="277" y1="62" x2="277" y2="66"/><line x1="283" y1="62" x2="283" y2="66"/>
+                        </g>
+                        <g font-family="Inter" text-anchor="middle">
+                            <text x="280" y="84" fill="#fff" font-size="13" font-weight="700">Harness</text>
+                            <text x="280" y="99" fill="#94a3b8" font-size="9.5">sanitizer build</text>
+                        </g>
+                        <line x1="352" y1="72" x2="388" y2="72" stroke="#94a3b8" stroke-width="2.2" stroke-linecap="round" marker-end="url(#ah4)"/>
+                        <!-- output -->
+                        <rect x="390" y="42" width="140" height="60" rx="12" fill="#1e293b" stroke="#334155"/>
+                        <rect x="404" y="42" width="112" height="4" rx="2" fill="#34d399"/>
+                        <g stroke="#34d399" stroke-width="1.8" fill="none" stroke-linecap="round">
+                            <line x1="408" y1="62" x2="424" y2="62"/>
+                            <line x1="408" y1="68" x2="420" y2="68"/>
+                            <line x1="408" y1="74" x2="424" y2="74"/>
+                        </g>
+                        <g font-family="Inter" text-anchor="middle">
+                            <text x="470" y="72" fill="#fff" font-size="12.5" font-weight="700">output</text>
+                            <text x="470" y="88" fill="#94a3b8" font-size="9.5">crash or clean</text>
+                        </g>
+                    </svg>
+
                     <p class="mini-h">The six tools it can call</p>
                     <table class="design-table">
                         <thead><tr><th>Tool</th><th>What it does</th></tr></thead>
