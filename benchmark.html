@@ -19,7 +19,8 @@
     .bench-hero h2{font-size:2.9rem;line-height:1.12;margin:0 auto 16px;letter-spacing:-.5px}
     .bench-hero .lede{max-width:60ch;margin:0 auto;color:var(--text-secondary);font-size:1.12rem;line-height:1.6}
     .bench-statrow{display:flex;flex-wrap:wrap;justify-content:center;gap:18px;margin:34px 0 8px}
-    .bench-stat{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 26px;min-width:150px}
+    .bench-stat{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 26px;min-width:150px;text-decoration:none;cursor:pointer;transition:border-color .15s,transform .15s}
+    .bench-stat:hover{border-color:#6366f1;transform:translateY(-2px)}
     .bench-stat .n{font-size:2rem;font-weight:700;color:var(--text-primary);font-family:var(--font-mono)}
     .bench-stat .l{font-size:.82rem;color:var(--text-muted);margin-top:4px}
     .bench-cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:26px}
@@ -373,10 +374,10 @@
                 <h2>FuzzingBrain Bench</h2>
                 <p class="lede">Everyone says language models can find vulnerabilities. No public benchmark measures this ability well. FuzzingBrain Bench ships 68 real bugs across 40 projects, hides the answer, and lets the program itself decide whether the model found the bug or just found a bug.</p>
                 <div class="bench-statrow">
-                    <div class="bench-stat"><div class="n">68</div><div class="l">Real bugs</div></div>
-                    <div class="bench-stat"><div class="n">40</div><div class="l">OSS projects</div></div>
-                    <div class="bench-stat"><div class="n">11</div><div class="l">Bug categories</div></div>
-                    <div class="bench-stat"><div class="n">3</div><div class="l">Languages</div></div>
+                    <a class="bench-stat" href="#challenges" data-tabjump="stats"><div class="n">68</div><div class="l">Real bugs</div></a>
+                    <a class="bench-stat" href="#challenges" data-tabjump="stats"><div class="n">40</div><div class="l">OSS projects</div></a>
+                    <a class="bench-stat" href="#categories" data-tabjump="stats"><div class="n">11</div><div class="l">Bug categories</div></a>
+                    <a class="bench-stat" href="#bylang" data-tabjump="stats"><div class="n">3</div><div class="l">Languages</div></a>
                 </div>
                 <div class="bench-cta">
                     <a href="https://github.com/OwenSanzas/FuzzingBrain-Bench" class="btn btn-primary">Get the Benchmark</a>
@@ -993,7 +994,7 @@ python -m fbbench.sweep.claudecode sweep --bugs all --model sonnet --auth api</c
         </section>
 
         <!-- Bug categories -->
-        <section class="bench-section">
+        <section class="bench-section" id="categories">
             <div class="section-content">
                 <h3 class="hd">Bug categories</h3>
                 <p class="sub">Every verdict is decided by one of five oracles, the sanitizer or engine that judges the run. The bugs themselves span memory-safety faults and denial-of-service classes.</p>
@@ -1163,7 +1164,7 @@ python -m fbbench.sweep.claudecode sweep --bugs all --model sonnet --auth api</c
                     <div class="sr-row sm"><div class="sr-k">excessive-computation</div><div class="sr-track"><div class="sr-fill" style="width:2%;background:#ef4444"></div></div><div class="sr-v">0%</div><div class="sr-n">1 bug</div></div>
                 </div>
                 <p class="dh-cap">Categories shown faint have only 1&ndash;4 bugs &mdash; treat those rates as indicative, not precise. The large categories (out-of-bounds-read 22, memory-exhaustion 9, uncaught-exception 8, null-pointer-dereference 6) are the solid signal.</p>
-                <h4 class="mini-h" style="margin-top:26px">By language</h4>
+                <h4 class="mini-h" style="margin-top:26px" id="bylang">By language</h4>
                 <div class="sr-wrap">
                     <div class="sr-row"><div class="sr-k">JVM</div><div class="sr-track"><div class="sr-fill" style="width:68%;background:#10b981"></div></div><div class="sr-v">68%</div><div class="sr-n">9 bugs</div></div>
                     <div class="sr-row"><div class="sr-k">C++</div><div class="sr-track"><div class="sr-fill" style="width:49%;background:#84cc16"></div></div><div class="sr-v">49%</div><div class="sr-n">28 bugs</div></div>
