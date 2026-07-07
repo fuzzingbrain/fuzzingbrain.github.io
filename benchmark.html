@@ -136,6 +136,12 @@
     .lb-table td.dash{color:var(--text-muted)}
     .lb-cond{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 20px}
     .lb-cond span{font-size:.75rem;color:var(--text-secondary);background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:3px 11px;font-family:var(--font-mono);white-space:nowrap}
+    .score-total{margin:15px 0 4px}
+    .stlabel{font-size:.82rem;color:var(--text-secondary);display:block;margin-bottom:8px}
+    .stlabel b{color:var(--text-primary);font-family:var(--font-mono)}
+    .stbar{display:flex;height:28px;border-radius:6px;overflow:hidden}
+    .stseg{display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:.73rem;font-weight:700;white-space:nowrap;overflow:hidden;min-width:0;border-right:1px solid rgba(10,15,30,.25)}
+    .stseg:last-child{border-right:0}
     /* design choices table */
     .design-table{width:100%;border-collapse:collapse;border:1px solid var(--border);border-radius:14px;overflow:hidden;font-size:.94rem}
     .design-table thead th{text-align:left;background:var(--surface);color:var(--text-muted);font-weight:600;font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;padding:12px 20px;border-bottom:1px solid var(--border)}
@@ -1240,7 +1246,17 @@ python -m fbbench.sweep.claudecode sweep --bugs all --model sonnet --auth api</c
                 <p class="sub">Ranked by difficulty-weighted score on all 68 bugs, one full-scan pass per model. A solve means the run found the documented bug on its own and cleared all five ladder rungs &mdash; reach, crash, differential, class and site &mdash; so off-target crashes do not count. Time is the median per bug; turns and grade calls are per-bug means, and cost is dollars per solved bug. Click any column to sort.</p>
                 <div class="lb-cond"><span>100 turns max</span><span>full-scan &middot; blind</span><span>5-rung ladder</span></div>
                 <div class="lb-method">
-                    <b>How the score works.</b> Each solved bug is worth its difficulty level &mdash; a D1 bug earns <span class="fx">1</span> point, a D5 earns <span class="fx">5</span> &mdash; so a model's <b>Score</b> is <span class="fx">&Sigma; D(solved bug)</span>, summed over every bug it cracked. Cracking the rare hard bugs counts for far more than piling up easy ones. The maximum is every bug at its own difficulty: <span class="fx">15&times;1 + 13&times;2 + 13&times;3 + 10&times;4 + 17&times;5 = 205</span>. Difficulty (D1&ndash;D5) is the dynamic ranking from the <a href="#difficulty" data-tabjump="stats" class="xlink">Difficulty section</a>.
+                    <b>How the score works.</b> Each solved bug is worth its difficulty level &mdash; a D1 bug earns <span class="fx">1</span> point, a D5 earns <span class="fx">5</span> &mdash; so a model's <b>Score</b> is <span class="fx">&Sigma; D(solved bug)</span>, summed over every bug it cracked. Cracking the rare hard bugs counts for far more than piling up easy ones. Difficulty (D1&ndash;D5) is the dynamic ranking from the <a href="#difficulty" data-tabjump="stats" class="xlink">Difficulty section</a>.
+                    <div class="score-total">
+                        <span class="stlabel">Max score = <b>205</b> &mdash; every bug counted at its own difficulty (count &times; points):</span>
+                        <div class="stbar">
+                            <span class="stseg" style="width:7.32%;background:#10b981;color:#08130d">15&times;1</span>
+                            <span class="stseg" style="width:12.68%;background:#84cc16;color:#141c05">13&times;2</span>
+                            <span class="stseg" style="width:19.02%;background:#f59e0b;color:#1c1400">13&times;3</span>
+                            <span class="stseg" style="width:19.51%;background:#f97316;color:#fff">10&times;4</span>
+                            <span class="stseg" style="width:41.46%;background:#ef4444;color:#fff">17&times;5</span>
+                        </div>
+                    </div>
                     <ul class="defs">
                         <li><b>Solved</b> &mdash; bugs cleared, of those run</li>
                         <li><b>Time</b> &mdash; median wall-clock per bug</li>
