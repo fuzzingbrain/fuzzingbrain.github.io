@@ -852,7 +852,7 @@ python -m fbbench.sweep.claudecode sweep --bugs all --model sonnet --auth api</c
         <!-- All challenges -->
         <section class="bench-section" id="challenges">
             <div class="section-content">
-                <h3 class="hd">Every challenge</h3>
+                <h3 class="hd">Challenge list</h3>
                 <p class="sub">Every challenge is a real, publicly known bug that FuzzingBrain found in an open-source library. There are 68 across 40 projects, each shipped as a sealed image under a neutral alias. Project and language are public. The fault, its crash site, and the required levels stay sealed.</p>
                 <div class="chall-cols">
                     <table class="chall-table">
@@ -905,6 +905,33 @@ python -m fbbench.sweep.claudecode sweep --bugs all --model sonnet --auth api</c
                             <tr><td class="pj">upx</td><td class="lg">C++</td><td class="ch"><code>upx-01</code> <code>upx-02</code></td></tr>
                         </tbody>
                     </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bug categories -->
+        <section class="bench-section">
+            <div class="section-content">
+                <h3 class="hd">Bug categories</h3>
+                <p class="sub">The exact fault each challenge falls into, the category the class rung must name. Memory-corruption faults dominate, with a long tail of JVM exceptions, undefined behavior, and resource exhaustion. Amber marks the JVM classes.</p>
+                <div class="chart-card">
+                    <div class="cbar-row fc"><div class="k">heap-buffer-overflow</div><div class="cbar-track"><div class="cbar-fill" style="width:100%;background:#6366f1"></div></div><div class="v">18</div></div>
+                    <div class="cbar-row fc"><div class="k">segv</div><div class="cbar-track"><div class="cbar-fill" style="width:56%;background:#6366f1"></div></div><div class="v">10</div></div>
+                    <div class="cbar-row fc"><div class="k">abrt</div><div class="cbar-track"><div class="cbar-fill" style="width:39%;background:#6366f1"></div></div><div class="v">7</div></div>
+                    <div class="cbar-row fc"><div class="k">oom</div><div class="cbar-track"><div class="cbar-fill" style="width:33%;background:#6366f1"></div></div><div class="v">6</div></div>
+                    <div class="cbar-row fc"><div class="k">uncaught-exception</div><div class="cbar-track"><div class="cbar-fill" style="width:22%;background:#f59e0b"></div></div><div class="v">4</div></div>
+                    <div class="cbar-row fc"><div class="k">heap-use-after-free</div><div class="cbar-track"><div class="cbar-fill" style="width:22%;background:#6366f1"></div></div><div class="v">4</div></div>
+                    <div class="cbar-row fc"><div class="k">allocation-size-too-big</div><div class="cbar-track"><div class="cbar-fill" style="width:17%;background:#6366f1"></div></div><div class="v">3</div></div>
+                    <div class="cbar-row fc"><div class="k">memory-leak</div><div class="cbar-track"><div class="cbar-fill" style="width:17%;background:#6366f1"></div></div><div class="v">3</div></div>
+                    <div class="cbar-row fc"><div class="k">class-cast</div><div class="cbar-track"><div class="cbar-fill" style="width:11%;background:#f59e0b"></div></div><div class="v">2</div></div>
+                    <div class="cbar-row fc"><div class="k">oob-read</div><div class="cbar-track"><div class="cbar-fill" style="width:11%;background:#6366f1"></div></div><div class="v">2</div></div>
+                    <div class="cbar-row fc"><div class="k">stack-buffer-overflow</div><div class="cbar-track"><div class="cbar-fill" style="width:11%;background:#6366f1"></div></div><div class="v">2</div></div>
+                    <div class="cbar-row fc"><div class="k">stack-overflow</div><div class="cbar-track"><div class="cbar-fill" style="width:11%;background:#6366f1"></div></div><div class="v">2</div></div>
+                    <div class="cbar-row fc"><div class="k">float-cast-overflow</div><div class="cbar-track"><div class="cbar-fill" style="width:6%;background:#6366f1"></div></div><div class="v">1</div></div>
+                    <div class="cbar-row fc"><div class="k">null-deref</div><div class="cbar-track"><div class="cbar-fill" style="width:6%;background:#6366f1"></div></div><div class="v">1</div></div>
+                    <div class="cbar-row fc"><div class="k">misaligned-access</div><div class="cbar-track"><div class="cbar-fill" style="width:6%;background:#6366f1"></div></div><div class="v">1</div></div>
+                    <div class="cbar-row fc"><div class="k">timeout</div><div class="cbar-track"><div class="cbar-fill" style="width:6%;background:#6366f1"></div></div><div class="v">1</div></div>
+                    <div class="cbar-row fc"><div class="k">stack-buffer-underflow</div><div class="cbar-track"><div class="cbar-fill" style="width:6%;background:#6366f1"></div></div><div class="v">1</div></div>
                 </div>
             </div>
         </section>
@@ -1083,27 +1110,6 @@ python -m fbbench.sweep.claudecode sweep --bugs all --model sonnet --auth api</c
                         <div class="cbar-row"><div class="k">UBSan</div><div class="cbar-track"><div class="cbar-fill" style="width:9%;background:#34d399"></div></div><div class="v">4</div></div>
                         <div class="cbar-row"><div class="k">LSan</div><div class="cbar-track"><div class="cbar-fill" style="width:7%;background:#10b981"></div></div><div class="v">3</div></div>
                     </div>
-                </div>
-                <div class="chart-card" style="margin-top:22px">
-                    <h4>By fault class</h4>
-                    <p class="cap">The exact category the class rung must name, straight from the sanitizer. Memory-corruption faults dominate, with a long tail of JVM exceptions, undefined behavior, and resource exhaustion. Amber marks the JVM classes.</p>
-                    <div class="cbar-row fc"><div class="k">heap-buffer-overflow</div><div class="cbar-track"><div class="cbar-fill" style="width:100%;background:#6366f1"></div></div><div class="v">18</div></div>
-                    <div class="cbar-row fc"><div class="k">segv</div><div class="cbar-track"><div class="cbar-fill" style="width:56%;background:#6366f1"></div></div><div class="v">10</div></div>
-                    <div class="cbar-row fc"><div class="k">abrt</div><div class="cbar-track"><div class="cbar-fill" style="width:39%;background:#6366f1"></div></div><div class="v">7</div></div>
-                    <div class="cbar-row fc"><div class="k">oom</div><div class="cbar-track"><div class="cbar-fill" style="width:33%;background:#6366f1"></div></div><div class="v">6</div></div>
-                    <div class="cbar-row fc"><div class="k">uncaught-exception</div><div class="cbar-track"><div class="cbar-fill" style="width:22%;background:#f59e0b"></div></div><div class="v">4</div></div>
-                    <div class="cbar-row fc"><div class="k">heap-use-after-free</div><div class="cbar-track"><div class="cbar-fill" style="width:22%;background:#6366f1"></div></div><div class="v">4</div></div>
-                    <div class="cbar-row fc"><div class="k">allocation-size-too-big</div><div class="cbar-track"><div class="cbar-fill" style="width:17%;background:#6366f1"></div></div><div class="v">3</div></div>
-                    <div class="cbar-row fc"><div class="k">memory-leak</div><div class="cbar-track"><div class="cbar-fill" style="width:17%;background:#6366f1"></div></div><div class="v">3</div></div>
-                    <div class="cbar-row fc"><div class="k">class-cast</div><div class="cbar-track"><div class="cbar-fill" style="width:11%;background:#f59e0b"></div></div><div class="v">2</div></div>
-                    <div class="cbar-row fc"><div class="k">oob-read</div><div class="cbar-track"><div class="cbar-fill" style="width:11%;background:#6366f1"></div></div><div class="v">2</div></div>
-                    <div class="cbar-row fc"><div class="k">stack-buffer-overflow</div><div class="cbar-track"><div class="cbar-fill" style="width:11%;background:#6366f1"></div></div><div class="v">2</div></div>
-                    <div class="cbar-row fc"><div class="k">stack-overflow</div><div class="cbar-track"><div class="cbar-fill" style="width:11%;background:#6366f1"></div></div><div class="v">2</div></div>
-                    <div class="cbar-row fc"><div class="k">float-cast-overflow</div><div class="cbar-track"><div class="cbar-fill" style="width:6%;background:#6366f1"></div></div><div class="v">1</div></div>
-                    <div class="cbar-row fc"><div class="k">null-deref</div><div class="cbar-track"><div class="cbar-fill" style="width:6%;background:#6366f1"></div></div><div class="v">1</div></div>
-                    <div class="cbar-row fc"><div class="k">misaligned-access</div><div class="cbar-track"><div class="cbar-fill" style="width:6%;background:#6366f1"></div></div><div class="v">1</div></div>
-                    <div class="cbar-row fc"><div class="k">timeout</div><div class="cbar-track"><div class="cbar-fill" style="width:6%;background:#6366f1"></div></div><div class="v">1</div></div>
-                    <div class="cbar-row fc"><div class="k">stack-buffer-underflow</div><div class="cbar-track"><div class="cbar-fill" style="width:6%;background:#6366f1"></div></div><div class="v">1</div></div>
                 </div>
             </div>
         </section>
