@@ -479,8 +479,6 @@
 
         <section class="bench-section">
             <div class="section-content">
-                <p class="sub" style="max-width:74ch">FuzzingBrain Bench decides mechanically whether a model found the exact documented bug. Three design choices make that verdict trustworthy.</p>
-
                 <svg class="arch-svg" style="max-width:720px" viewBox="0 0 720 260" role="img" aria-label="The three design pillars of FuzzingBrain Bench">
                     <defs>
                         <marker id="ah-sp" markerWidth="9" markerHeight="9" refX="6.2" refY="3" orient="auto"><path d="M0,0 L6.2,3 L0,6 z" fill="#94a3b8"/></marker>
@@ -539,7 +537,7 @@
 
                 <div class="intro-block">
                     <div class="ib-h"><h4>A sandbox that plays like real bug hunting</h4></div>
-                    <p>The sandbox is built to feel like real vulnerability research: nothing in it tells the model it is being benchmarked. The bug carries a neutral alias, the shell has no internet, the model key never enters the container, and every grade returns only the raw harness output a fuzzer would show &mdash; no scoreboard to game, no sense of how close it is. Pinned dependencies and a fixed build keep the environment out of the way, so all of the model&rsquo;s effort goes into the bug.</p>
+                    <p>The sandbox is built to feel like real vulnerability research: nothing in it tells the model it is being benchmarked. The bug carries a neutral alias, the shell has no internet, the model key never enters the container, and every grade returns only the raw harness output a fuzzer would show &mdash; no scoreboard to game, no sense of how close it is. Pinned dependencies and a fixed build keep the environment out of the way, so all of the model&rsquo;s effort goes into the bug. The five-level ladder below is scored entirely behind the scenes &mdash; the model never sees it.</p>
                     <div class="ladder-wrap">
                         <div>
                             <svg class="ladder-svg" viewBox="-24 0 508 320" role="img" aria-label="Capability ladder pyramid">
