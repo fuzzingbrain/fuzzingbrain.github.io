@@ -527,7 +527,7 @@
 
                 <div class="intro-block">
                     <div class="ib-h"><h4>Multi-level grading</h4></div>
-                    <p>Every candidate input is scored on a five-level ladder: reach, crash, differential, class, site. Each level is strictly stronger than the last &mdash; a crash of the wrong class or at the wrong location is a different bug, so an off-target crash is progress, not a solve.</p>
+                    <p>Every candidate input is scored on a five-level ladder of reach, crash, differential, class, and site. Each level is strictly stronger than the last. A crash of the wrong class or at the wrong location is a different bug, so an off-target crash is progress, not a solve.</p>
                 </div>
 
                 <div class="intro-block">
@@ -537,7 +537,7 @@
 
                 <div class="intro-block">
                     <div class="ib-h"><h4>A sandbox that plays like real bug hunting</h4></div>
-                    <p>The sandbox is built to feel like real vulnerability research: nothing in it tells the model it is being benchmarked. The bug carries a neutral alias, the shell has no internet, the model key never enters the container, and every grade returns only the raw harness output a fuzzer would show &mdash; no scoreboard to game, no sense of how close it is. Pinned dependencies and a fixed build keep the environment out of the way, so all of the model&rsquo;s effort goes into the bug.</p>
+                    <p>The sandbox is built to feel like real vulnerability research. Nothing in it tells the model it is being benchmarked. The bug carries a neutral alias, the shell has no internet, the model key never enters the container, and every grade returns only the raw harness output a fuzzer would show. There is no scoreboard to game and no sense of how close it is. Pinned dependencies and a fixed build keep the environment out of the way, so all of the model&rsquo;s effort goes into the bug.</p>
                     <svg class="arch-svg" style="max-width:720px" viewBox="0 0 720 400" role="img" aria-label="What is inside the sandbox">
                         <defs>
                             <marker id="ah-sb" markerWidth="9" markerHeight="9" refX="6.2" refY="3" orient="auto"><path d="M0,0 L6.2,3 L0,6 z" fill="#94a3b8"/></marker>
@@ -555,10 +555,10 @@
                             <text x="226" y="172" fill="#94a3b8" font-size="10.5">turns faults into crash reports</text>
                             <rect x="210" y="192" width="320" height="48" rx="9" fill="#1e293b" stroke="#6366f1"/>
                             <text x="226" y="212" fill="#fff" font-size="13" font-weight="700">Fixed environment</text>
-                            <text x="226" y="229" fill="#94a3b8" font-size="10.5">pinned dependencies, prebuilt &mdash; nothing to set up</text>
+                            <text x="226" y="229" fill="#94a3b8" font-size="10.5">pinned dependencies, prebuilt, nothing to set up</text>
                             <rect x="210" y="250" width="320" height="48" rx="9" fill="#1e293b" stroke="#6366f1"/>
                             <text x="226" y="270" fill="#fff" font-size="13" font-weight="700">The bug under test</text>
-                            <text x="226" y="287" fill="#94a3b8" font-size="10.5">no name, no description &mdash; just an alias like <tspan font-family="JetBrains Mono" fill="#cbd5e1">json-java-02</tspan></text>
+                            <text x="226" y="287" fill="#94a3b8" font-size="10.5">no name or description, just an alias like <tspan font-family="JetBrains Mono" fill="#cbd5e1">json-java-02</tspan></text>
                             <!-- agent endpoint -->
                             <rect x="10" y="150" width="110" height="34" rx="17" fill="#1e293b" stroke="#64748b"/>
                             <text x="65" y="172" fill="#cbd5e1" font-size="12" font-weight="600" text-anchor="middle">your agent</text>
