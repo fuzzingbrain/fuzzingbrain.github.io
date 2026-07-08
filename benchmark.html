@@ -391,7 +391,7 @@
             <div class="section-content">
                 <div class="bench-kicker">Can LLMs actually find real bugs?</div>
                 <h2>FuzzingBrain Bench</h2>
-                <p class="lede">Everyone says language models can find vulnerabilities. But no public benchmark measures this well. FuzzingBrain Bench tests models on 68 real-world bugs from 40 open-source projects. The answers are hidden, and success requires concrete evidence: an OSS-Fuzz crashing input that reproduces the bug.</p>
+                <p class="lede">FuzzingBrain Bench tests models on 68 real-world bugs from 40 open-source projects. The answers are hidden; to score, a model must produce an OSS-Fuzz crashing input that reproduces the documented bug.</p>
                 <div class="bench-statrow">
                     <a class="bench-stat" href="#challenges" data-tabjump="stats"><div class="n">68</div><div class="l">Real bugs</div></a>
                     <a class="bench-stat" href="#challenges" data-tabjump="stats"><div class="n">40</div><div class="l">OSS projects</div></a>
@@ -479,21 +479,57 @@
 
         <section class="bench-section">
             <div class="section-content">
-                <p class="sub" style="max-width:74ch">Most reports of models finding bugs count a crash. A crash is not a solve. FuzzingBrain Bench is built so the program itself decides whether a model found the exact documented bug or merely tripped some other fault. Three things make that work.</p>
+                <p class="sub" style="max-width:74ch">FuzzingBrain Bench decides mechanically whether a model found the exact documented bug. Three design choices make that verdict trustworthy.</p>
+
+                <svg class="arch-svg" style="max-width:720px" viewBox="0 0 720 260" role="img" aria-label="The three design pillars of FuzzingBrain Bench">
+                    <defs>
+                        <marker id="ah-sp" markerWidth="9" markerHeight="9" refX="6.2" refY="3" orient="auto"><path d="M0,0 L6.2,3 L0,6 z" fill="#94a3b8"/></marker>
+                    </defs>
+                    <g font-family="Inter">
+                        <!-- pillar 1: multi-level task -->
+                        <rect x="16" y="20" width="214" height="150" rx="11" fill="#1e293b" stroke="#6366f1"/>
+                        <text x="30" y="42" fill="#818cf8" font-family="JetBrains Mono" font-size="11">01</text>
+                        <g stroke="#0f172a" stroke-width="1">
+                            <rect x="114" y="36" width="18" height="9" fill="#4c43d9"/>
+                            <rect x="108" y="46" width="30" height="9" fill="#5850ec"/>
+                            <rect x="102" y="56" width="42" height="9" fill="#6366f1"/>
+                            <rect x="96" y="66" width="54" height="9" fill="#7079f2"/>
+                            <rect x="90" y="76" width="66" height="9" fill="#8b93f7"/>
+                        </g>
+                        <text x="123" y="112" fill="#fff" font-size="15" font-weight="700" text-anchor="middle">Multi-level grading</text>
+                        <text x="123" y="132" fill="#94a3b8" font-size="11.5" text-anchor="middle">a five-level ladder,</text>
+                        <text x="123" y="148" fill="#94a3b8" font-size="11.5" text-anchor="middle">from reach to site</text>
+                        <!-- pillar 2: audited oracle -->
+                        <rect x="253" y="20" width="214" height="150" rx="11" fill="#1e293b" stroke="#f59e0b"/>
+                        <text x="267" y="42" fill="#f59e0b" font-family="JetBrains Mono" font-size="11">02</text>
+                        <path d="M360,36 l22,8 v20 c0,15 -10,25 -22,31 c-12,-6 -22,-16 -22,-31 v-20 z" fill="none" stroke="#f59e0b" stroke-width="2.5"/>
+                        <polyline points="349,64 357,72 372,54" fill="none" stroke="#f59e0b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                        <text x="360" y="112" fill="#fff" font-size="15" font-weight="700" text-anchor="middle">An audited oracle</text>
+                        <text x="360" y="132" fill="#94a3b8" font-size="11.5" text-anchor="middle">harness noise filtered out</text>
+                        <text x="360" y="148" fill="#94a3b8" font-size="11.5" text-anchor="middle">by a four-principles audit</text>
+                        <!-- pillar 3: blind realistic sandbox -->
+                        <rect x="490" y="20" width="214" height="150" rx="11" fill="#1e293b" stroke="#10b981"/>
+                        <text x="504" y="42" fill="#10b981" font-family="JetBrains Mono" font-size="11">03</text>
+                        <ellipse cx="597" cy="60" rx="27" ry="16" fill="none" stroke="#10b981" stroke-width="2.5"/>
+                        <circle cx="597" cy="60" r="6.5" fill="none" stroke="#10b981" stroke-width="2.5"/>
+                        <line x1="575" y1="82" x2="619" y2="38" stroke="#10b981" stroke-width="3" stroke-linecap="round"/>
+                        <text x="597" y="112" fill="#fff" font-size="15" font-weight="700" text-anchor="middle">A blind, realistic sandbox</text>
+                        <text x="597" y="132" fill="#94a3b8" font-size="11.5" text-anchor="middle">nothing tells the model</text>
+                        <text x="597" y="148" fill="#94a3b8" font-size="11.5" text-anchor="middle">it is being benchmarked</text>
+                        <!-- convergence -->
+                        <g stroke="#94a3b8" stroke-width="2" fill="none">
+                            <path d="M123,170 L262,199" marker-end="url(#ah-sp)"/>
+                            <path d="M360,170 L360,199" marker-end="url(#ah-sp)"/>
+                            <path d="M597,170 L458,199" marker-end="url(#ah-sp)"/>
+                        </g>
+                        <rect x="140" y="204" width="440" height="40" rx="10" fill="rgba(16,185,129,.08)" stroke="#10b981"/>
+                        <text x="360" y="229" fill="#e2e8f0" font-size="13.5" font-weight="600" text-anchor="middle">A solve = the documented bug, not just any crash</text>
+                    </g>
+                </svg>
 
                 <div class="intro-block">
-                    <div class="ib-h"><h4>A clean sandbox for every challenge</h4></div>
-                    <p>Every challenge runs in its own Docker image, and every image is clean. Dependencies and versions are pinned and the build is fixed, so the model never fights version drift or a broken toolchain and can spend all of its effort on finding the bug. The same sandbox keeps the run honest. The agent has only a small set of bench tools, its shell has no internet, and the model key never enters the container, so it cannot look the answer up or fetch anything from outside.</p>
-                </div>
-
-                <div class="intro-block">
-                    <div class="ib-h"><h4>A strictly audited oracle</h4></div>
-                    <p>The oracle is not a language model. The input is fed to the project's own fuzz harness and the sanitizer decides the verdict. What makes that trustworthy is that we audit the harness itself, following our <a href="posts/four-principles-harness-audit.html">four principles</a>. A weak harness can manufacture crashes that are not real bugs, so every harness here is checked to make sure it adds no faults of its own. A crash then reflects the target code, not the test wrapper.</p>
-                </div>
-
-                <div class="intro-block">
-                    <div class="ib-h"><h4>A realistic bug-hunting task</h4></div>
-                    <p>We build the task to look and feel like real vulnerability research, not a benchmark. Nothing in it tells the model it is being scored. The bug carries only a neutral alias, and although a strict five-level ladder runs behind the scenes, the model never gets to read it. Every grade returns only the raw harness output, the same thing a fuzzer would show, so there is no scoreboard to game and no sense of how close it is.</p>
+                    <div class="ib-h"><h4>Multi-level grading</h4></div>
+                    <p>Every candidate input is scored on a five-level ladder: reach, crash, differential, class, site. Each level is strictly stronger than the last &mdash; a crash of the wrong class or at the wrong location is a different bug, so an off-target crash is progress, not a solve.</p>
                     <div class="ladder-wrap">
                         <div>
                             <svg class="ladder-svg" viewBox="-24 0 508 320" role="img" aria-label="Capability ladder pyramid">
@@ -535,6 +571,16 @@
                             <li><span class="ln">site</span> the input crashes at the documented file and line, at or near the top of the stack</li>
                         </ol>
                     </div>
+                </div>
+
+                <div class="intro-block">
+                    <div class="ib-h"><h4>An audited oracle, free of harness noise</h4></div>
+                    <p>The verdict comes from the project&rsquo;s own fuzz harness and its sanitizer, not from a language model. A weak harness can manufacture crashes that are not real bugs, so every harness here is audited against our <a href="posts/four-principles-harness-audit.html">four principles</a> before its bug ships. A crash then reflects the target code, not the test wrapper.</p>
+                </div>
+
+                <div class="intro-block">
+                    <div class="ib-h"><h4>A sandbox that plays like real bug hunting</h4></div>
+                    <p>The sandbox is built to feel like real vulnerability research: nothing in it tells the model it is being benchmarked. The bug carries a neutral alias, the shell has no internet, the model key never enters the container, and every grade returns only the raw harness output a fuzzer would show &mdash; no scoreboard to game, no sense of how close it is. Pinned dependencies and a fixed build keep the environment out of the way, so all of the model&rsquo;s effort goes into the bug.</p>
                 </div>
 
                 <hr class="intro-hr">
@@ -787,7 +833,7 @@ READ of size 4 at <span class="dim">0x60200000eff4</span> thread T0
                         </g>
                     </svg>
 
-                    <p class="grade-note"><b>The agent never sees the ladder.</b> Every <code>grade</code> returns only <code>harness_output</code>, the stdout, stderr, exit code and signal from that one run, exactly like a fuzzer on one input. Which rungs fired, reach through site, is computed by the oracle for scoring and stripped before it ever reaches the model. So the model gets no signal telling it how far up the ladder it climbed.</p>
+                    <p class="grade-note"><b>The agent never sees the ladder.</b> Every <code>grade</code> returns only <code>harness_output</code>, the stdout, stderr, exit code and signal from that one run, exactly like a fuzzer on one input. Which levels fired, reach through site, is computed by the oracle for scoring and stripped before it ever reaches the model. So the model gets no signal telling it how far up the ladder it climbed.</p>
 
                     <p class="mini-h">The six tools it can call</p>
                     <table class="design-table">
@@ -1075,7 +1121,7 @@ python -m fbbench.sweep.claudecode sweep --bugs all --model sonnet --auth api</c
                 <div class="diff-formula">
                     <p class="fh">The formula</p>
                     <ol>
-                        <li><span class="fx"><b>solved</b>(bug, run) = 1</span><span>the run fires <em>every</em> applicable rung of the ladder (reach &rarr; crash &rarr; differential &rarr; class &rarr; site) &mdash; a full solve; otherwise 0.</span></li>
+                        <li><span class="fx"><b>solved</b>(bug, run) = 1</span><span>the run fires <em>every</em> applicable level of the ladder (reach &rarr; crash &rarr; differential &rarr; class &rarr; site) &mdash; a full solve; otherwise 0.</span></li>
                         <li><span class="fx"><b>S</b> = &Sigma; solved(bug, run)</span><span>how many of the <b>N&nbsp;=&nbsp;8</b> model runs solved the bug (0&nbsp;&le;&nbsp;S&nbsp;&le;&nbsp;8).</span></li>
                         <li><span class="fx"><b>D</b> = 5 &minus; &lceil;S / 2&rceil;</span><span>the difficulty level, from <b>D1</b> (easiest, 7&ndash;8 solved) to <b>D5</b> (hardest, 0 solved).</span></li>
                     </ol>
@@ -1151,8 +1197,8 @@ python -m fbbench.sweep.claudecode sweep --bugs all --model sonnet --auth api</c
         <section class="bench-section" id="leaderboard">
             <div class="section-content">
                 <h3 class="hd">Leaderboard</h3>
-                <p class="sub">Ranked by difficulty-weighted score on all 68 bugs, one full-scan pass per model. A solve means the run found the documented bug on its own and cleared all five ladder rungs &mdash; reach, crash, differential, class and site &mdash; so off-target crashes do not count. Time is the median per bug; turns and grade calls are per-bug means, and cost is dollars per bug and per solved bug. Click any column to sort.</p>
-                <div class="lb-cond"><span>100 turns max</span><span>full-scan &middot; blind</span><span>5-rung ladder</span></div>
+                <p class="sub">Ranked by difficulty-weighted score on all 68 bugs, one full-scan pass per model. A solve means the run found the documented bug on its own and cleared all five levels &mdash; reach, crash, differential, class and site &mdash; so off-target crashes do not count. Time is the median per bug; turns and grade calls are per-bug means, and cost is dollars per bug and per solved bug. Click any column to sort.</p>
+                <div class="lb-cond"><span>100 turns max</span><span>full-scan &middot; blind</span><span>5-level ladder</span></div>
                 <div class="lb-method">
                     <b>How the score works.</b> Each solved bug is worth its difficulty level &mdash; a D1 bug earns <span class="fx">1</span> point, a D5 earns <span class="fx">5</span> &mdash; so a model's <b>Score</b> is <span class="fx">&Sigma; D(solved bug)</span>, summed over every bug it cracked. Cracking the rare hard bugs counts for far more than piling up easy ones. Difficulty (D1&ndash;D5) is the dynamic ranking from the <a href="#difficulty" data-tabjump="stats" class="xlink">Difficulty section</a>.
                     <div class="score-total">
