@@ -538,53 +538,59 @@
                 <div class="intro-block">
                     <div class="ib-h"><h4>A sandbox that plays like real bug hunting</h4></div>
                     <p>The sandbox is built to feel like real vulnerability research: nothing in it tells the model it is being benchmarked. The bug carries a neutral alias, the shell has no internet, the model key never enters the container, and every grade returns only the raw harness output a fuzzer would show &mdash; no scoreboard to game, no sense of how close it is. Pinned dependencies and a fixed build keep the environment out of the way, so all of the model&rsquo;s effort goes into the bug.</p>
-                    <svg class="arch-svg" style="max-width:720px" viewBox="0 0 720 320" role="img" aria-label="How the sandbox is designed">
+                    <svg class="arch-svg" style="max-width:720px" viewBox="0 0 720 400" role="img" aria-label="What is inside the sandbox">
                         <defs>
                             <marker id="ah-sb" markerWidth="9" markerHeight="9" refX="6.2" refY="3" orient="auto"><path d="M0,0 L6.2,3 L0,6 z" fill="#94a3b8"/></marker>
                         </defs>
                         <g font-family="Inter">
-                            <!-- sandbox zone -->
-                            <rect x="200" y="24" width="320" height="230" rx="14" fill="rgba(99,102,241,.06)" stroke="#6366f1" stroke-opacity="0.45" stroke-dasharray="5 5"/>
-                            <text x="216" y="50" fill="#818cf8" font-family="JetBrains Mono" font-size="11.5" letter-spacing="1">SANDBOX &middot; sealed Docker image</text>
-                            <rect x="224" y="66" width="272" height="48" rx="9" fill="#1e293b" stroke="#6366f1"/>
-                            <text x="240" y="86" fill="#fff" font-size="13" font-weight="700">Project source</text>
-                            <text x="240" y="103" fill="#94a3b8" font-size="10.5">vulnerable revision &middot; no answers on disk</text>
-                            <rect x="224" y="122" width="272" height="48" rx="9" fill="#1e293b" stroke="#6366f1"/>
-                            <text x="240" y="142" fill="#fff" font-size="13" font-weight="700">Fuzz harness</text>
-                            <text x="240" y="159" fill="#94a3b8" font-size="10.5">sanitizer-instrumented build</text>
-                            <rect x="224" y="178" width="272" height="48" rx="9" fill="#1e293b" stroke="#6366f1"/>
-                            <text x="240" y="198" fill="#fff" font-size="13" font-weight="700">Fixed environment</text>
-                            <text x="240" y="215" fill="#94a3b8" font-size="10.5">pinned deps &middot; bug alias <tspan font-family="JetBrains Mono" fill="#cbd5e1">json-java-02</tspan></text>
-                            <!-- agent (endpoint pill) -->
-                            <rect x="34" y="122" width="102" height="34" rx="17" fill="#1e293b" stroke="#64748b"/>
-                            <text x="85" y="144" fill="#cbd5e1" font-size="12" font-weight="600" text-anchor="middle">your agent</text>
-                            <!-- oracle (endpoint pill) -->
-                            <rect x="584" y="122" width="118" height="34" rx="17" fill="#1e293b" stroke="#f59e0b" stroke-opacity=".7"/>
-                            <text x="643" y="144" fill="#cbd5e1" font-size="12" font-weight="600" text-anchor="middle">remote oracle</text>
+                            <!-- sandbox container -->
+                            <rect x="190" y="20" width="360" height="298" rx="14" fill="rgba(99,102,241,.06)" stroke="#6366f1" stroke-opacity="0.45" stroke-dasharray="5 5"/>
+                            <text x="210" y="46" fill="#818cf8" font-family="JetBrains Mono" font-size="11.5" letter-spacing="1">SANDBOX &middot; one sealed container per bug</text>
+                            <rect x="210" y="62" width="320" height="48" rx="9" fill="#1e293b" stroke="#6366f1"/>
+                            <text x="226" y="82" fill="#fff" font-size="13" font-weight="700">Project source</text>
+                            <text x="226" y="99" fill="#94a3b8" font-size="10.5">the target code, at the revision that contains the bug</text>
+                            <rect x="210" y="120" width="320" height="62" rx="9" fill="#1e293b" stroke="#6366f1"/>
+                            <text x="226" y="140" fill="#fff" font-size="13" font-weight="700">Fuzz harness</text>
+                            <text x="226" y="157" fill="#94a3b8" font-size="10.5">feeds any input into the code; the sanitizer</text>
+                            <text x="226" y="172" fill="#94a3b8" font-size="10.5">turns faults into crash reports</text>
+                            <rect x="210" y="192" width="320" height="48" rx="9" fill="#1e293b" stroke="#6366f1"/>
+                            <text x="226" y="212" fill="#fff" font-size="13" font-weight="700">Fixed environment</text>
+                            <text x="226" y="229" fill="#94a3b8" font-size="10.5">pinned dependencies, prebuilt &mdash; nothing to set up</text>
+                            <rect x="210" y="250" width="320" height="48" rx="9" fill="#1e293b" stroke="#6366f1"/>
+                            <text x="226" y="270" fill="#fff" font-size="13" font-weight="700">The bug under test</text>
+                            <text x="226" y="287" fill="#94a3b8" font-size="10.5">no name, no description &mdash; just an alias like <tspan font-family="JetBrains Mono" fill="#cbd5e1">json-java-02</tspan></text>
+                            <!-- agent endpoint -->
+                            <rect x="10" y="150" width="110" height="34" rx="17" fill="#1e293b" stroke="#64748b"/>
+                            <text x="65" y="172" fill="#cbd5e1" font-size="12" font-weight="600" text-anchor="middle">your agent</text>
+                            <text x="65" y="205" fill="#64748b" font-size="10.5" text-anchor="middle">the model under test</text>
+                            <!-- oracle endpoint -->
+                            <rect x="600" y="150" width="110" height="34" rx="17" fill="#1e293b" stroke="#f59e0b" stroke-opacity=".7"/>
+                            <text x="655" y="172" fill="#cbd5e1" font-size="12" font-weight="600" text-anchor="middle">remote oracle</text>
+                            <text x="655" y="205" fill="#64748b" font-size="10.5" text-anchor="middle">knows the real bug,</text>
+                            <text x="655" y="218" fill="#64748b" font-size="10.5" text-anchor="middle">checks your input</text>
                             <!-- arrows -->
                             <g stroke="#94a3b8" stroke-width="2" fill="none">
-                                <line x1="140" y1="128" x2="196" y2="128" marker-end="url(#ah-sb)"/>
-                                <line x1="196" y1="152" x2="140" y2="152" marker-end="url(#ah-sb)"/>
-                                <line x1="524" y1="128" x2="580" y2="128" marker-end="url(#ah-sb)"/>
-                                <line x1="580" y1="152" x2="524" y2="152" marker-end="url(#ah-sb)"/>
+                                <line x1="124" y1="138" x2="186" y2="138" marker-end="url(#ah-sb)"/>
+                                <line x1="186" y1="170" x2="124" y2="170" marker-end="url(#ah-sb)"/>
+                                <line x1="554" y1="138" x2="596" y2="138" marker-end="url(#ah-sb)"/>
+                                <line x1="596" y1="170" x2="554" y2="170" marker-end="url(#ah-sb)"/>
                             </g>
                             <g font-size="10.5" fill="#94a3b8" text-anchor="middle">
-                                <text x="168" y="118">bench tools</text>
-                                <text x="168" y="168">results</text>
-                                <text x="552" y="118">grade(input)</text>
-                                <text x="552" y="168">raw output</text>
+                                <text x="155" y="126">read &middot; write &middot; exec</text>
+                                <text x="155" y="188">files &amp; output</text>
+                                <text x="575" y="126">grade(input)</text>
+                                <text x="575" y="188">crash report only,</text>
+                                <text x="575" y="201">no score, no hints</text>
                             </g>
                             <!-- kept out -->
-                            <text x="360" y="276" fill="#64748b" font-size="10.5" text-anchor="middle">never inside the sandbox &middot; never returned to the model</text>
+                            <text x="360" y="352" fill="#64748b" font-size="10.5" text-anchor="middle">never inside the container</text>
                             <g font-family="JetBrains Mono" font-size="11" text-anchor="middle">
-                                <rect x="96" y="284" width="110" height="28" rx="14" fill="rgba(239,68,68,.07)" stroke="#ef4444" stroke-opacity=".55"/>
-                                <text x="151" y="302" fill="#f87171">&#10005; internet</text>
-                                <rect x="222" y="284" width="120" height="28" rx="14" fill="rgba(239,68,68,.07)" stroke="#ef4444" stroke-opacity=".55"/>
-                                <text x="282" y="302" fill="#f87171">&#10005; model key</text>
-                                <rect x="358" y="284" width="130" height="28" rx="14" fill="rgba(239,68,68,.07)" stroke="#ef4444" stroke-opacity=".55"/>
-                                <text x="423" y="302" fill="#f87171">&#10005; answers</text>
-                                <rect x="504" y="284" width="150" height="28" rx="14" fill="rgba(239,68,68,.07)" stroke="#ef4444" stroke-opacity=".55"/>
-                                <text x="579" y="302" fill="#f87171">&#10005; ladder verdict</text>
+                                <rect x="169" y="360" width="110" height="28" rx="14" fill="rgba(239,68,68,.07)" stroke="#ef4444" stroke-opacity=".55"/>
+                                <text x="224" y="378" fill="#f87171">&#10005; internet</text>
+                                <rect x="295" y="360" width="130" height="28" rx="14" fill="rgba(239,68,68,.07)" stroke="#ef4444" stroke-opacity=".55"/>
+                                <text x="360" y="378" fill="#f87171">&#10005; answer files</text>
+                                <rect x="441" y="360" width="110" height="28" rx="14" fill="rgba(239,68,68,.07)" stroke="#ef4444" stroke-opacity=".55"/>
+                                <text x="496" y="378" fill="#f87171">&#10005; API keys</text>
                             </g>
                         </g>
                     </svg>
