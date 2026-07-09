@@ -1,64 +1,101 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 322" role="img" aria-label="What is inside the sandbox" font-family="Inter, system-ui, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 330" role="img" aria-label="What is inside the sandbox" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">
   <style>
-    .sb-mod rect.body { transition: filter .2s; }
-    svg:hover .sb-mod rect.body { filter: brightness(1.12); }
-    .sb-scan { animation: sbscan 3.6s ease-in-out infinite; }
-    @keyframes sbscan { 0%,100% { transform: translateY(0); } 50% { transform: translateY(192px); } }
-    .sb-dot { animation: sbdot 2.2s ease-in-out infinite; }
-    @keyframes sbdot { 0%,100% { opacity: .4; } 50% { opacity: 1; } }
+    .scan { animation: scan 4.2s ease-in-out infinite; }
+    @keyframes scan { 0%,100% { transform: translateY(0); } 50% { transform: translateY(226px); } }
+    .deny { animation: deny 2.6s ease-in-out infinite; }
+    @keyframes deny { 0%,100% { opacity: .45; } 50% { opacity: 1; } }
     @media (prefers-reduced-motion: reduce) {
-      .sb-scan, .sb-dot { animation: none; }
-      .sb-scan { opacity: 0; }
+      .scan, .deny { animation: none; }
+      .scan { opacity: 0; }
+      .deny { opacity: .8; }
     }
   </style>
   <defs>
-    <linearGradient id="sbmod" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#243048"/><stop offset="1" stop-color="#1a2337"/>
+    <linearGradient id="cont" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="rgba(99,102,241,.14)"/><stop offset="1" stop-color="rgba(99,102,241,.03)"/>
     </linearGradient>
-    <linearGradient id="sbcont" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="rgba(99,102,241,.12)"/><stop offset="1" stop-color="rgba(99,102,241,.03)"/>
+    <linearGradient id="row" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#232e47"/><stop offset="1" stop-color="#182137"/>
     </linearGradient>
-    <linearGradient id="sbscang" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="rgba(129,140,248,0)"/><stop offset=".5" stop-color="rgba(129,140,248,.16)"/><stop offset="1" stop-color="rgba(129,140,248,0)"/>
+    <linearGradient id="scang" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="rgba(129,140,248,0)"/><stop offset=".5" stop-color="rgba(129,140,248,.14)"/><stop offset="1" stop-color="rgba(129,140,248,0)"/>
     </linearGradient>
-    <clipPath id="sbclip"><rect x="24" y="16" width="672" height="232" rx="16"/></clipPath>
+    <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1" fill="rgba(148,163,184,.07)"/>
+    </pattern>
+    <filter id="rowds" x="-20%" y="-40%" width="140%" height="200%">
+      <feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="rgba(2,6,23,.45)"/>
+    </filter>
+    <filter id="contglow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="0" stdDeviation="14" flood-color="rgba(99,102,241,.22)"/>
+    </filter>
+    <clipPath id="contclip"><rect x="24" y="16" width="672" height="262" rx="16"/></clipPath>
   </defs>
 
-  <rect x="24" y="16" width="672" height="232" rx="16" fill="url(#sbcont)" stroke="#6366f1" stroke-opacity="0.6" stroke-width="1.6" stroke-dasharray="7 5"/>
-  <rect class="sb-scan" clip-path="url(#sbclip)" x="24" y="16" width="672" height="40" fill="url(#sbscang)"/>
-  <text x="44" y="44" fill="#a5b4fc" font-family="JetBrains Mono, ui-monospace, monospace" font-size="12" letter-spacing="1.5">SANDBOX &#183; one sealed container per bug</text>
+  <!-- sealed container -->
+  <rect x="24" y="16" width="672" height="262" rx="16" fill="url(#cont)" filter="url(#contglow)"/>
+  <rect x="24" y="16" width="672" height="262" rx="16" fill="url(#dots)" stroke="#6366f1" stroke-opacity=".65" stroke-width="1.6"/>
+  <rect class="scan" clip-path="url(#contclip)" x="24" y="16" width="672" height="36" fill="url(#scang)"/>
 
-  <g class="sb-mod">
-    <rect class="body" x="44" y="60" width="632" height="56" rx="10" fill="url(#sbmod)" stroke="#6366f1" stroke-opacity=".85"/>
-    <rect x="44" y="60" width="5" height="56" rx="2.5" fill="#818cf8"/>
-    <circle cx="648" cy="88" r="11" fill="none" stroke="#818cf8" stroke-width="1.8"/><path d="M642,88 h12 M648,82 v12" stroke="#818cf8" stroke-width="1.8"/>
-    <text x="68" y="86" fill="#fff" font-size="15" font-weight="700">Project source</text>
-    <text x="68" y="105" fill="#94a3b8" font-size="12">the target source code, at the exact revision that contains the bug</text>
+  <!-- title bar -->
+  <circle cx="50" cy="40" r="4.5" fill="#f87171" fill-opacity=".85"/>
+  <circle cx="66" cy="40" r="4.5" fill="#fbbf24" fill-opacity=".85"/>
+  <circle cx="82" cy="40" r="4.5" fill="#34d399" fill-opacity=".85"/>
+  <text x="104" y="44" fill="#a5b4fc" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="11.5" letter-spacing="1.5">SANDBOX &#183; one sealed container per bug</text>
+  <g stroke="#a5b4fc" stroke-width="1.7" fill="none" stroke-linecap="round">
+    <path d="M660.5,40 v-4.5 a3.5,3.5 0 0 1 7,0 v4.5"/>
+    <rect x="657.5" y="40" width="13" height="10" rx="2.5"/>
+    <circle cx="664" cy="45" r="1.4" fill="#a5b4fc" stroke="none"/>
+  </g>
+  <line x1="40" y1="58" x2="680" y2="58" stroke="rgba(129,140,248,.18)" stroke-width="1"/>
+
+  <!-- module 1, project source -->
+  <g>
+    <rect x="44" y="70" width="632" height="56" rx="12" fill="url(#row)" stroke="rgba(99,102,241,.4)" filter="url(#rowds)"/>
+    <rect x="60" y="80" width="36" height="36" rx="10" fill="rgba(129,140,248,.12)" stroke="rgba(129,140,248,.5)"/>
+    <g stroke="#818cf8" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M71,93 l-5,5 5,5"/><path d="M85,93 l5,5 -5,5"/><path d="M80,91 l-4,14"/>
+    </g>
+    <text x="114" y="94" fill="#f1f5f9" font-size="15" font-weight="700">Project source</text>
+    <text x="114" y="113" fill="#94a3b8" font-size="12">the target source code, pinned to the exact revision that contains the bug</text>
   </g>
 
-  <g class="sb-mod">
-    <rect class="body" x="44" y="124" width="632" height="56" rx="10" fill="url(#sbmod)" stroke="#6366f1" stroke-opacity=".85"/>
-    <rect x="44" y="124" width="5" height="56" rx="2.5" fill="#a78bfa"/>
-    <path d="M640,150 l10,8 -10,8 M652,166 h8" stroke="#a78bfa" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-    <text x="68" y="150" fill="#fff" font-size="15" font-weight="700">Fuzz harness</text>
-    <text x="68" y="169" fill="#94a3b8" font-size="12">runs any input through the code, and the sanitizer reports a fault as a crash</text>
+  <!-- module 2, fuzz harness -->
+  <g>
+    <rect x="44" y="134" width="632" height="56" rx="12" fill="url(#row)" stroke="rgba(99,102,241,.4)" filter="url(#rowds)"/>
+    <rect x="60" y="144" width="36" height="36" rx="10" fill="rgba(167,139,250,.12)" stroke="rgba(167,139,250,.5)"/>
+    <g stroke="#a78bfa" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M70,156 l7,6 -7,6"/><path d="M80,168 h7"/>
+    </g>
+    <text x="114" y="158" fill="#f1f5f9" font-size="15" font-weight="700">Fuzz harness</text>
+    <text x="114" y="177" fill="#94a3b8" font-size="12">feeds any input to the code, and the sanitizer reports any fault as a crash</text>
   </g>
 
-  <g class="sb-mod">
-    <rect class="body" x="44" y="188" width="632" height="56" rx="10" fill="url(#sbmod)" stroke="#6366f1" stroke-opacity=".85"/>
-    <rect x="44" y="188" width="5" height="56" rx="2.5" fill="#60a5fa"/>
-    <circle cx="648" cy="216" r="10" fill="none" stroke="#60a5fa" stroke-width="1.8"/><path d="M648,209 v7 l5,4" stroke="#60a5fa" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-    <text x="68" y="214" fill="#fff" font-size="15" font-weight="700">Fixed environment</text>
-    <text x="68" y="233" fill="#94a3b8" font-size="12">pinned dependencies, prebuilt and ready to run, nothing to set up</text>
+  <!-- module 3, fixed environment -->
+  <g>
+    <rect x="44" y="198" width="632" height="56" rx="12" fill="url(#row)" stroke="rgba(99,102,241,.4)" filter="url(#rowds)"/>
+    <rect x="60" y="208" width="36" height="36" rx="10" fill="rgba(96,165,250,.12)" stroke="rgba(96,165,250,.5)"/>
+    <g stroke="#60a5fa" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M78,217 l8,4.5 v9 l-8,4.5 l-8,-4.5 v-9 z"/>
+      <path d="M70,221.5 l8,4.5 8,-4.5"/><path d="M78,226 v9"/>
+    </g>
+    <text x="114" y="222" fill="#f1f5f9" font-size="15" font-weight="700">Fixed environment</text>
+    <text x="114" y="241" fill="#94a3b8" font-size="12">dependencies pinned, everything prebuilt, nothing for the model to set up</text>
   </g>
 
-  <text x="360" y="280" fill="#64748b" font-size="12" text-anchor="middle">never enters the container</text>
-  <g class="sb-dot" font-family="JetBrains Mono, ui-monospace, monospace" font-size="12" text-anchor="middle">
-    <rect x="158" y="290" width="120" height="30" rx="15" fill="rgba(239,68,68,.08)" stroke="#ef4444" stroke-opacity=".6"/>
-    <text x="218" y="309" fill="#f87171">&#10005; internet</text>
-    <rect x="288" y="290" width="144" height="30" rx="15" fill="rgba(239,68,68,.08)" stroke="#ef4444" stroke-opacity=".6"/>
-    <text x="360" y="309" fill="#f87171">&#10005; answer files</text>
-    <rect x="442" y="290" width="120" height="30" rx="15" fill="rgba(239,68,68,.08)" stroke="#ef4444" stroke-opacity=".6"/>
-    <text x="502" y="309" fill="#f87171">&#10005; API keys</text>
+  <!-- blocked at the boundary -->
+  <g font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="11.5">
+    <rect x="181" y="263" width="100" height="30" rx="15" fill="#141b2d" stroke="#ef4444" stroke-opacity=".55"/>
+    <g class="deny" stroke="#f87171" stroke-width="1.6" stroke-linecap="round"><path d="M195,274 l8,8 M203,274 l-8,8"/></g>
+    <text x="211" y="282" fill="#f87171">internet</text>
+
+    <rect x="297" y="263" width="126" height="30" rx="15" fill="#141b2d" stroke="#ef4444" stroke-opacity=".55"/>
+    <g class="deny" stroke="#f87171" stroke-width="1.6" stroke-linecap="round"><path d="M311,274 l8,8 M319,274 l-8,8"/></g>
+    <text x="327" y="282" fill="#f87171">answer files</text>
+
+    <rect x="439" y="263" width="100" height="30" rx="15" fill="#141b2d" stroke="#ef4444" stroke-opacity=".55"/>
+    <g class="deny" stroke="#f87171" stroke-width="1.6" stroke-linecap="round"><path d="M453,274 l8,8 M461,274 l-8,8"/></g>
+    <text x="469" y="282" fill="#f87171">API keys</text>
   </g>
+  <text x="360" y="314" fill="#64748b" font-size="11.5" text-anchor="middle">stopped at the boundary, never enters the container</text>
 </svg>

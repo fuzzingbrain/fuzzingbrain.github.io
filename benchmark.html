@@ -173,17 +173,6 @@
     .ladder-list .ln{color:var(--text-primary);font-weight:600;font-family:var(--font-mono);margin-right:8px}
     /* architecture diagram */
     .arch-svg{width:100%;height:auto;display:block;margin-top:16px}
-    .sb-flow{stroke-dasharray:6 7;animation:sbflow .85s linear infinite}
-    @keyframes sbflow{to{stroke-dashoffset:-13}}
-    .sb-breathe{animation:sbbreathe 2.8s ease-in-out infinite}
-    @keyframes sbbreathe{0%,100%{stroke-opacity:.45}50%{stroke-opacity:1}}
-    .sb-mod{transition:filter .2s}
-    .sb-svg:hover .sb-mod{filter:brightness(1.12)}
-    .sb-dot{animation:sbdot 2.2s ease-in-out infinite}
-    @keyframes sbdot{0%,100%{opacity:.35}50%{opacity:1}}
-    .sb-scan{animation:sbscan 3.6s ease-in-out infinite}
-    @keyframes sbscan{0%,100%{transform:translateY(0)}50%{transform:translateY(244px)}}
-    @media(prefers-reduced-motion:reduce){.sb-flow,.sb-breathe,.sb-dot,.sb-scan{animation:none}.sb-flow{stroke-dasharray:none}.sb-scan{opacity:0}}
     .intro-hr{border:0;border-top:1px solid var(--border);margin:38px 0 0}
     .parts-list{list-style:none;margin:14px 0 18px;padding:0}
     .parts-list li{position:relative;padding:9px 0 9px 24px;border-bottom:1px solid var(--border);color:var(--text-secondary);line-height:1.5;font-size:.93rem}
@@ -549,73 +538,7 @@
                 <div class="intro-block">
                     <div class="ib-h"><h4>Realistic sandbox</h4></div>
                     <p>The sandbox is built to feel like real vulnerability research. Nothing in it tells the model it is being benchmarked. The bug carries a neutral alias, the shell has no internet, the model key never enters the container, and every grade returns only the raw harness output a fuzzer would show. Dependencies are pinned and the build is fixed, so the model does not fight the environment.</p>
-                    <svg class="arch-svg sb-svg" style="margin-top:22px" viewBox="0 0 720 372" role="img" aria-label="What is inside the sandbox">
-                        <defs>
-                            <linearGradient id="sbmod" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0" stop-color="#243048"/><stop offset="1" stop-color="#1a2337"/>
-                            </linearGradient>
-                            <linearGradient id="sbcont" x1="0" y1="0" x2="1" y2="1">
-                                <stop offset="0" stop-color="rgba(99,102,241,.12)"/><stop offset="1" stop-color="rgba(99,102,241,.03)"/>
-                            </linearGradient>
-                            <linearGradient id="sbscang" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0" stop-color="rgba(129,140,248,0)"/><stop offset=".5" stop-color="rgba(129,140,248,.16)"/><stop offset="1" stop-color="rgba(129,140,248,0)"/>
-                            </linearGradient>
-                            <clipPath id="sbclip"><rect x="24" y="16" width="672" height="284" rx="16"/></clipPath>
-                        </defs>
-                        <g font-family="Inter">
-                            <!-- sandbox container -->
-                            <rect x="24" y="16" width="672" height="284" rx="16" fill="url(#sbcont)" stroke="#6366f1" stroke-opacity="0.6" stroke-width="1.6" stroke-dasharray="7 5"/>
-                            <rect class="sb-scan" clip-path="url(#sbclip)" x="24" y="16" width="672" height="40" fill="url(#sbscang)"/>
-                            <text x="44" y="44" fill="#a5b4fc" font-family="JetBrains Mono" font-size="12" letter-spacing="1.5">SANDBOX &middot; one sealed container per bug</text>
-                            <!-- module 1: project source -->
-                            <g class="sb-mod">
-                                <rect x="44" y="58" width="308" height="106" rx="10" fill="url(#sbmod)" stroke="#6366f1" stroke-opacity=".85"/>
-                                <rect x="44" y="58" width="5" height="106" rx="2.5" fill="#818cf8"/>
-                                <circle cx="322" cy="86" r="11" fill="none" stroke="#818cf8" stroke-width="1.8"/><path d="M316,86 h12 M322,80 v12" stroke="#818cf8" stroke-width="1.8"/>
-                                <text x="68" y="90" fill="#fff" font-size="15" font-weight="700">Project source</text>
-                                <text x="68" y="116" fill="#94a3b8" font-size="12">the target code, at the exact</text>
-                                <text x="68" y="134" fill="#94a3b8" font-size="12">revision that contains the bug</text>
-                            </g>
-                            <!-- module 2: fuzz harness -->
-                            <g class="sb-mod">
-                                <rect x="368" y="58" width="308" height="106" rx="10" fill="url(#sbmod)" stroke="#6366f1" stroke-opacity=".85"/>
-                                <rect x="368" y="58" width="5" height="106" rx="2.5" fill="#a78bfa"/>
-                                <path d="M642,82 l10,8 -10,8 M654,98 h8" stroke="#a78bfa" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                                <text x="392" y="90" fill="#fff" font-size="15" font-weight="700">Fuzz harness</text>
-                                <text x="392" y="116" fill="#94a3b8" font-size="12">runs an input through the code,</text>
-                                <text x="392" y="134" fill="#94a3b8" font-size="12">and the sanitizer flags any fault</text>
-                                <text x="392" y="152" fill="#94a3b8" font-size="12">as a crash</text>
-                            </g>
-                            <!-- module 3: fixed environment -->
-                            <g class="sb-mod">
-                                <rect x="44" y="178" width="308" height="106" rx="10" fill="url(#sbmod)" stroke="#6366f1" stroke-opacity=".85"/>
-                                <rect x="44" y="178" width="5" height="106" rx="2.5" fill="#60a5fa"/>
-                                <circle cx="322" cy="206" r="10" fill="none" stroke="#60a5fa" stroke-width="1.8"/><path d="M322,199 v7 l5,4" stroke="#60a5fa" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-                                <text x="68" y="210" fill="#fff" font-size="15" font-weight="700">Fixed environment</text>
-                                <text x="68" y="236" fill="#94a3b8" font-size="12">pinned dependencies, prebuilt</text>
-                                <text x="68" y="254" fill="#94a3b8" font-size="12">and ready to run</text>
-                            </g>
-                            <!-- module 4: bug under test -->
-                            <g class="sb-mod">
-                                <rect x="368" y="178" width="308" height="106" rx="10" fill="url(#sbmod)" stroke="#f59e0b" stroke-opacity=".6"/>
-                                <rect x="368" y="178" width="5" height="106" rx="2.5" fill="#fbbf24"/>
-                                <path d="M636,206 a8,8 0 1,1 10,0 M641,196 v-4 M632,201 l-4,-3 M650,201 l4,-3" stroke="#fbbf24" stroke-width="1.7" fill="none" stroke-linecap="round"/>
-                                <text x="392" y="210" fill="#fff" font-size="15" font-weight="700">The bug under test</text>
-                                <text x="392" y="236" fill="#94a3b8" font-size="12">only an alias like <tspan font-family="JetBrains Mono" fill="#cbd5e1">json-java-02</tspan></text>
-                                <text x="392" y="254" fill="#94a3b8" font-size="12">no name and no description</text>
-                            </g>
-                            <!-- kept out -->
-                            <text x="360" y="330" fill="#64748b" font-size="12" text-anchor="middle">never enters the container</text>
-                            <g class="sb-dot" font-family="JetBrains Mono" font-size="12" text-anchor="middle">
-                                <rect x="158" y="342" width="120" height="30" rx="15" fill="rgba(239,68,68,.08)" stroke="#ef4444" stroke-opacity=".6"/>
-                                <text x="218" y="361" fill="#f87171">&#10005; internet</text>
-                                <rect x="288" y="342" width="144" height="30" rx="15" fill="rgba(239,68,68,.08)" stroke="#ef4444" stroke-opacity=".6"/>
-                                <text x="360" y="361" fill="#f87171">&#10005; answer files</text>
-                                <rect x="442" y="342" width="120" height="30" rx="15" fill="rgba(239,68,68,.08)" stroke="#ef4444" stroke-opacity=".6"/>
-                                <text x="502" y="361" fill="#f87171">&#10005; API keys</text>
-                            </g>
-                        </g>
-                    </svg>
+                    <img class="arch-svg" style="margin-top:22px" src="assets/images/sandbox.svg" alt="What is inside the sandbox" width="720" height="330">
                     <p style="color:var(--text-muted);font-size:.86rem;margin:12px 0 0;max-width:74ch">The agent works only inside the container with a few tools. It submits a candidate input through <span style="font-family:var(--font-mono)">grade()</span> and gets back the raw harness report, with no score and no hint of how close the input came.</p>
                 </div>
 
