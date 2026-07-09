@@ -85,17 +85,21 @@
 
   <!-- blocked at the boundary -->
   <g font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="11.5">
-    <rect x="181" y="263" width="100" height="30" rx="15" fill="#141b2d" stroke="#ef4444" stroke-opacity=".55"/>
-    <g class="deny" stroke="#f87171" stroke-width="1.6" stroke-linecap="round"><path d="M195,274 l8,8 M203,274 l-8,8"/></g>
-    <text x="211" y="282" fill="#f87171">internet</text>
+    <rect x="121" y="263" width="100" height="30" rx="15" fill="#141b2d" stroke="#ef4444" stroke-opacity=".55"/>
+    <g class="deny" stroke="#f87171" stroke-width="1.6" stroke-linecap="round"><path d="M135,274 l8,8 M143,274 l-8,8"/></g>
+    <text x="151" y="282" fill="#f87171">internet</text>
 
-    <rect x="297" y="263" width="126" height="30" rx="15" fill="#141b2d" stroke="#ef4444" stroke-opacity=".55"/>
-    <g class="deny" stroke="#f87171" stroke-width="1.6" stroke-linecap="round"><path d="M311,274 l8,8 M319,274 l-8,8"/></g>
-    <text x="327" y="282" fill="#f87171">answer files</text>
+    <rect x="237" y="263" width="126" height="30" rx="15" fill="#141b2d" stroke="#ef4444" stroke-opacity=".55"/>
+    <g class="deny" stroke="#f87171" stroke-width="1.6" stroke-linecap="round"><path d="M251,274 l8,8 M259,274 l-8,8"/></g>
+    <text x="267" y="282" fill="#f87171">answer files</text>
 
-    <rect x="439" y="263" width="100" height="30" rx="15" fill="#141b2d" stroke="#ef4444" stroke-opacity=".55"/>
-    <g class="deny" stroke="#f87171" stroke-width="1.6" stroke-linecap="round"><path d="M453,274 l8,8 M461,274 l-8,8"/></g>
-    <text x="469" y="282" fill="#f87171">API keys</text>
+    <rect x="379" y="263" width="104" height="30" rx="15" fill="#141b2d" stroke="#ef4444" stroke-opacity=".55"/>
+    <g class="deny" stroke="#f87171" stroke-width="1.6" stroke-linecap="round"><path d="M393,274 l8,8 M401,274 l-8,8"/></g>
+    <text x="409" y="282" fill="#f87171">bug hints</text>
+
+    <rect x="499" y="263" width="100" height="30" rx="15" fill="#141b2d" stroke="#ef4444" stroke-opacity=".55"/>
+    <g class="deny" stroke="#f87171" stroke-width="1.6" stroke-linecap="round"><path d="M513,274 l8,8 M521,274 l-8,8"/></g>
+    <text x="529" y="282" fill="#f87171">API keys</text>
   </g>
   <text x="360" y="314" fill="#64748b" font-size="11.5" text-anchor="middle">stopped at the boundary, never enters the container</text>
 </svg>
