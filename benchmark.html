@@ -391,7 +391,7 @@
             <div class="section-content">
                 <div class="bench-kicker">Can LLMs actually find real bugs?</div>
                 <h2>FuzzingBrain Bench</h2>
-                <p class="lede">Everyone says language models can find vulnerabilities. But no public benchmark measures this well. FuzzingBrain Bench tests models on 68 real-world bugs from 40 open-source projects. The answers are hidden, and success requires concrete evidence: an OSS-Fuzz crashing input that reproduces the bug.</p>
+                <p class="lede">FuzzingBrain Bench tests models on 68 real-world bugs from 40 open-source projects. The answers are hidden; to score, a model must produce an OSS-Fuzz crashing input that reproduces the documented bug.</p>
                 <div class="bench-statrow">
                     <a class="bench-stat" href="#challenges" data-tabjump="stats"><div class="n">68</div><div class="l">Real bugs</div></a>
                     <a class="bench-stat" href="#challenges" data-tabjump="stats"><div class="n">40</div><div class="l">OSS projects</div></a>
@@ -479,62 +479,58 @@
 
         <section class="bench-section">
             <div class="section-content">
-                <p class="sub" style="max-width:74ch">Most reports of models finding bugs count a crash. A crash is not a solve. FuzzingBrain Bench is built so the program itself decides whether a model found the exact documented bug or merely tripped some other fault. Three things make that work.</p>
+                <h3 class="hd">What is new</h3>
+                <p class="sub">Three design pillars are the core contribution of FuzzingBrain Bench. No other bug-finding benchmark has them together.</p>
+                <svg class="arch-svg" style="max-width:720px" viewBox="0 0 720 190" role="img" aria-label="The three design pillars of FuzzingBrain Bench">
+                    <g font-family="Inter">
+                        <!-- pillar 1: multi-level task -->
+                        <rect x="16" y="20" width="214" height="150" rx="11" fill="#1e293b" stroke="#6366f1"/>
+                        <text x="30" y="42" fill="#818cf8" font-family="JetBrains Mono" font-size="11">01</text>
+                        <g stroke="#0f172a" stroke-width="1">
+                            <rect x="114" y="36" width="18" height="9" fill="#4c43d9"/>
+                            <rect x="108" y="46" width="30" height="9" fill="#5850ec"/>
+                            <rect x="102" y="56" width="42" height="9" fill="#6366f1"/>
+                            <rect x="96" y="66" width="54" height="9" fill="#7079f2"/>
+                            <rect x="90" y="76" width="66" height="9" fill="#8b93f7"/>
+                        </g>
+                        <text x="123" y="112" fill="#fff" font-size="15" font-weight="700" text-anchor="middle">Multi-level grading</text>
+                        <text x="123" y="132" fill="#94a3b8" font-size="11.5" text-anchor="middle">a five-level ladder,</text>
+                        <text x="123" y="148" fill="#94a3b8" font-size="11.5" text-anchor="middle">from reach to site</text>
+                        <!-- pillar 2: audited oracle -->
+                        <rect x="253" y="20" width="214" height="150" rx="11" fill="#1e293b" stroke="#f59e0b"/>
+                        <text x="267" y="42" fill="#f59e0b" font-family="JetBrains Mono" font-size="11">02</text>
+                        <path d="M360,36 l22,8 v20 c0,15 -10,25 -22,31 c-12,-6 -22,-16 -22,-31 v-20 z" fill="none" stroke="#f59e0b" stroke-width="2.5"/>
+                        <polyline points="349,64 357,72 372,54" fill="none" stroke="#f59e0b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                        <text x="360" y="112" fill="#fff" font-size="15" font-weight="700" text-anchor="middle">Audited oracle</text>
+                        <text x="360" y="132" fill="#94a3b8" font-size="11.5" text-anchor="middle">harness noise filtered out</text>
+                        <text x="360" y="148" fill="#94a3b8" font-size="11.5" text-anchor="middle">by a four-principles audit</text>
+                        <!-- pillar 3: blind realistic sandbox -->
+                        <rect x="490" y="20" width="214" height="150" rx="11" fill="#1e293b" stroke="#10b981"/>
+                        <text x="504" y="42" fill="#10b981" font-family="JetBrains Mono" font-size="11">03</text>
+                        <ellipse cx="597" cy="60" rx="27" ry="16" fill="none" stroke="#10b981" stroke-width="2.5"/>
+                        <circle cx="597" cy="60" r="6.5" fill="none" stroke="#10b981" stroke-width="2.5"/>
+                        <line x1="575" y1="82" x2="619" y2="38" stroke="#10b981" stroke-width="3" stroke-linecap="round"/>
+                        <text x="597" y="112" fill="#fff" font-size="15" font-weight="700" text-anchor="middle">Realistic sandbox</text>
+                        <text x="597" y="132" fill="#94a3b8" font-size="11.5" text-anchor="middle">nothing tells the model</text>
+                        <text x="597" y="148" fill="#94a3b8" font-size="11.5" text-anchor="middle">it is being benchmarked</text>
+                    </g>
+                </svg>
 
                 <div class="intro-block">
-                    <div class="ib-h"><h4>A clean sandbox for every challenge</h4></div>
-                    <p>Every challenge runs in its own Docker image, and every image is clean. Dependencies and versions are pinned and the build is fixed, so the model never fights version drift or a broken toolchain and can spend all of its effort on finding the bug. The same sandbox keeps the run honest. The agent has only a small set of bench tools, its shell has no internet, and the model key never enters the container, so it cannot look the answer up or fetch anything from outside.</p>
+                    <div class="ib-h"><h4>Multi-level grading</h4></div>
+                    <p>Every candidate input is scored on a five-level ladder of reach, crash, differential, class, and site. Each level is strictly stronger than the last. A crash of the wrong class or at the wrong location is a different bug, so an off-target crash is progress, not a solve.</p>
                 </div>
 
                 <div class="intro-block">
-                    <div class="ib-h"><h4>A strictly audited oracle</h4></div>
-                    <p>The oracle is not a language model. The input is fed to the project's own fuzz harness and the sanitizer decides the verdict. What makes that trustworthy is that we audit the harness itself, following our <a href="posts/four-principles-harness-audit.html">four principles</a>. A weak harness can manufacture crashes that are not real bugs, so every harness here is checked to make sure it adds no faults of its own. A crash then reflects the target code, not the test wrapper.</p>
+                    <div class="ib-h"><h4>Audited oracle</h4></div>
+                    <p>The verdict comes from the project&rsquo;s own fuzz harness and its sanitizer, not from a language model. A weak harness can manufacture crashes that are not real bugs, so every harness here is audited against our <a href="posts/four-principles-harness-audit.html">four principles</a> before its bug ships. A crash then reflects the target code, not the test wrapper.</p>
                 </div>
 
                 <div class="intro-block">
-                    <div class="ib-h"><h4>A realistic bug-hunting task</h4></div>
-                    <p>We build the task to look and feel like real vulnerability research, not a benchmark. Nothing in it tells the model it is being scored. The bug carries only a neutral alias, and although a strict five-level ladder runs behind the scenes, the model never gets to read it. Every grade returns only the raw harness output, the same thing a fuzzer would show, so there is no scoreboard to game and no sense of how close it is.</p>
-                    <div class="ladder-wrap">
-                        <div>
-                            <svg class="ladder-svg" viewBox="-24 0 508 320" role="img" aria-label="Capability ladder pyramid">
-                                <!-- pyramid tiers -->
-                                <g stroke="#0f172a" stroke-width="2">
-                                    <polygon points="190,24 270,24 292,78 168,78" fill="#4c43d9"/>
-                                    <polygon points="168,78 292,78 314,132 146,132" fill="#5850ec"/>
-                                    <polygon points="146,132 314,132 336,186 124,186" fill="#6366f1"/>
-                                    <polygon points="124,186 336,186 358,240 102,240" fill="#7079f2"/>
-                                    <polygon points="102,240 358,240 380,294 80,294" fill="#8b93f7"/>
-                                </g>
-                                <g fill="#fff" font-family="JetBrains Mono" font-size="14" text-anchor="middle" font-weight="600">
-                                    <text x="230" y="56">site</text>
-                                    <text x="230" y="110">class</text>
-                                    <text x="230" y="164">differential</text>
-                                    <text x="230" y="218">crash</text>
-                                    <text x="230" y="272">reach</text>
-                                </g>
-                                <!-- side arrows -->
-                                <g stroke="#94a3b8" stroke-width="3.5" fill="none" stroke-linecap="round">
-                                    <line x1="34" y1="52" x2="34" y2="268"/>
-                                    <line x1="426" y1="268" x2="426" y2="52"/>
-                                </g>
-                                <g fill="#94a3b8">
-                                    <polygon points="22,264 46,264 34,286"/>
-                                    <polygon points="414,56 438,56 426,34"/>
-                                </g>
-                                <g fill="#cbd5e1" font-family="Inter" font-size="14" font-weight="600" text-anchor="middle">
-                                    <text x="34" y="308">more reach</text>
-                                    <text x="426" y="24">harder</text>
-                                </g>
-                            </svg>
-                        </div>
-                        <ol class="ladder-list">
-                            <li><span class="ln">reach</span> the input drives execution into the buggy region of code</li>
-                            <li><span class="ln">crash</span> the input makes the sanitizer-instrumented build fault at all</li>
-                            <li><span class="ln">differential</span> the input faults the vulnerable build but runs clean on the patched build, so the crash is this bug and not a pre-existing one</li>
-                            <li><span class="ln">class</span> the input triggers the same fault class the bug is documented as, for example heap-overflow or use-after-free</li>
-                            <li><span class="ln">site</span> the input crashes at the documented file and line, at or near the top of the stack</li>
-                        </ol>
-                    </div>
+                    <div class="ib-h"><h4>Realistic sandbox</h4></div>
+                    <p>The sandbox is built to feel like real vulnerability research. Nothing in it tells the model it is being benchmarked. The bug carries a neutral alias, the shell has no internet, the model key never enters the container, and every grade returns only the raw harness output a fuzzer would show. Dependencies are pinned and the build is fixed, so the model does not fight the environment.</p>
+                    <img class="arch-svg" style="margin-top:22px" src="assets/images/sandbox.svg" alt="What is inside the sandbox" width="720" height="330">
+                    <p style="color:var(--text-muted);font-size:.86rem;margin:12px 0 0;max-width:74ch">The agent works only inside the container with a few tools. It submits a candidate input through <span style="font-family:var(--font-mono)">grade()</span> and gets back the raw harness report, with no score and no hint of how close the input came.</p>
                 </div>
 
                 <hr class="intro-hr">
@@ -656,6 +652,47 @@ READ of size 4 at <span class="dim">0x60200000eff4</span> thread T0
                 <div class="intro-block">
                     <div class="ib-h"><h4>Grading</h4></div>
                     <p>At its core the task is simple. The agent is generating a fuzz input. It writes some bytes, the harness runs them, and the output is a crash or a clean run.</p>
+                    <div class="ladder-wrap">
+                        <div>
+                            <svg class="ladder-svg" viewBox="-24 0 508 320" role="img" aria-label="Capability ladder pyramid">
+                                <!-- pyramid tiers -->
+                                <g stroke="#0f172a" stroke-width="2">
+                                    <polygon points="190,24 270,24 292,78 168,78" fill="#4c43d9"/>
+                                    <polygon points="168,78 292,78 314,132 146,132" fill="#5850ec"/>
+                                    <polygon points="146,132 314,132 336,186 124,186" fill="#6366f1"/>
+                                    <polygon points="124,186 336,186 358,240 102,240" fill="#7079f2"/>
+                                    <polygon points="102,240 358,240 380,294 80,294" fill="#8b93f7"/>
+                                </g>
+                                <g fill="#fff" font-family="JetBrains Mono" font-size="14" text-anchor="middle" font-weight="600">
+                                    <text x="230" y="56">site</text>
+                                    <text x="230" y="110">class</text>
+                                    <text x="230" y="164">differential</text>
+                                    <text x="230" y="218">crash</text>
+                                    <text x="230" y="272">reach</text>
+                                </g>
+                                <!-- side arrows -->
+                                <g stroke="#94a3b8" stroke-width="3.5" fill="none" stroke-linecap="round">
+                                    <line x1="34" y1="52" x2="34" y2="268"/>
+                                    <line x1="426" y1="268" x2="426" y2="52"/>
+                                </g>
+                                <g fill="#94a3b8">
+                                    <polygon points="22,264 46,264 34,286"/>
+                                    <polygon points="414,56 438,56 426,34"/>
+                                </g>
+                                <g fill="#cbd5e1" font-family="Inter" font-size="14" font-weight="600" text-anchor="middle">
+                                    <text x="34" y="308">more reach</text>
+                                    <text x="426" y="24">harder</text>
+                                </g>
+                            </svg>
+                        </div>
+                        <ol class="ladder-list">
+                            <li><span class="ln">reach</span> the input drives execution into the buggy region of code</li>
+                            <li><span class="ln">crash</span> the input makes the sanitizer-instrumented build fault at all</li>
+                            <li><span class="ln">differential</span> the input faults the vulnerable build but runs clean on the patched build, so the crash is this bug and not a pre-existing one</li>
+                            <li><span class="ln">class</span> the input triggers the same fault class the bug is documented as, for example heap-overflow or use-after-free</li>
+                            <li><span class="ln">site</span> the input crashes at the documented file and line, at or near the top of the stack</li>
+                        </ol>
+                    </div>
                     <svg class="arch-svg" style="max-width:540px;margin:6px auto 2px;display:block" viewBox="0 0 560 124" role="img" aria-label="the agent's input runs through the harness and produces output">
                         <defs>
                             <marker id="ah4" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#94a3b8"/></marker>
@@ -787,7 +824,7 @@ READ of size 4 at <span class="dim">0x60200000eff4</span> thread T0
                         </g>
                     </svg>
 
-                    <p class="grade-note"><b>The agent never sees the ladder.</b> Every <code>grade</code> returns only <code>harness_output</code>, the stdout, stderr, exit code and signal from that one run, exactly like a fuzzer on one input. Which rungs fired, reach through site, is computed by the oracle for scoring and stripped before it ever reaches the model. So the model gets no signal telling it how far up the ladder it climbed.</p>
+                    <p class="grade-note"><b>The agent never sees the ladder.</b> Every <code>grade</code> returns only <code>harness_output</code>, the stdout, stderr, exit code and signal from that one run, exactly like a fuzzer on one input. Which levels fired, reach through site, is computed by the oracle for scoring and stripped before it ever reaches the model. So the model gets no signal telling it how far up the ladder it climbed.</p>
 
                     <p class="mini-h">The six tools it can call</p>
                     <table class="design-table">
@@ -1075,7 +1112,7 @@ python -m fbbench.sweep.claudecode sweep --bugs all --model sonnet --auth api</c
                 <div class="diff-formula">
                     <p class="fh">The formula</p>
                     <ol>
-                        <li><span class="fx"><b>solved</b>(bug, run) = 1</span><span>the run fires <em>every</em> applicable rung of the ladder (reach &rarr; crash &rarr; differential &rarr; class &rarr; site) &mdash; a full solve; otherwise 0.</span></li>
+                        <li><span class="fx"><b>solved</b>(bug, run) = 1</span><span>the run fires <em>every</em> applicable level of the ladder (reach &rarr; crash &rarr; differential &rarr; class &rarr; site) &mdash; a full solve; otherwise 0.</span></li>
                         <li><span class="fx"><b>S</b> = &Sigma; solved(bug, run)</span><span>how many of the <b>N&nbsp;=&nbsp;8</b> model runs solved the bug (0&nbsp;&le;&nbsp;S&nbsp;&le;&nbsp;8).</span></li>
                         <li><span class="fx"><b>D</b> = 5 &minus; &lceil;S / 2&rceil;</span><span>the difficulty level, from <b>D1</b> (easiest, 7&ndash;8 solved) to <b>D5</b> (hardest, 0 solved).</span></li>
                     </ol>
@@ -1114,10 +1151,91 @@ python -m fbbench.sweep.claudecode sweep --bugs all --model sonnet --auth api</c
         </section>
 
         <!-- Difficulty x model heatmap -->
-        <section class="bench-section" id="climb">
+        <!-- Solve rate by category and language -->
+        <section class="bench-section">
             <div class="section-content">
+                <h3 class="hd">Solve rate by vulnerability category</h3>
+                <p class="sub">Pooled over the eight model runs, broken out by fault category and by language. One pattern runs through it: a bug that fires on a single malformed input is easy, while a bug that needs the model to construct a condition &mdash; free-then-use, exhaust memory, leak &mdash; is hard.</p>
+                <div class="sr-wrap">
+                    <div class="sr-row"><div class="sr-k">uncaught-exception</div><div class="sr-track"><div class="sr-fill" style="width:67%;background:#10b981"></div></div><div class="sr-v">67%</div><div class="sr-n">8 bugs</div></div>
+                    <div class="sr-row sm"><div class="sr-k">out-of-bounds-write</div><div class="sr-track"><div class="sr-fill" style="width:59%;background:#10b981"></div></div><div class="sr-v">59%</div><div class="sr-n">4 bugs</div></div>
+                    <div class="sr-row sm"><div class="sr-k">undefined-behavior</div><div class="sr-track"><div class="sr-fill" style="width:56%;background:#10b981"></div></div><div class="sr-v">56%</div><div class="sr-n">4 bugs</div></div>
+                    <div class="sr-row"><div class="sr-k">null-pointer-dereference</div><div class="sr-track"><div class="sr-fill" style="width:55%;background:#10b981"></div></div><div class="sr-v">55%</div><div class="sr-n">6 bugs</div></div>
+                    <div class="sr-row"><div class="sr-k">out-of-bounds-read</div><div class="sr-track"><div class="sr-fill" style="width:49%;background:#84cc16"></div></div><div class="sr-v">49%</div><div class="sr-n">22 bugs</div></div>
+                    <div class="sr-row"><div class="sr-k">reachable-assertion</div><div class="sr-track"><div class="sr-fill" style="width:45%;background:#84cc16"></div></div><div class="sr-v">45%</div><div class="sr-n">5 bugs</div></div>
+                    <div class="sr-row"><div class="sr-k">memory-exhaustion</div><div class="sr-track"><div class="sr-fill" style="width:34%;background:#f59e0b"></div></div><div class="sr-v">34%</div><div class="sr-n">9 bugs</div></div>
+                    <div class="sr-row sm"><div class="sr-k">stack-exhaustion</div><div class="sr-track"><div class="sr-fill" style="width:31%;background:#f59e0b"></div></div><div class="sr-v">31%</div><div class="sr-n">2 bugs</div></div>
+                    <div class="sr-row sm"><div class="sr-k">memory-leak</div><div class="sr-track"><div class="sr-fill" style="width:17%;background:#f97316"></div></div><div class="sr-v">17%</div><div class="sr-n">3 bugs</div></div>
+                    <div class="sr-row sm"><div class="sr-k">use-after-free</div><div class="sr-track"><div class="sr-fill" style="width:16%;background:#f97316"></div></div><div class="sr-v">16%</div><div class="sr-n">4 bugs</div></div>
+                    <div class="sr-row sm"><div class="sr-k">excessive-computation</div><div class="sr-track"><div class="sr-fill" style="width:2%;background:#ef4444"></div></div><div class="sr-v">0%</div><div class="sr-n">1 bug</div></div>
+                </div>
+                <p class="dh-cap">Categories shown faint have only 1&ndash;4 bugs &mdash; treat those rates as indicative, not precise. The large categories (out-of-bounds-read 22, memory-exhaustion 9, uncaught-exception 8, null-pointer-dereference 6) are the solid signal.</p>
+                <h4 class="mini-h" style="margin-top:26px" id="bylang">By language</h4>
+                <div class="sr-wrap">
+                    <div class="sr-row"><div class="sr-k">JVM</div><div class="sr-track"><div class="sr-fill" style="width:68%;background:#10b981"></div></div><div class="sr-v">68%</div><div class="sr-n">9 bugs</div></div>
+                    <div class="sr-row"><div class="sr-k">C++</div><div class="sr-track"><div class="sr-fill" style="width:49%;background:#84cc16"></div></div><div class="sr-v">49%</div><div class="sr-n">28 bugs</div></div>
+                    <div class="sr-row"><div class="sr-k">C</div><div class="sr-track"><div class="sr-fill" style="width:37%;background:#f59e0b"></div></div><div class="sr-v">37%</div><div class="sr-n">31 bugs</div></div>
+                </div>
+                <p class="dh-cap">JVM bugs are mostly uncaught exceptions a single bad field triggers; C is all low-level memory faults where the input must be built byte by byte.</p>
+            </div>
+        </section>
+
+
+
+        </div>
+
+        <div class="tab-panel" data-panel="leaderboard">
+        <section class="bench-section" id="leaderboard">
+            <div class="section-content">
+                <h3 class="hd">Leaderboard</h3>
+                <p class="sub">Ranked by difficulty-weighted score on all 68 bugs, one full-scan pass per model. A solve means the run found the documented bug on its own and cleared all five levels &mdash; reach, crash, differential, class and site &mdash; so off-target crashes do not count. Time is the median per bug; turns and grade calls are per-bug means, and cost is dollars per bug and per solved bug. Click any column to sort.</p>
+                <div class="lb-cond"><span>100 turns max</span><span>full-scan &middot; blind</span><span>5-level ladder</span></div>
+                <div class="lb-method">
+                    <b>How the score works.</b> Each solved bug is worth its difficulty level &mdash; a D1 bug earns <span class="fx">1</span> point, a D5 earns <span class="fx">5</span> &mdash; so a model's <b>Score</b> is <span class="fx">&Sigma; D(solved bug)</span>, summed over every bug it cracked. Cracking the rare hard bugs counts for far more than piling up easy ones. Difficulty (D1&ndash;D5) is the dynamic ranking from the <a href="#difficulty" data-tabjump="stats" class="xlink">Difficulty section</a>.
+                    <div class="score-total">
+                        <span class="stlabel">Max score = <b>205</b> &mdash; every bug counted at its own difficulty (count &times; points):</span>
+                        <div class="stbar">
+                            <span class="stseg" style="width:7.32%;background:#10b981;color:#08130d">15&times;1</span>
+                            <span class="stseg" style="width:12.68%;background:#84cc16;color:#141c05">13&times;2</span>
+                            <span class="stseg" style="width:19.02%;background:#f59e0b;color:#1c1400">13&times;3</span>
+                            <span class="stseg" style="width:19.51%;background:#f97316;color:#fff">10&times;4</span>
+                            <span class="stseg" style="width:41.46%;background:#ef4444;color:#fff">17&times;5</span>
+                        </div>
+                    </div>
+                    <ul class="defs">
+                        <li><b>Solved</b> &mdash; bugs cleared, of those run</li>
+                        <li><b>Time</b> &mdash; median wall-clock per bug</li>
+                        <li><b>Turns</b> &mdash; mean model turns per bug (100 max); pair below is mean turns when solved &middot; when it gave up</li>
+                        <li><b>Grade calls</b> &mdash; mean candidate inputs graded per bug</li>
+                        <li><b>&cent; / turn</b> &mdash; mean spend per model turn</li>
+                        <li><b>$ / bug</b> &mdash; mean spend per bug over all 68</li>
+                        <li><b>$ / solve</b> &mdash; total spend divided by bugs solved</li>
+                    </ul>
+                </div>
+                <div class="lb-wrap">
+                <table class="lb-table">
+                    <thead><tr><th>#</th><th class="sortable" data-type="str">Model</th><th class="sortable sorted-desc">Score</th><th class="sortable num">Solved</th><th class="sortable num">Time</th><th class="sortable num">Turns</th><th class="sortable num">Grade calls</th><th class="sortable num">&cent; / turn</th><th class="sortable num">$ / bug</th><th class="sortable num">$ / solve</th></tr></thead>
+                    <tbody>
+                        <tr><td class="rk"><span class="lb-rank gold">1</span></td><td class="lb-model" data-v="Claude Code Opus">Claude Code &middot; Opus 4.8<span class="lb-arm agent">agent</span></td><td data-v="77"><div class="lb-score"><div class="lb-track"><div class="lb-fill" style="width:37.6%;background:#d97757"></div></div><b>77</b><span class="lb-tot">/205</span></div></td><td class="num" data-v="56">56%<span class="lb-cnt">38 / 68</span></td><td class="num" data-v="16.1">16.1m</td><td class="num" data-v="76">76<span class="lb-cnt">70&middot;85</span></td><td class="num dash" data-v="">&mdash;</td><td class="num" data-v="8.46">8.5&cent;</td><td class="num" data-v="6.48">$6.48</td><td class="num" data-v="11.62">$11.62</td></tr>
+                        <tr><td class="rk"><span class="lb-rank">2</span></td><td class="lb-model" data-v="Codex GPT-5.5">Codex &middot; GPT-5.5<span class="lb-arm agent">agent</span></td><td data-v="75"><div class="lb-score"><div class="lb-track"><div class="lb-fill" style="width:36.6%;background:#10a37f"></div></div><b>75</b><span class="lb-tot">/205</span></div></td><td class="num" data-v="53">53%<span class="lb-cnt">36 / 68</span></td><td class="num" data-v="4.8">4.8m</td><td class="num" data-v="100">100<span class="lb-cnt">100&middot;100</span></td><td class="num dash" data-v="">&mdash;</td><td class="num" data-v="1.30">1.3&cent;</td><td class="num" data-v="1.31">$1.31</td><td class="num" data-v="2.47">$2.47</td></tr>
+                        <tr><td class="rk"><span class="lb-rank">3</span></td><td class="lb-model" data-v="Opus API">Opus 4.8<span class="lb-arm api">API</span></td><td data-v="70"><div class="lb-score"><div class="lb-track"><div class="lb-fill" style="width:34.1%;background:#d97757"></div></div><b>70</b><span class="lb-tot">/205</span></div></td><td class="num" data-v="53">53%<span class="lb-cnt">36 / 68</span></td><td class="num" data-v="2.4">2.4m</td><td class="num" data-v="37">37<span class="lb-cnt">20&middot;54</span></td><td class="num" data-v="7.5">7.5</td><td class="num" data-v="3.91">3.9&cent;</td><td class="num" data-v="1.41">$1.41</td><td class="num" data-v="2.79">$2.79</td></tr>
+                        <tr><td class="rk"><span class="lb-rank">4</span></td><td class="lb-model" data-v="GPT-5.5 API">GPT-5.5<span class="lb-arm api">API</span></td><td data-v="65"><div class="lb-score"><div class="lb-track"><div class="lb-fill" style="width:31.7%;background:#10a37f"></div></div><b>65</b><span class="lb-tot">/205</span></div></td><td class="num" data-v="51">51%<span class="lb-cnt">35 / 68</span></td><td class="num" data-v="1.3">1.3m</td><td class="num" data-v="26">26<span class="lb-cnt">20&middot;33</span></td><td class="num" data-v="3.1">3.1</td><td class="num" data-v="2.68">2.7&cent;</td><td class="num" data-v="0.70">$0.70</td><td class="num" data-v="1.36">$1.36</td></tr>
+                        <tr><td class="rk"><span class="lb-rank">5</span></td><td class="lb-model" data-v="DeepSeek V4 Pro">DeepSeek V4 Pro<span class="lb-arm api">API</span></td><td data-v="62"><div class="lb-score"><div class="lb-track"><div class="lb-fill" style="width:30.2%;background:#4d6bfe"></div></div><b>62</b><span class="lb-tot">/205</span></div></td><td class="num" data-v="50">50%<span class="lb-cnt">34 / 68</span></td><td class="num" data-v="27.4">27.4m</td><td class="num" data-v="59">59<span class="lb-cnt">37&middot;82</span></td><td class="num" data-v="7.4">7.4</td><td class="num" data-v="1.03">1.0&cent;</td><td class="num" data-v="0.58">$0.58</td><td class="num" data-v="1.15">$1.15</td></tr>
+                        <tr><td class="rk"><span class="lb-rank">6</span></td><td class="lb-model" data-v="DeepSeek V4 Flash">DeepSeek V4 Flash<span class="lb-arm api">API</span></td><td data-v="36"><div class="lb-score"><div class="lb-track"><div class="lb-fill" style="width:17.6%;background:#4d6bfe"></div></div><b>36</b><span class="lb-tot">/205</span></div></td><td class="num" data-v="37">37%<span class="lb-cnt">25 / 68</span></td><td class="num" data-v="17.2">17.2m</td><td class="num" data-v="68">68<span class="lb-cnt">41&middot;84</span></td><td class="num" data-v="24.4">24.4</td><td class="num" data-v="0.56">0.6&cent;</td><td class="num" data-v="0.39">$0.39</td><td class="num" data-v="1.05">$1.05</td></tr>
+                        <tr><td class="rk"><span class="lb-rank">7</span></td><td class="lb-model" data-v="Haiku API">Haiku 4.5<span class="lb-arm api">API</span></td><td data-v="34"><div class="lb-score"><div class="lb-track"><div class="lb-fill" style="width:16.6%;background:#d97757"></div></div><b>34</b><span class="lb-tot">/205</span></div></td><td class="num" data-v="32">32%<span class="lb-cnt">22 / 68</span></td><td class="num" data-v="3.9">3.9m</td><td class="num" data-v="66">66<span class="lb-cnt">40&middot;80</span></td><td class="num" data-v="16.4">16.4</td><td class="num" data-v="0.61">0.6&cent;</td><td class="num" data-v="0.41">$0.41</td><td class="num" data-v="1.28">$1.28</td></tr>
+                        <tr><td class="rk"><span class="lb-rank">8</span></td><td class="lb-model" data-v="Claude Code Haiku">Claude Code &middot; Haiku 4.5<span class="lb-arm agent">agent</span></td><td data-v="31"><div class="lb-score"><div class="lb-track"><div class="lb-fill" style="width:15.1%;background:#d97757"></div></div><b>31</b><span class="lb-tot">/205</span></div></td><td class="num" data-v="32">32%<span class="lb-cnt">22 / 68</span></td><td class="num" data-v="6.1">6.1m</td><td class="num" data-v="100">100<span class="lb-cnt">100&middot;100</span></td><td class="num dash" data-v="">&mdash;</td><td class="num" data-v="1.00">1.0&cent;</td><td class="num" data-v="0.99">$0.99</td><td class="num" data-v="3.07">$3.07</td></tr>
+                    </tbody>
+                </table>
+                </div>
+                <p class="lb-note"><b>Knowing when to stop is part of the task.</b> A real bug hunt may turn up nothing, so a model is free to give up when it finds no fault &mdash; and the <b>Turns</b> column shows it. The small pair is mean turns when the model solved &middot; when it gave up. For every API model a give-up costs about twice the turns of a solve (Opus 20&middot;54, GPT 20&middot;33, Haiku 40&middot;80): it keeps digging, then stops. The two agents never self-terminate, so both read 100&middot;100. Cost, though, follows the per-turn price, not the turn count &mdash; <b>&cent;/turn</b> spans 15&times; (Opus 8.5&cent; vs DeepSeek Flash 0.6&cent;), so a cheap model that burns many turns still lands cheap.</p>
+                <p class="lb-note">One pass per model (seed 0). Agent rows wrap the same base model in a coding agent (Codex, Claude Code); API rows call the model directly. Grade calls are shown for API runs only &mdash; the agent harnesses do not expose reliable per-tool telemetry, so those cells read &mdash;. Gemini and further models are being added. See <a href="#climb" data-tabjump="leaderboard" class="xlink">how each model&rsquo;s score breaks down by difficulty &rarr;</a></p>
+            </div>
+        </section>
+
+        <section class="bench-section" id="climb">
+            <div class="section-content" style="max-width:900px">
                 <h3 class="hd">How far each model climbs</h3>
-                <p class="sub">The same five difficulty tiers, now split by model: how many bugs each run solved at each level. Everyone clears the easy floor, nobody cracks the D5 tail, and the field fans out in the middle &mdash; that is where the score is really won.</p>
+                <p class="sub">The <b>Score</b> column above, unrolled across the five <a href="#difficulty" data-tabjump="stats" class="xlink">difficulty tiers</a>: how many bugs each run solved at each level. Everyone clears the easy floor, nobody cracks the D5 tail, and the field fans out in the middle &mdash; that is where the score is really won.</p>
                 <div class="dh">
                     <div class="dh-grid">
                         <div></div>
@@ -1185,87 +1303,6 @@ python -m fbbench.sweep.claudecode sweep --bugs all --model sonnet --auth api</c
                     </div>
                     <p class="dh-cap">Each cell is bugs solved of that tier; deeper colour = a larger share cleared. The warm D4 band lights up only for the strongest runs, while the weakest fade out by D3 &mdash; and the D5 column stays dark for everyone.</p>
                 </div>
-            </div>
-        </section>
-
-        <!-- Solve rate by category and language -->
-        <section class="bench-section">
-            <div class="section-content">
-                <h3 class="hd">Solve rate by vulnerability category</h3>
-                <p class="sub">Pooled over the eight model runs, broken out by fault category and by language. One pattern runs through it: a bug that fires on a single malformed input is easy, while a bug that needs the model to construct a condition &mdash; free-then-use, exhaust memory, leak &mdash; is hard.</p>
-                <div class="sr-wrap">
-                    <div class="sr-row"><div class="sr-k">uncaught-exception</div><div class="sr-track"><div class="sr-fill" style="width:67%;background:#10b981"></div></div><div class="sr-v">67%</div><div class="sr-n">8 bugs</div></div>
-                    <div class="sr-row sm"><div class="sr-k">out-of-bounds-write</div><div class="sr-track"><div class="sr-fill" style="width:59%;background:#10b981"></div></div><div class="sr-v">59%</div><div class="sr-n">4 bugs</div></div>
-                    <div class="sr-row sm"><div class="sr-k">undefined-behavior</div><div class="sr-track"><div class="sr-fill" style="width:56%;background:#10b981"></div></div><div class="sr-v">56%</div><div class="sr-n">4 bugs</div></div>
-                    <div class="sr-row"><div class="sr-k">null-pointer-dereference</div><div class="sr-track"><div class="sr-fill" style="width:55%;background:#10b981"></div></div><div class="sr-v">55%</div><div class="sr-n">6 bugs</div></div>
-                    <div class="sr-row"><div class="sr-k">out-of-bounds-read</div><div class="sr-track"><div class="sr-fill" style="width:49%;background:#84cc16"></div></div><div class="sr-v">49%</div><div class="sr-n">22 bugs</div></div>
-                    <div class="sr-row"><div class="sr-k">reachable-assertion</div><div class="sr-track"><div class="sr-fill" style="width:45%;background:#84cc16"></div></div><div class="sr-v">45%</div><div class="sr-n">5 bugs</div></div>
-                    <div class="sr-row"><div class="sr-k">memory-exhaustion</div><div class="sr-track"><div class="sr-fill" style="width:34%;background:#f59e0b"></div></div><div class="sr-v">34%</div><div class="sr-n">9 bugs</div></div>
-                    <div class="sr-row sm"><div class="sr-k">stack-exhaustion</div><div class="sr-track"><div class="sr-fill" style="width:31%;background:#f59e0b"></div></div><div class="sr-v">31%</div><div class="sr-n">2 bugs</div></div>
-                    <div class="sr-row sm"><div class="sr-k">memory-leak</div><div class="sr-track"><div class="sr-fill" style="width:17%;background:#f97316"></div></div><div class="sr-v">17%</div><div class="sr-n">3 bugs</div></div>
-                    <div class="sr-row sm"><div class="sr-k">use-after-free</div><div class="sr-track"><div class="sr-fill" style="width:16%;background:#f97316"></div></div><div class="sr-v">16%</div><div class="sr-n">4 bugs</div></div>
-                    <div class="sr-row sm"><div class="sr-k">excessive-computation</div><div class="sr-track"><div class="sr-fill" style="width:2%;background:#ef4444"></div></div><div class="sr-v">0%</div><div class="sr-n">1 bug</div></div>
-                </div>
-                <p class="dh-cap">Categories shown faint have only 1&ndash;4 bugs &mdash; treat those rates as indicative, not precise. The large categories (out-of-bounds-read 22, memory-exhaustion 9, uncaught-exception 8, null-pointer-dereference 6) are the solid signal.</p>
-                <h4 class="mini-h" style="margin-top:26px" id="bylang">By language</h4>
-                <div class="sr-wrap">
-                    <div class="sr-row"><div class="sr-k">JVM</div><div class="sr-track"><div class="sr-fill" style="width:68%;background:#10b981"></div></div><div class="sr-v">68%</div><div class="sr-n">9 bugs</div></div>
-                    <div class="sr-row"><div class="sr-k">C++</div><div class="sr-track"><div class="sr-fill" style="width:49%;background:#84cc16"></div></div><div class="sr-v">49%</div><div class="sr-n">28 bugs</div></div>
-                    <div class="sr-row"><div class="sr-k">C</div><div class="sr-track"><div class="sr-fill" style="width:37%;background:#f59e0b"></div></div><div class="sr-v">37%</div><div class="sr-n">31 bugs</div></div>
-                </div>
-                <p class="dh-cap">JVM bugs are mostly uncaught exceptions a single bad field triggers; C is all low-level memory faults where the input must be built byte by byte.</p>
-            </div>
-        </section>
-
-
-
-        </div>
-
-        <div class="tab-panel" data-panel="leaderboard">
-        <section class="bench-section" id="leaderboard">
-            <div class="section-content">
-                <h3 class="hd">Leaderboard</h3>
-                <p class="sub">Ranked by difficulty-weighted score on all 68 bugs, one full-scan pass per model. A solve means the run found the documented bug on its own and cleared all five ladder rungs &mdash; reach, crash, differential, class and site &mdash; so off-target crashes do not count. Time is the median per bug; turns and grade calls are per-bug means, and cost is dollars per bug and per solved bug. Click any column to sort.</p>
-                <div class="lb-cond"><span>100 turns max</span><span>full-scan &middot; blind</span><span>5-rung ladder</span></div>
-                <div class="lb-method">
-                    <b>How the score works.</b> Each solved bug is worth its difficulty level &mdash; a D1 bug earns <span class="fx">1</span> point, a D5 earns <span class="fx">5</span> &mdash; so a model's <b>Score</b> is <span class="fx">&Sigma; D(solved bug)</span>, summed over every bug it cracked. Cracking the rare hard bugs counts for far more than piling up easy ones. Difficulty (D1&ndash;D5) is the dynamic ranking from the <a href="#difficulty" data-tabjump="stats" class="xlink">Difficulty section</a>.
-                    <div class="score-total">
-                        <span class="stlabel">Max score = <b>205</b> &mdash; every bug counted at its own difficulty (count &times; points):</span>
-                        <div class="stbar">
-                            <span class="stseg" style="width:7.32%;background:#10b981;color:#08130d">15&times;1</span>
-                            <span class="stseg" style="width:12.68%;background:#84cc16;color:#141c05">13&times;2</span>
-                            <span class="stseg" style="width:19.02%;background:#f59e0b;color:#1c1400">13&times;3</span>
-                            <span class="stseg" style="width:19.51%;background:#f97316;color:#fff">10&times;4</span>
-                            <span class="stseg" style="width:41.46%;background:#ef4444;color:#fff">17&times;5</span>
-                        </div>
-                    </div>
-                    <ul class="defs">
-                        <li><b>Solved</b> &mdash; bugs cleared, of those run</li>
-                        <li><b>Time</b> &mdash; median wall-clock per bug</li>
-                        <li><b>Turns</b> &mdash; mean model turns per bug (100 max); pair below is mean turns when solved &middot; when it gave up</li>
-                        <li><b>Grade calls</b> &mdash; mean candidate inputs graded per bug</li>
-                        <li><b>&cent; / turn</b> &mdash; mean spend per model turn</li>
-                        <li><b>$ / bug</b> &mdash; mean spend per bug over all 68</li>
-                        <li><b>$ / solve</b> &mdash; total spend divided by bugs solved</li>
-                    </ul>
-                </div>
-                <div class="lb-wrap">
-                <table class="lb-table">
-                    <thead><tr><th>#</th><th class="sortable" data-type="str">Model</th><th class="sortable sorted-desc">Score</th><th class="sortable num">Solved</th><th class="sortable num">Time</th><th class="sortable num">Turns</th><th class="sortable num">Grade calls</th><th class="sortable num">&cent; / turn</th><th class="sortable num">$ / bug</th><th class="sortable num">$ / solve</th></tr></thead>
-                    <tbody>
-                        <tr><td class="rk"><span class="lb-rank gold">1</span></td><td class="lb-model" data-v="Claude Code Opus">Claude Code &middot; Opus 4.8<span class="lb-arm agent">agent</span></td><td data-v="77"><div class="lb-score"><div class="lb-track"><div class="lb-fill" style="width:37.6%;background:#d97757"></div></div><b>77</b><span class="lb-tot">/205</span></div></td><td class="num" data-v="56">56%<span class="lb-cnt">38 / 68</span></td><td class="num" data-v="16.1">16.1m</td><td class="num" data-v="76">76<span class="lb-cnt">70&middot;85</span></td><td class="num dash" data-v="">&mdash;</td><td class="num" data-v="8.46">8.5&cent;</td><td class="num" data-v="6.48">$6.48</td><td class="num" data-v="11.62">$11.62</td></tr>
-                        <tr><td class="rk"><span class="lb-rank">2</span></td><td class="lb-model" data-v="Codex GPT-5.5">Codex &middot; GPT-5.5<span class="lb-arm agent">agent</span></td><td data-v="75"><div class="lb-score"><div class="lb-track"><div class="lb-fill" style="width:36.6%;background:#10a37f"></div></div><b>75</b><span class="lb-tot">/205</span></div></td><td class="num" data-v="53">53%<span class="lb-cnt">36 / 68</span></td><td class="num" data-v="4.8">4.8m</td><td class="num" data-v="100">100<span class="lb-cnt">100&middot;100</span></td><td class="num dash" data-v="">&mdash;</td><td class="num" data-v="1.30">1.3&cent;</td><td class="num" data-v="1.31">$1.31</td><td class="num" data-v="2.47">$2.47</td></tr>
-                        <tr><td class="rk"><span class="lb-rank">3</span></td><td class="lb-model" data-v="Opus API">Opus 4.8<span class="lb-arm api">API</span></td><td data-v="70"><div class="lb-score"><div class="lb-track"><div class="lb-fill" style="width:34.1%;background:#d97757"></div></div><b>70</b><span class="lb-tot">/205</span></div></td><td class="num" data-v="53">53%<span class="lb-cnt">36 / 68</span></td><td class="num" data-v="2.4">2.4m</td><td class="num" data-v="37">37<span class="lb-cnt">20&middot;54</span></td><td class="num" data-v="7.5">7.5</td><td class="num" data-v="3.91">3.9&cent;</td><td class="num" data-v="1.41">$1.41</td><td class="num" data-v="2.79">$2.79</td></tr>
-                        <tr><td class="rk"><span class="lb-rank">4</span></td><td class="lb-model" data-v="GPT-5.5 API">GPT-5.5<span class="lb-arm api">API</span></td><td data-v="65"><div class="lb-score"><div class="lb-track"><div class="lb-fill" style="width:31.7%;background:#10a37f"></div></div><b>65</b><span class="lb-tot">/205</span></div></td><td class="num" data-v="51">51%<span class="lb-cnt">35 / 68</span></td><td class="num" data-v="1.3">1.3m</td><td class="num" data-v="26">26<span class="lb-cnt">20&middot;33</span></td><td class="num" data-v="3.1">3.1</td><td class="num" data-v="2.68">2.7&cent;</td><td class="num" data-v="0.70">$0.70</td><td class="num" data-v="1.36">$1.36</td></tr>
-                        <tr><td class="rk"><span class="lb-rank">5</span></td><td class="lb-model" data-v="DeepSeek V4 Pro">DeepSeek V4 Pro<span class="lb-arm api">API</span></td><td data-v="62"><div class="lb-score"><div class="lb-track"><div class="lb-fill" style="width:30.2%;background:#4d6bfe"></div></div><b>62</b><span class="lb-tot">/205</span></div></td><td class="num" data-v="50">50%<span class="lb-cnt">34 / 68</span></td><td class="num" data-v="27.4">27.4m</td><td class="num" data-v="59">59<span class="lb-cnt">37&middot;82</span></td><td class="num" data-v="7.4">7.4</td><td class="num" data-v="1.03">1.0&cent;</td><td class="num" data-v="0.58">$0.58</td><td class="num" data-v="1.15">$1.15</td></tr>
-                        <tr><td class="rk"><span class="lb-rank">6</span></td><td class="lb-model" data-v="DeepSeek V4 Flash">DeepSeek V4 Flash<span class="lb-arm api">API</span></td><td data-v="36"><div class="lb-score"><div class="lb-track"><div class="lb-fill" style="width:17.6%;background:#4d6bfe"></div></div><b>36</b><span class="lb-tot">/205</span></div></td><td class="num" data-v="37">37%<span class="lb-cnt">25 / 68</span></td><td class="num" data-v="17.2">17.2m</td><td class="num" data-v="68">68<span class="lb-cnt">41&middot;84</span></td><td class="num" data-v="24.4">24.4</td><td class="num" data-v="0.56">0.6&cent;</td><td class="num" data-v="0.39">$0.39</td><td class="num" data-v="1.05">$1.05</td></tr>
-                        <tr><td class="rk"><span class="lb-rank">7</span></td><td class="lb-model" data-v="Haiku API">Haiku 4.5<span class="lb-arm api">API</span></td><td data-v="34"><div class="lb-score"><div class="lb-track"><div class="lb-fill" style="width:16.6%;background:#d97757"></div></div><b>34</b><span class="lb-tot">/205</span></div></td><td class="num" data-v="32">32%<span class="lb-cnt">22 / 68</span></td><td class="num" data-v="3.9">3.9m</td><td class="num" data-v="66">66<span class="lb-cnt">40&middot;80</span></td><td class="num" data-v="16.4">16.4</td><td class="num" data-v="0.61">0.6&cent;</td><td class="num" data-v="0.41">$0.41</td><td class="num" data-v="1.28">$1.28</td></tr>
-                        <tr><td class="rk"><span class="lb-rank">8</span></td><td class="lb-model" data-v="Claude Code Haiku">Claude Code &middot; Haiku 4.5<span class="lb-arm agent">agent</span></td><td data-v="31"><div class="lb-score"><div class="lb-track"><div class="lb-fill" style="width:15.1%;background:#d97757"></div></div><b>31</b><span class="lb-tot">/205</span></div></td><td class="num" data-v="32">32%<span class="lb-cnt">22 / 68</span></td><td class="num" data-v="6.1">6.1m</td><td class="num" data-v="100">100<span class="lb-cnt">100&middot;100</span></td><td class="num dash" data-v="">&mdash;</td><td class="num" data-v="1.00">1.0&cent;</td><td class="num" data-v="0.99">$0.99</td><td class="num" data-v="3.07">$3.07</td></tr>
-                    </tbody>
-                </table>
-                </div>
-                <p class="lb-note"><b>Knowing when to stop is part of the task.</b> A real bug hunt may turn up nothing, so a model is free to give up when it finds no fault &mdash; and the <b>Turns</b> column shows it. The small pair is mean turns when the model solved &middot; when it gave up. For every API model a give-up costs about twice the turns of a solve (Opus 20&middot;54, GPT 20&middot;33, Haiku 40&middot;80): it keeps digging, then stops. The two agents never self-terminate, so both read 100&middot;100. Cost, though, follows the per-turn price, not the turn count &mdash; <b>&cent;/turn</b> spans 15&times; (Opus 8.5&cent; vs DeepSeek Flash 0.6&cent;), so a cheap model that burns many turns still lands cheap.</p>
-                <p class="lb-note">One pass per model (seed 0). Agent rows wrap the same base model in a coding agent (Codex, Claude Code); API rows call the model directly. Grade calls are shown for API runs only &mdash; the agent harnesses do not expose reliable per-tool telemetry, so those cells read &mdash;. Gemini and further models are being added. See <a href="#climb" data-tabjump="stats" class="xlink">how each model&rsquo;s score breaks down by difficulty &rarr;</a></p>
             </div>
         </section>
         </div>
