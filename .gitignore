@@ -1,0 +1,10 @@
+# Vulnerability-management working data — never publish (contains undisclosed
+# crash reports and reproduction artifacts)
+O2_Vulnerability_Management/
+
+# Local working notes / drafts
+highlights.txt
+posts/blog-post.md
+
+# Archives
+*.tar.gz

@@ -3,9 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FuzzingBrain-Bench: Measuring Whether LLMs Can Actually Find Real Bugs - FuzzingBrain</title>
+    <title>FuzzingBrain-Bench: Measuring Whether LLMs Can Actually Find Real Bugs — FuzzingBrain</title>
     <meta name="description" content="A public, execution-grounded, capability-laddered benchmark for LLM bug-finding on 68 real C/C++/Java bugs across 40 projects, 17 fault classes, and a calibrated difficulty spectrum.">
-    <link rel="stylesheet" href="../styles.css">
+    <link rel="canonical" href="https://fuzzingbrain.github.io/posts/fuzzingbrain-bench-capability-ladder.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="FuzzingBrain-Bench: Measuring Whether LLMs Can Actually Find Real Bugs">
+    <meta property="og:description" content="A public, execution-grounded, capability-laddered benchmark for LLM bug-finding on 68 real C/C++/Java bugs across 40 projects, 17 fault classes, and a calibrated difficulty spectrum.">
+    <meta property="og:url" content="https://fuzzingbrain.github.io/posts/fuzzingbrain-bench-capability-ladder.html">
+    <meta property="og:image" content="https://fuzzingbrain.github.io/assets/images/fuzzbrain.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="FuzzingBrain-Bench: Measuring Whether LLMs Can Actually Find Real Bugs">
+    <meta name="twitter:description" content="A public, execution-grounded, capability-laddered benchmark for LLM bug-finding on 68 real C/C++/Java bugs across 40 projects, 17 fault classes, and a calibrated difficulty spectrum.">
+    <meta name="twitter:image" content="https://fuzzingbrain.github.io/assets/images/fuzzbrain.jpg">
+    <link rel="stylesheet" href="../styles.css?v=20260720">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/line-numbers/prism-line-numbers.min.css">
@@ -30,7 +40,9 @@
                 <nav class="nav" aria-label="Main navigation">
                     <a href="../documentation.html">Docs</a>
                     <a href="../quickstart.html">Quickstart</a>
+                    <a href="../benchmark.html">Benchmark</a>
                     <a href="../blog.html" class="nav-active">Blog</a>
+                    <a href="../disclosures.html">Disclosures</a>
                     <a href="../index.html#results">Results</a>
                     <a href="https://github.com/o2lab/afc-crs-all-you-need-is-a-fuzzing-brain" class="nav-cta" target="_blank" rel="noopener noreferrer">GitHub</a>
                 </nav>
@@ -385,13 +397,13 @@ python -m fbbench.sweep.orchestrator --models sweep --bugs all --exp sweep1</cod
 
         <!-- Post navigation -->
         <nav class="post-navigation">
-            <a href="four-principles-harness-audit.html" class="post-nav-link prev"><span class="nav-label">Previous</span><span class="nav-title">Harnesses Have Bugs Too</span></a>
+            <a href="how-we-verify-fuzzer-crashes.html" class="post-nav-link prev"><span class="nav-label">Previous</span><span class="nav-title">← How We Verify Fuzzer Crashes</span></a>
         </nav>
 
         <footer class="footer">
             <div class="footer-content">
                 <div class="footer-text">
-                    <p>&copy; 2026 All You Need Is A Fuzzing Brain Research Team</p>
+                    <p>© 2026 All You Need Is A Fuzzing Brain Research Team</p>
                     <p>Advancing autonomous vulnerability discovery through AI</p>
                 </div>
                 <div class="footer-links">
@@ -405,6 +417,6 @@ python -m fbbench.sweep.orchestrator --models sweep --bugs all --exp sweep1</cod
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-core.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/autoloader/prism-autoloader.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/line-numbers/prism-line-numbers.min.js"></script>
-    <script src="../script.js"></script>
+    <script src="../script.js?v=20260720"></script>
 </body>
 </html>
