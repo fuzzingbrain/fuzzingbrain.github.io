@@ -459,7 +459,6 @@
                         <li>A frame is named by its <b>function alone</b>. No file path, no line number, no module offset: those move with every rebuild of a target, function names do not.</li>
                         <li>Frames that are not the target are dropped &mdash; the sanitizer runtime and its allocator interceptors, the libFuzzer driver, the C runtime entry, system libraries, C++ standard-library headers, and the Jazzer harness wrapper.</li>
                         <li>Names are normalised: parameter lists, template arguments and Rust instantiation hashes are stripped. Namespaces and class names are kept.</li>
-                        <li>The <code>|</code> separator is escaped wherever it occurs inside a component, because <code>operator|</code> is a legal C++ function name.</li>
                     </ul>
                 </div>
 
@@ -494,7 +493,6 @@ Live Heap Allocations: 158414331 bytes in 26 chunks; ...
                         <p class="cap" style="margin:0">A frame is named by its function alone, so two faults at <b>different lines of the same function</b> collapse into one crash. That floor is deliberate: line numbers and offsets move with every rebuild, function names do not.</p>
                     </div>
                 </div>
-                <p class="sub" style="margin:20px 0 0;max-width:none">Where the rules cannot decide, they are built to <b>undercount rather than invent a finding</b>: a crash whose output carries no marker we can name it by is filed under a single fallback identity, so every such crash in an episode counts once. Establishing which distinct <em>defects</em> a set of signatures corresponds to would require manual triage and root-cause analysis of every signature &mdash; the challenge image grades against no answer key, so no run can decide that on its own.</p>
             </div>
         </section>
 
@@ -519,10 +517,10 @@ Live Heap Allocations: 158414331 bytes in 26 chunks; ...
                             <li><code>new</code> &mdash; absent, so it is inserted and the episode&rsquo;s distinct-crash count goes up.</li>
                             <li><code>duplicate</code> &mdash; already present, and nothing changes.</li>
                         </ul>
-                        <p class="cap" style="margin:14px 0 0">The model learns immediately whether the input it just submitted added a finding, which is what lets it turn away from a crash it already holds and look for another one. The set is <b>per-episode</b> and lives only in that container&rsquo;s memory &mdash; telling one run its crash is old because another run found it first would leak other runs&rsquo; findings into its feedback and make a model&rsquo;s result depend on what other models had done.</p>
+                        <p class="cap" style="margin:14px 0 0">The model learns immediately whether the input it just submitted added a finding, which is what lets it turn away from a crash it already holds and look for another one. The set lives in the memory of a container that serves exactly one episode, so nothing is shared between episodes and no run is ever aware of signatures produced in another run.</p>
+                        <p class="cap" style="margin:14px 0 0">A crash whose output carries no marker a signature can be derived from is assigned a common <b>fallback identity</b>, and counts once per episode.</p>
                     </div>
                 </div>
-                <p class="sub" style="margin:20px 0 0;max-width:none">One more rule keeps identity stable: frames enter a signature in the order the stack reports them, except for a stack that is a repeating cycle. Those blow at whichever frame happens to cross the guard page, so for cyclic traces the repeating frames are sorted &mdash; a rotation of one and the same cycle does not read as a new crash.</p>
             </div>
         </section>
 
