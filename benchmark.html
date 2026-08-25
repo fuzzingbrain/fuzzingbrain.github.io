@@ -328,16 +328,16 @@
         <section class="bench-section">
             <div class="section-content">
                 <h3 class="hd">Why FuzzingBrain-Bench?</h3>
-                <p class="sub">Earlier evaluations of LLM bug-discovery capability evolved through three generations, each with a key limitation.</p>
+                <p class="sub">The first two generations do not execute code. The third introduces harness execution, but three design choices still limit how faithfully it measures bug-discovery capability.</p>
                 <figure class="generations-figure">
                     <img src="assets/images/fb-bench-generations.svg" alt="Four generations of evaluating the bug-discovery capability of large language models">
                 </figure>
                 <ol class="generation-list">
-                    <li><strong>Binary classification</strong> assigns a label to a single function, but does not show whether the model understands the defect and does not reflect the complexity of a real codebase.</li>
-                    <li><strong>Structured reports</strong> add the CWE class, location, and description, but matching a recorded answer neither validates the answer nor demonstrates that the defect can be triggered.</li>
-                    <li><strong>Target reproduction</strong> executes model-generated inputs, but scores only one predefined vulnerability and may discard other valid crashes.</li>
+                    <li><strong>Predefined target.</strong> Existing benchmarks ask whether a model can reproduce one known vulnerability without revealing its details. A valid crash at another location is discarded, so the benchmark measures target reproduction rather than broader bug discovery.</li>
+                    <li><strong>Patch-dependent grading.</strong> To identify the target vulnerability, some benchmarks compare vulnerable and patched builds. The verdict therefore depends on the correctness and completeness of a developer-provided patch, which can cause valid results to be misclassified.</li>
+                    <li><strong>Harness correctness.</strong> Existing benchmarks do not consistently exclude faults that originate in the harness itself. Counting a harness failure as a project-level finding can distort the model&rsquo;s measured performance.</li>
                 </ol>
-                <p class="generation-conclusion">To support a broader evaluation of real-world bug-discovery capability, we designed <strong>FuzzingBrain-Bench</strong>. It credits every distinct, reproducible crash a model triggers through the provided harness, including crashes beyond the vulnerability originally associated with the challenge.</p>
+                <p class="generation-conclusion">Together, these limitations can prevent existing benchmarks from accurately reflecting a model&rsquo;s bug-discovery capability. We designed <strong>FuzzingBrain-Bench</strong> to score distinct, reproducible crashes beyond a predefined target, grade only the vulnerable build without relying on a patch, and exclude crashes that originate in the harness.</p>
             </div>
         </section>
 
