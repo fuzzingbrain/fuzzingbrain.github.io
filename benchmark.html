@@ -241,16 +241,16 @@
             <div class="section-content">
                 <div class="bench-kicker">Can LLMs actually find real bugs?</div>
                 <h2>FuzzingBrain Bench</h2>
-                <p class="lede">A model is handed an open-source project at a vulnerable revision and a sanitizer-instrumented harness &mdash; no description, no fault class, no location, not even a promise that a bug exists. It scores by writing inputs that make the harness fault, and <b>every distinct crash counts</b>, not just the one the challenge was cut from.</p>
+                <p class="lede">FuzzingBrain-Bench evaluates a model&rsquo;s bug-discovery capability on an open-source project at a vulnerable revision. Each challenge provides the project source and a sanitizer-instrumented harness, but no description, fault class, location, patch, or fix commit. The model generates candidate inputs, and its performance is measured by the distinct crash signatures it triggers through the harness, including crashes beyond the vulnerability originally associated with the challenge.</p>
                 <div class="bench-statrow">
                     <a class="bench-stat" href="#challenges" data-tabjump="stats"><div class="n">77</div><div class="l">Challenges</div></a>
                     <a class="bench-stat" href="#corpus" data-tabjump="stats"><div class="n">43</div><div class="l">OSS projects</div></a>
                     <a class="bench-stat" href="#difficulty" data-tabjump="stats"><div class="n">5</div><div class="l">Difficulty tiers</div></a>
-                    <a class="bench-stat" href="#leaderboard" data-tabjump="leaderboard"><div class="n">579</div><div class="l">Points on the table</div></a>
+                    <a class="bench-stat" href="#leaderboard" data-tabjump="leaderboard"><div class="n">579</div><div class="l">Total Points</div></a>
                 </div>
                 <div class="bench-cta">
                     <a href="https://github.com/fuzzingbrain/FuzzingBrain-Bench" class="btn btn-primary">Get the Benchmark</a>
-                    <a href="#run" class="btn btn-secondary" data-tabjump="quickstart">Run in 5 Minutes</a>
+                    <a href="#run" class="btn btn-secondary" data-tabjump="quickstart">Quick Start</a>
                 </div>
             </div>
         </section>
