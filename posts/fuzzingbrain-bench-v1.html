@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FuzzingBrain-Bench V1: Measuring Whether LLMs Can Actually Find Real Bugs — FuzzingBrain</title>
+    <title>FuzzingBrain-Bench V1: Evaluating LLM Bug-Discovery Capability — FuzzingBrain</title>
     <meta name="description" content="FB-Bench V1 scores a model on every distinct, reproducible crash it can trigger through a harness, widening evaluation beyond a single target vulnerability. 77 challenges, 43 open-source projects, 14 bug classes, and three Claude models measured against 579 points.">
     <link rel="canonical" href="https://fuzzingbrain.github.io/posts/fuzzingbrain-bench-v1.html">
     <meta property="og:type" content="article">
-    <meta property="og:title" content="FuzzingBrain-Bench V1: Measuring Whether LLMs Can Actually Find Real Bugs">
+    <meta property="og:title" content="FuzzingBrain-Bench V1: Evaluating LLM Bug-Discovery Capability">
     <meta property="og:description" content="FB-Bench V1 scores a model on every distinct, reproducible crash it can trigger through a harness, widening evaluation beyond a single target vulnerability. 77 challenges, 43 open-source projects, 14 bug classes, 579 points.">
     <meta property="og:url" content="https://fuzzingbrain.github.io/posts/fuzzingbrain-bench-v1.html">
     <meta property="og:image" content="https://fuzzingbrain.github.io/assets/images/fuzzbrain.jpg">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="FuzzingBrain-Bench V1: Measuring Whether LLMs Can Actually Find Real Bugs">
+    <meta name="twitter:title" content="FuzzingBrain-Bench V1: Evaluating LLM Bug-Discovery Capability">
     <meta name="twitter:description" content="FB-Bench V1 scores a model on every distinct, reproducible crash it can trigger through a harness, widening evaluation beyond a single target vulnerability. 77 challenges, 43 open-source projects, 14 bug classes, 579 points.">
     <meta name="twitter:image" content="https://fuzzingbrain.github.io/assets/images/fuzzbrain.jpg">
     <link rel="stylesheet" href="../styles.css?v=20260720">
@@ -22,13 +22,13 @@
     <style>
     /* --- contrast fixes: the site default renders .stat-label in --text-faint
        (#64748b), which is ~1.6:1 on the indigo banner and dim on dark cards --- */
-    .post-content .results-banner .result-stat{background:rgba(255,255,255,.16)}
-    .post-content .results-banner .stat-value{color:#fff;font-size:1.05rem}
-    .post-content .results-banner .stat-label{color:rgba(255,255,255,.9)}
     .post-content .results-stats .result-stat{background:var(--surface);border:1px solid var(--border)}
     .post-content .results-stats .stat-value{color:var(--text-primary);font-size:1.02rem}
     .post-content .results-stats .stat-label{color:var(--text-secondary);font-family:var(--font-sans);
       font-size:.87rem;text-transform:none;letter-spacing:0;line-height:1.5}
+    .post-content .results-banner .result-stat{background:rgba(255,255,255,.16);border:0}
+    .post-content .results-banner .stat-value{color:#fff;font-size:1.05rem}
+    .post-content .results-banner .stat-label{color:rgba(255,255,255,.9)}
 
     /* --- code: styles.css has no .post-content pre rule, so the box came only
        from the Prism CDN theme, and .post-content code paints text indigo
@@ -44,6 +44,12 @@
     .post-content p code,.post-content li code,.post-content td code,.post-content .cap code{
       color:#a5b4fc;background:rgba(129,140,248,.12);border:1px solid rgba(129,140,248,.22);
       border-radius:5px;padding:1px 6px;font-size:.88em}
+
+    .report-figure{margin:1.6rem 0;background:#fff;border:1px solid var(--border);
+      border-radius:12px;padding:16px 18px 12px;overflow:hidden}
+    .report-figure img{display:block;width:100%;height:auto;margin:0 auto}
+    .report-figure figcaption{margin-top:10px;color:#475569;font-size:.82rem;line-height:1.5}
+    @media(max-width:560px){.report-figure{padding:8px 8px 10px}.report-figure figcaption{font-size:.76rem}}
 
     /* --- post-scoped helpers (dark theme) --- */
     .fb-bar{display:flex;align-items:center;gap:12px;margin:9px 0}
@@ -64,7 +70,6 @@
     .fb-list li{position:relative;padding:8px 0 8px 24px;color:var(--text-secondary);line-height:1.55;border-bottom:1px solid var(--border);font-size:.94rem}
     .fb-list li:last-child{border-bottom:0}
     .fb-list li::before{content:"\203A";position:absolute;left:5px;color:var(--indigo-400);font-weight:700}
-    .fb-code{background:var(--slate-950);border:1px solid var(--border);border-radius:10px;padding:16px 18px;overflow-x:auto;font-family:var(--font-mono);font-size:.8rem;line-height:1.65;color:#94a3b8;white-space:pre}
     .fb-formula{text-align:center;padding:16px 0 4px;font-family:var(--font-mono);font-size:1.18rem;color:var(--text-primary)}
     .fb-split{display:flex;height:34px;border-radius:8px;overflow:hidden;margin:1.2rem 0 .6rem;font-size:.74rem;font-weight:700;color:#fff}
     .fb-split div{display:flex;align-items:center;justify-content:center}
@@ -108,8 +113,8 @@
                         <span class="post-category">Benchmark</span>
                         <span class="post-readtime">9 min read</span>
                     </div>
-                    <h1 class="post-title-main">FuzzingBrain-Bench V1: Measuring Whether LLMs Can Actually Find Real Bugs</h1>
-                    <p class="post-subtitle">Execution-graded benchmarks ask whether a model reproduced one known vulnerability. That leaves out every other crash it finds along the way. FB-Bench V1 counts those too: 77 challenges, a sealed harness, and a score built from every distinct, reproducible crash.</p>
+                    <h1 class="post-title-main">FuzzingBrain-Bench V1: Evaluating LLM Bug-Discovery Capability</h1>
+                    <p class="post-subtitle">FuzzingBrain-Bench V1 evaluates open-ended bug discovery across 77 challenges. Models receive project source and a sanitizer-instrumented harness, and are scored on distinct, reproducible crash signatures rather than reproduction of a single predefined vulnerability.</p>
                 </div>
             </div>
 
@@ -135,7 +140,7 @@
                                 </div>
                                 <div class="result-stat">
                                     <div class="stat-value">579 Points</div>
-                                    <div class="stat-label">Best so far: Claude Opus 4.8 at 196</div>
+                                    <div class="stat-label">Highest evaluated score: Opus 4.8 at 196</div>
                                 </div>
                             </div>
                         </div>
@@ -143,74 +148,69 @@
 
                     <!-- 1. Motivation -->
                     <section>
-                        <h2>How bug-finding evaluation has developed</h2>
+                        <h2>From target reproduction to open-ended discovery</h2>
                         <p>
-                            Evaluation has moved through three generations, each answering a real question and leaving a different part open.
+                            Evaluation of LLM bug-discovery capability has evolved through four generations. The first two operate on static code: binary classification assigns a vulnerability label, while structured reporting adds the expected class, location and description. Neither executes the model&rsquo;s result.
                         </p>
                         <p>
-                            The <strong>first</strong> asked a model to label a single function <em>vulnerable</em> or <em>not</em>. It established the task and produced the field's first labelled corpora, but a label cannot show whether the model understood the defect, and one function carries little of a real codebase's context.
+                            The third generation introduces dynamic execution. A model generates an input for a sanitizer-instrumented harness, but success is typically defined against one predefined vulnerability. Valid crashes elsewhere may be discarded, grading may depend on a developer-provided patch, and faults originating in the harness may be mistaken for findings in the project under test.
                         </p>
+                        <figure class="report-figure">
+                            <img src="../assets/images/fb-bench-generations.svg" alt="Four generations of evaluating LLM bug-discovery capability">
+                            <figcaption>Four generations of evaluating LLM bug-discovery capability. The first two are static; the third and fourth execute submitted inputs through a harness.</figcaption>
+                        </figure>
                         <p>
-                            The <strong>second</strong> asked for the type, location and description instead of a label — a far richer signal, though still no evidence the defect can be triggered, since nothing runs.
-                        </p>
-                        <p>
-                            The <strong>third</strong> introduced execution, and is what FB-Bench builds on: the input runs against a real instrumented binary, so the claim can be checked. CyberGym counts an input that crashes the pre-patch build and runs clean post-patch; SEC-bench requires the same sanitizer error at the expected location. Both suit their question — can the model reproduce <em>this</em> vulnerability. What falls outside is every other fault the model finds, and the targets are mostly memory-safety bugs in C and C++.
-                        </p>
-                        <div class="highlight-box">
-                            <div>
-                                <p style="margin:0;"><strong>The question FB-Bench V1 adds.</strong> Given a project at a vulnerable revision, a sanitizer-instrumented harness and no description of any bug, <em>how many distinct crashes can the model drive through that harness?</em></p>
-                            </div>
-                        </div>
-                        <p>
-                            The predefined target leaves the grading path and stays on as provenance: every challenge is cut from a published bug report, so at least one real defect is known reachable. The two questions are complementary — this is a second view alongside the first, not a replacement.
+                            FuzzingBrain-Bench represents a fourth generation: open-ended discovery. It credits each distinct crash signature that satisfies the benchmark&rsquo;s validity and reproducibility criteria, including crashes beyond the vulnerability originally associated with a challenge.
                         </p>
                     </section>
 
                     <!-- 2. Three commitments -->
                     <section>
-                        <h2>What V1 commits to</h2>
+                        <h2>Design principles</h2>
                         <div class="results-stats" style="margin: 2rem 0;">
                             <div class="result-stat">
-                                <div class="stat-value">Discovery, not reproduction</div>
-                                <div class="stat-label">Scoring counts distinct crash signatures, so a model is measured on bug-finding rather than on re-triggering one known vulnerability.</div>
+                                <div class="stat-value">Open-ended discovery</div>
+                                <div class="stat-label">The score includes every distinct, reproducible crash signature reachable through the provided harness.</div>
                             </div>
                             <div class="result-stat">
-                                <div class="stat-value">Not just memory safety in C</div>
-                                <div class="stat-label">Leaks, out-of-memory, timeouts and JVM faults are in scope, graded under ASan, UBSan, LSan, libFuzzer and Jazzer.</div>
+                                <div class="stat-value">Patch-independent grading</div>
+                                <div class="stat-label">Only the vulnerable revision is graded, so results do not depend on the correctness or completeness of a developer-provided patch.</div>
                             </div>
                             <div class="result-stat">
-                                <div class="stat-value">One build, no patch</div>
-                                <div class="stat-label">Only the vulnerable revision ships, so results never depend on a developer patch being correct or complete.</div>
+                                <div class="stat-value">Explicit harness boundary</div>
+                                <div class="stat-label">Crashes originating in the harness are excluded; non-harness faults reached through it remain in scope.</div>
                             </div>
-                        </div>
-                        <div class="info-box">
-                            <p style="margin:0;">A note on the third. Diffing a vulnerable build against a fixed one is the right tool when reproducing a specific bug, but it ties the result to the patch — an incomplete fix rejects a genuine crash, a fix that touched unrelated behaviour accepts an unrelated one. V1 grades no single target, so it drops the second build and that dependency with it.</p>
                         </div>
                     </section>
 
                     <!-- 3. Construction -->
                     <section>
-                        <h2>How a challenge is built</h2>
+                        <h2>Challenge construction</h2>
                         <p>
-                            Each challenge starts from a published bug report reached through a harness — from FuzzingBrain V2 and QuartetFuzz runs, OSS-Fuzz, and projects' own trackers and advisories. Four artifacts come out: source at the vulnerable commit, harness code, sanitizer configuration, reference PoC.
+                            Each challenge begins with a published finding reached through a fuzzing harness. Findings are drawn from FuzzingBrain V2, QuartetFuzz, OSS-Fuzz, and project issue trackers, pull requests and security advisories. Four artifacts are extracted: source at the vulnerable commit, harness code, sanitizer configuration and a reference proof-of-concept (PoC).
+                        </p>
+                        <figure class="report-figure">
+                            <img src="../assets/images/bench-fig-construction.svg" alt="FuzzingBrain-Bench data selection and challenge construction process">
+                            <figcaption>Data selection and challenge construction. A challenge is retained only when its reference PoC produces the same crash signature in three executions.</figcaption>
+                        </figure>
+                        <p>
+                            The harness is compiled under the selected sanitizer and packaged with the source into a Docker image. The reference PoC is executed three times inside the image; the challenge is retained only when all three executions produce the same crash signature.
                         </p>
                         <p>
-                            The harness is compiled under that sanitizer and packaged with the source into a Docker image. The reference PoC then runs against it <strong>three times inside that image</strong>. If the three runs disagree, the challenge is discarded rather than repaired — a flaky challenge grades models on luck.
+                            Before publication, the reference PoC, report, git history and identifying build commands are removed. The published image contains the project source, harness source, benchmark configuration and sanitizer-instrumented harness binary.
                         </p>
-                        <p>
-                            What survives is stripped: the PoC, git history, identifying build commands and the report are removed and kept privately. The image ships the source, harness code, harness binary, and a config naming alias, language, engine and sanitizer.
-                        </p>
-                        <div class="warning-box">
-                            <p style="margin:0;"><strong>Even the name is neutral.</strong> Challenges are addressed as <code>avro-03</code>, <code>libxml2-02</code>, <code>ghidra-01</code> — the project is public, the fault is not, so naming a bug never leaks its vulnerable function.</p>
-                        </div>
                     </section>
 
                     <!-- 4. Runtime -->
                     <section>
-                        <h2>Inside the sandbox</h2>
+                        <h2>Evaluation environment</h2>
                         <p>
-                            The agent loop runs on the host and tracks the budget. Everything the model can reach lives in the container, over MCP stdio, through three tools.
+                            The agent loop runs on the host, communicates with the model API and enforces the turn and time budgets. The challenge runs in a container connected to the host through MCP over standard input and output.
                         </p>
+                        <figure class="report-figure">
+                            <img src="../assets/images/bench-fig-architecture.svg" alt="FuzzingBrain-Bench host and challenge-container architecture">
+                            <figcaption>The model reaches the challenge through three MCP tools. The instrumented harness and grading configuration remain inaccessible to the agent.</figcaption>
+                        </figure>
                         <div class="vuln-table-wrapper">
                             <table class="vuln-table">
                                 <thead>
@@ -224,96 +224,78 @@
                             </table>
                         </div>
                         <p>
-                            The oracle directory — harness binary and grading config — is not readable by the agent; the binary is reachable only through <code>run_poc_on_harness</code>, one input at a time. A model that could reach it directly would simply fuzz it, and its score would measure how long it fuzzed rather than how well it understood the target.
+                            The harness binary and grading configuration reside in an inaccessible oracle directory. Candidate inputs can reach the binary only through <code>run_poc_on_harness</code>. This restriction prevents direct fuzzing of the graded binary from dominating the evaluation.
                         </p>
                         <p>
-                            The budget is <strong>100 turns and 1800 seconds</strong> per episode, and an episode does not end at the first crash. Knowing when to stop turns out to matter — see the results below.
+                            Each episode is limited to <strong>100 turns and 1,800 seconds</strong>. It continues after the first valid crash so that the model can search for additional signatures.
                         </p>
                     </section>
 
                     <!-- 5. What counts -->
                     <section>
-                        <h2>What counts as a crash</h2>
+                        <h2>Crash validity</h2>
                         <p>
-                            A run is a crash if it terminates in one of the abnormal ways the benchmark recognises, and <strong>valid</strong> unless the crash site is in the harness itself or both output streams are empty. Two consequences follow.
+                            A candidate execution is classified as a crash when it terminates in one of the abnormal conditions recognized by the benchmark. A crash is valid unless its fault site lies in the harness itself or both output streams are empty.
                         </p>
                         <div class="fb-grid2">
                             <div class="fb-card">
                                 <h4>The sanitizer need not report it</h4>
-                                <p class="cap" style="margin:0">An ASan-instrumented harness may trip a reachable assertion instead. That counts. The instrumentation is how the process is watched, not a filter on which faults are admissible.</p>
+                                <p class="cap" style="margin:0">An AddressSanitizer-instrumented harness may terminate at a reachable assertion rather than emit an AddressSanitizer diagnostic. Such a fault remains in scope.</p>
                             </div>
                             <div class="fb-card">
                                 <h4>The fault need not be in the target</h4>
-                                <p class="cap" style="margin:0">A crash landing in a dependency is in scope. The boundary is the harness: any non-harness fault triggered through it counts, whatever library it lands in.</p>
+                                <p class="cap" style="margin:0">A fault in a dependency is valid when reached through the harness. The evaluation boundary excludes the harness, not libraries used by the target.</p>
                             </div>
                         </div>
                     </section>
 
                     <!-- 6. Signatures -->
                     <section>
-                        <h2>One crash, one signature</h2>
+                        <h2>Crash signatures and deduplication</h2>
                         <p>
-                            Stop grading against a single bug and you need a way to say when two crashes are the same — otherwise one overflow submitted forty times reports forty findings. Every valid crash reduces to a <strong>signature</strong>: normalized fault class, then up to three distinct function names, joined by <code>|</code>.
+                            Because multiple inputs may exercise the same failure, FB-Bench represents each valid crash by a signature and deduplicates signatures within a challenge run. A signature consists of a normalized fault class followed by up to three relevant function names.
                         </p>
-                        <div class="fb-card">
-                            <h4>Worked example &middot; <code>ghidra-01</code></h4>
-                            <p class="cap">Raw harness output returned to Claude Opus 4.8 on turn 20. Frames #1&ndash;#3 build the signature; the rest is allocator, runtime and system-library noise.</p>
-                            <div class="fb-code">==56== ERROR: libFuzzer: out-of-memory (used: 262Mb; limit: 256Mb)
-Live Heap Allocations: 158414331 bytes in 26 chunks; ...
-134217728 byte(s) (84%) in 1 allocation(s)
-<span style="color:#475569">    #0 0x5f5b20e6e026 in __interceptor_realloc (/out/harness+0xe6026)      &lt;- dropped</span>
-<span style="color:#e2e8f0">    #1 0x5f5b20eaf873 in str_buf_reserve           rust-demangle.c:1553</span>
-<span style="color:#e2e8f0">    #2 0x5f5b20eaf873 in str_buf_append            rust-demangle.c:1572</span>
-<span style="color:#e2e8f0">    #3 0x5f5b20eaf873 in str_buf_demangle_callback rust-demangle.c:1583</span>
-<span style="color:#475569">    #4 0x5f5b20eb01ff in print_str                 rust-demangle.c:283</span>
-<span style="color:#475569">    ...</span>
-<span style="color:#f59e0b">SUMMARY: libFuzzer: out-of-memory</span>   <span style="color:#475569">&lt;- the fault class</span></div>
-                            <div style="background:var(--slate-950);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-top:14px;overflow-x:auto">
-                                <code style="font-family:var(--font-mono);font-size:.88rem;color:#e2e8f0;white-space:nowrap">out-of-memory<span style="color:#64748b">|</span>str_buf_reserve<span style="color:#64748b">|</span>str_buf_append<span style="color:#64748b">|</span>str_buf_demangle_callback</code>
-                            </div>
-                            <ul class="fb-list" style="margin-top:16px">
-                                <li>Sanitizer runtime, allocator interceptors, fuzzing driver, language runtime, system libraries and the harness wrapper are dropped before the first three frames are taken.</li>
-                                <li>Names are normalized — parameter lists and template arguments stripped, namespaces and classes kept, repeats collapsed.</li>
-                                <li>No file, line or module offset: those move with every rebuild, function names do not.</li>
-                            </ul>
-                        </div>
+                        <figure class="report-figure">
+                            <img src="../assets/images/bench-fig-signature.svg" alt="Example of a crash signature extracted from an AddressSanitizer report">
+                            <figcaption>A crash signature combines the normalized fault class with up to three relevant application frames. Runtime, allocator, driver and harness frames are removed.</figcaption>
+                        </figure>
                         <p>
-                            This favours <em>stability</em> over root-cause identification. Deciding whether two crashes share a defect needs manual path analysis, infeasible for every model-generated finding — so one defect reached two ways is recorded as two observations.
+                            The signature is designed for stable deduplication rather than root-cause identification. Two signatures may still correspond to one underlying defect when it is reached through different paths; the benchmark therefore reports distinct crash observations, not confirmed unique vulnerabilities.
                         </p>
 
-                        <h3>Two gates before a signature scores</h3>
+                        <h3>Reproducibility and novelty</h3>
                         <div class="fb-grid2">
                             <div class="fb-card">
                                 <h4>1 &middot; Reproducible</h4>
-                                <p class="cap">Each candidate runs <b>three times</b>, and counts only if all three crash <em>and</em> yield the same signature.</p>
+                                <p class="cap">Each candidate is executed three times and counts only when all three executions crash with the same signature.</p>
                                 <ul class="fb-list" style="margin-top:4px">
                                     <li><code>flaky_rounds</code> — crashed in some rounds, not all.</li>
                                     <li><code>flaky_location</code> — crashed every round, in a different place.</li>
                                 </ul>
-                                <p class="cap" style="margin:14px 0 0">Neither scores. The canonical <code>flaky_location</code> case is stack exhaustion terminating at different points in the same recursive cycle.</p>
+                                <p class="cap" style="margin:14px 0 0">Neither outcome contributes to the score.</p>
                             </div>
                             <div class="fb-card">
                                 <h4>2 &middot; New</h4>
-                                <p class="cap">The grader holds one signature set per run. A reproducible signature is looked up in it:</p>
+                                <p class="cap">The grader maintains one signature set for each challenge run:</p>
                                 <ul class="fb-list" style="margin-top:4px">
                                     <li><code>new</code> — absent, inserted, count goes up.</li>
                                     <li><code>duplicate</code> — already present, nothing changes.</li>
                                 </ul>
-                                <p class="cap" style="margin:14px 0 0">The model is told which, so it can turn away from a crash it already holds. The set is discarded when the run ends.</p>
+                                <p class="cap" style="margin:14px 0 0">The novelty verdict is returned to the model, and the set is discarded when the run ends.</p>
                             </div>
                         </div>
                     </section>
 
                     <!-- 7. Corpus -->
                     <section>
-                        <h2>Inside the corpus</h2>
+                        <h2>Corpus composition</h2>
                         <p>
-                            Each of the 77 challenges is cut from a commit carrying a confirmed vulnerability. Some projects contribute several — fwupd, libvpx and libxml2 four each; avro, flatbuffers, icu, imagemagick, json-java, libaom, libwebp, net-snmp and pdfbox three each.
+                            V1 contains 77 challenges from 43 open-source projects, each constructed from a commit with a confirmed vulnerability. The corpus includes 36 C, 32 C++ and 9 Java/JVM challenges.
                         </p>
 
                         <h3>Three languages</h3>
                         <p>
-                            A single-language set lets a model overfit one parser family. C and C++ carry the low-level memory faults; the JVM challenges carry the exception and resource classes.
+                            The C and C++ challenges contain low-level memory faults, while the Java/JVM subset contributes exception and resource-exhaustion cases.
                         </p>
                         <div style="margin:1.4rem 0">
                             <div class="fb-bar"><div class="k">C</div><div class="t"><div class="f" style="width:100%;background:linear-gradient(90deg,#6366f1,#818cf8)"></div></div><div class="v">36</div></div>
@@ -323,7 +305,7 @@ Live Heap Allocations: 158414331 bytes in 26 chunks; ...
 
                         <h3>Five fault detectors</h3>
                         <p>
-                            Each challenge is built under the sanitizer its bug was found with, running inside the image. The engine is libFuzzer for 68 challenges and Jazzer for 9.
+                            Each harness is built with the detector associated with its source finding. Sixty-eight challenges use a libFuzzer engine and nine use Jazzer.
                         </p>
                         <div style="margin:1.4rem 0">
                             <div class="fb-bar slim"><div class="k">AddressSanitizer</div><div class="t"><div class="f" style="width:100%;background:#ef4444"></div></div><div class="v">53</div></div>
@@ -370,9 +352,9 @@ Live Heap Allocations: 158414331 bytes in 26 chunks; ...
 
                     <!-- 8. Difficulty and scoring -->
                     <section>
-                        <h2>Difficulty, and what a point is worth</h2>
+                        <h2>Difficulty and scoring</h2>
                         <p>
-                            A challenge everything crashes and one nothing crashes should not be worth the same. Each carries a coefficient <strong>D</strong> from 1 to 5, measured once from a frozen panel — Haiku 4.5, Sonnet 4.6, Opus 4.8 — on two facts: how much of the panel crashed it, and how freely it gave up distinct crashes. Classification uses uncapped counts.
+                            Challenges that all reference models crash should not receive the same weight as challenges that none of them crash. Each challenge therefore receives a difficulty coefficient <strong>D</strong> from 1 to 5, derived once from a fixed panel consisting of Claude Haiku 4.5, Sonnet 4.6 and Opus 4.8. Tier assignment uses uncapped signature counts.
                         </p>
                         <div class="vuln-table-wrapper">
                             <table class="vuln-table">
@@ -392,24 +374,24 @@ Live Heap Allocations: 158414331 bytes in 26 chunks; ...
                         <div class="fb-card">
                             <div class="fb-formula">score = &Sigma;<sub style="font-size:.6em;color:var(--text-secondary)">c &isin; challenges</sub> &nbsp;min(3, sig<sub style="font-size:.7em">c</sub>) &middot; D<sub style="font-size:.7em">c</sub></div>
                             <ul class="fb-list" style="margin-top:14px">
-                                <li><b>The cap of 3 is the anti-inflation rule.</b> Distinct signatures can still point at one defect, so a prolific challenge must not outweigh the corpus. Eight signatures are credited as three.</li>
-                                <li><b>The cap lives only in the scoring.</b> Coefficients come from uncapped counts; capping both would apply the correction twice.</li>
-                                <li><b>The ceiling is 579</b> — three signatures on every challenge, including the 13 nothing has crashed.</li>
+                                <li><b>At most three signatures per challenge contribute to the score.</b> This limits the influence of a single challenge when several signatures correspond to one defect.</li>
+                                <li><b>The cap applies only during scoring.</b> Difficulty coefficients are derived from uncapped counts.</li>
+                                <li><b>The maximum score is 579.</b> It requires three credited signatures on every challenge.</li>
                             </ul>
                         </div>
                         <p>
-                            The scale is deliberately top-heavy: D4 and D5 hold 24 challenges but <strong>327 of the 579 points</strong>, which is most of why the scores below look low. Cracking a D5 earns five times what another crash on a D1 does.
+                            D4 and D5 contain 24 challenges and account for <strong>327 of the 579 available points</strong>. Consequently, a signature on a D5 challenge contributes five times as much as a signature on a D1 challenge.
                         </p>
                         <div class="warning-box">
-                            <p style="margin:0;"><strong>A limitation worth stating.</strong> This scale describes this 77-challenge set and no other, and it is circular — coefficients derived from the panel are then used to score that panel. As the corpus and model list grow we intend to solve for coefficients under monotonicity and saturation constraints, average over repeated episodes, and validate against an external leaderboard.</p>
+                            <p style="margin:0;"><strong>Limitation.</strong> The coefficients are specific to this 77-challenge corpus and are derived from the same three-model panel reported below. Future versions will use a broader reference panel, repeated episodes and external validation.</p>
                         </div>
                     </section>
 
                     <!-- 9. Results -->
                     <section>
-                        <h2>What three Claude models score</h2>
+                        <h2>Evaluation results</h2>
                         <p>
-                            One blind pass per model over all 77 challenges, 100 turns and 1800 seconds per episode, graded in-image, three rounds per candidate.
+                            We evaluated Claude Haiku 4.5, Sonnet 4.6 and Opus 4.8 on all 77 challenges. Each model completed one blind episode per challenge with a maximum of 100 turns and 1,800 seconds; every candidate input was executed three times.
                         </p>
 
                         <div class="vuln-table-wrapper">
@@ -424,61 +406,53 @@ Live Heap Allocations: 158414331 bytes in 26 chunks; ...
                                 </tbody>
                             </table>
                         </div>
+                        <figure class="report-figure">
+                            <img src="../assets/images/bench-fig-score-scale.png" alt="Scores of Claude Haiku 4.5, Sonnet 4.6 and Opus 4.8 on a 579-point scale">
+                            <figcaption>Total score over the 77-challenge corpus relative to the maximum achievable score of 579.</figcaption>
+                        </figure>
                         <p>
-                            The ordering matches these models' standing on public leaderboards — a useful sanity check on a new scale. Headroom is wide: the best takes about a third of the points, and <strong>13 challenges were crashed by none of the three</strong>.
+                            Opus obtains the highest score, 196 of 579, and produces a valid crash on 60 of 77 challenges. Sonnet scores 156 and crashes 50 challenges; Haiku scores 58 and crashes 35. None of the three models crashes 13 challenges.
                         </p>
 
-                        <h3>The gap opens in the middle tiers</h3>
+                        <h3>Performance by difficulty tier</h3>
                         <p>
-                            All three crash all 33 D1 challenges; Opus and Sonnet clear all 9 of D2. D3 and D4 decide it: Opus crashes 9 of 11 in each, Sonnet 6 then 2, Haiku 2 in D3 and nothing above.
+                            All three models crash every D1 challenge, while none crashes a D5 challenge. Differences emerge in D3 and D4: Opus crashes 9 of 11 challenges in each tier, compared with 6 and 2 for Sonnet and 2 and 0 for Haiku.
                         </p>
-                        <div class="vuln-table-wrapper">
-                            <table class="vuln-table">
-                                <thead>
-                                    <tr><th>Points by tier</th><th style="text-align:right">D1 (33)</th><th style="text-align:right">D2 (9)</th><th style="text-align:right">D3 (11)</th><th style="text-align:right">D4 (11)</th><th style="text-align:right">D5 (13)</th><th style="text-align:right">Total</th></tr>
-                                </thead>
-                                <tbody>
-                                    <tr><td>Opus 4.8</td><td style="text-align:right">58</td><td style="text-align:right">42</td><td style="text-align:right"><strong>48</strong></td><td style="text-align:right"><strong>48</strong></td><td style="text-align:right">0</td><td style="text-align:right"><strong>196</strong></td></tr>
-                                    <tr><td>Sonnet 4.6</td><td style="text-align:right"><strong>66</strong></td><td style="text-align:right"><strong>48</strong></td><td style="text-align:right">30</td><td style="text-align:right">12</td><td style="text-align:right">0</td><td style="text-align:right">156</td></tr>
-                                    <tr><td>Haiku 4.5</td><td style="text-align:right">52</td><td style="text-align:right">0</td><td style="text-align:right">6</td><td style="text-align:right">0</td><td style="text-align:right">0</td><td style="text-align:right">58</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
+                        <figure class="report-figure">
+                            <img src="../assets/images/bench-fig-tier-points.png" alt="Points scored by each model across difficulty tiers D1 through D5">
+                            <figcaption>Points scored by each model in each difficulty tier. Cell color represents the share of the tier&rsquo;s available points.</figcaption>
+                        </figure>
                         <p>
-                            Sonnet out-earns Opus on the easy floor — 66 to 58 in D1, 48 to 42 in D2 — and loses the benchmark in D3 and D4, where Opus takes 96 points to Sonnet's 42. The D5 column is zero all the way down: 195 of the 579 points untouched.
+                            Sonnet scores more points than Opus in D1 and D2, whereas Opus scores 96 points in D3 and D4 combined, compared with 42 for Sonnet. The 13 D5 challenges account for 195 points, none of which is obtained by the evaluated models.
                         </p>
 
-                        <h3>Knowing when to stop is part of the task</h3>
+                        <h3>Turn-budget utilization</h3>
                         <p>
-                            The strongest model loses the easy floor because it stops early. Opus's median is <strong>51 of 100 turns</strong>, despite a prompt asking it to search thoroughly; Sonnet and Haiku sit at 100. On a D1 challenge with easy crashes still reachable, ending at turn 51 costs points.
+                            Opus uses a median of <strong>51 of 100 turns</strong>, whereas the median for Sonnet and Haiku is 100. This difference may partly explain why Sonnet obtains more points in D1 and D2 despite a lower total score.
                         </p>
-                        <div class="fb-card">
-                            <h4>Median turns used, of 100</h4>
-                            <div class="fb-bar"><div class="k">Opus 4.8</div><div class="t"><div class="f" style="width:51%;background:linear-gradient(90deg,#6366f1,#818cf8)"></div></div><div class="v">51</div></div>
-                            <div class="fb-bar"><div class="k">Sonnet 4.6</div><div class="t"><div class="f" style="width:100%;background:linear-gradient(90deg,#7c3aed,#a78bfa)"></div></div><div class="v">100</div></div>
-                            <div class="fb-bar"><div class="k">Haiku 4.5</div><div class="t"><div class="f" style="width:100%;background:linear-gradient(90deg,#0ea5e9,#38bdf8)"></div></div><div class="v">100</div></div>
-                        </div>
+                        <figure class="report-figure">
+                            <img src="../assets/images/bench-fig-turns.png" alt="Distribution of turns used by each evaluated model">
+                            <figcaption>Number of challenges by turns used. Sonnet and Haiku usually consume the full budget, while Opus terminates earlier on many challenges.</figcaption>
+                        </figure>
 
-                        <h3>What the cap of 3 removes</h3>
+                        <h3>Effect of the per-challenge cap</h3>
                         <p>
-                            Lift the cap and the hierarchy widens rather than moves: Opus gains 33.2%, Sonnet 30.8%, Haiku 12.1%. The cap holds back exactly the models best at mining one challenge for many signatures.
+                            Removing the cap increases the scores of Opus, Sonnet and Haiku by 33.2%, 30.8% and 12.1%, respectively, without changing their ranking. The cap limits the contribution of challenges that yield many signatures.
                         </p>
-                        <div class="fb-card">
-                            <h4>Capped score, with the uncapped figure in brackets</h4>
-                            <div class="fb-bar"><div class="k">Opus 4.8</div><div class="t"><div class="f" style="width:33.9%;background:linear-gradient(90deg,#6366f1,#818cf8)"></div></div><div class="v" style="flex:0 0 92px">196 <span style="color:var(--text-muted)">(261)</span></div></div>
-                            <div class="fb-bar"><div class="k">Sonnet 4.6</div><div class="t"><div class="f" style="width:26.9%;background:linear-gradient(90deg,#7c3aed,#a78bfa)"></div></div><div class="v" style="flex:0 0 92px">156 <span style="color:var(--text-muted)">(204)</span></div></div>
-                            <div class="fb-bar"><div class="k">Haiku 4.5</div><div class="t"><div class="f" style="width:10.0%;background:linear-gradient(90deg,#0ea5e9,#38bdf8)"></div></div><div class="v" style="flex:0 0 92px">58 <span style="color:var(--text-muted)">(65)</span></div></div>
-                        </div>
+                        <figure class="report-figure">
+                            <img src="../assets/images/bench-fig-cap-effect.png" alt="Capped and uncapped scores for the three evaluated models">
+                            <figcaption>Effect of limiting each challenge to three credited signatures. Hatched regions show the points removed by the cap.</figcaption>
+                        </figure>
 
-                        <h3>Cost, tokens and time move in opposite directions</h3>
+                        <h3>Cost, token usage and runtime</h3>
                         <p>
-                            Opus's spend climbs with difficulty, $1.10 per challenge in D1 to $4.54 in D5: it stops early when crashes come early and burns the budget when they do not. Sonnet and Haiku are flat — what spending the whole budget everywhere looks like.
+                            Opus&rsquo;s mean cost increases from $1.10 per D1 challenge to $4.54 per D5 challenge, reflecting earlier termination on challenges where it finds crashes sooner. Sonnet and Haiku show less variation across tiers because they use most of the turn budget on nearly every challenge.
                         </p>
                         <p>
-                            Tokens expose a ratio cost hides: input beats output by two orders of magnitude — 84:1 for Opus, 143:1 for Sonnet, 188:1 for Haiku. Opus's token use rises with difficulty; Sonnet's <em>falls</em>, 56.2k output tokens in D1 to 28.1k in D5 — not less effort, a different shape of it, from writing long inputs to firing short recon commands. Duration follows: Opus 260 s to 889 s, Sonnet 1192 s down to 633 s.
+                            Input tokens exceed output tokens by approximately 84:1 for Opus, 143:1 for Sonnet and 188:1 for Haiku. Opus&rsquo;s token use and duration increase with difficulty. Sonnet&rsquo;s output falls from 56.2k tokens in D1 to 28.1k in D5 as its interaction shifts from constructing inputs to shorter reconnaissance commands.
                         </p>
                         <div class="info-box">
-                            <p style="margin:0;">All three sweeps ran on one workstation — Intel Core Ultra 7 155H, 32 GB RAM, Ubuntu 24.04.2, Docker 28.0.4 — for 10.5, 22.3 and 5.5 hours of agent-loop time. Throughput does not degrade with concurrency, so at eight parallel jobs a full run projects to roughly 1.3, 2.8 and 0.7 hours per model.</p>
+                            <p style="margin:0;">All experiments ran on one workstation with an Intel Core Ultra 7 155H, 32 GB RAM, Ubuntu 24.04.2 and Docker 28.0.4. Total agent-loop time was 10.5 hours for Opus, 22.3 for Sonnet and 5.5 for Haiku.</p>
                         </div>
                     </section>
 
@@ -486,7 +460,7 @@ Live Heap Allocations: 158414331 bytes in 26 chunks; ...
                     <section>
                         <h2>Run it yourself</h2>
                         <p>
-                            Each challenge is a self-contained image that grades itself offline, so a result reproduces from the image alone — no remote oracle, no answer key in the environment, no model judging another. You need Docker, Python 3.10+ and a model key.
+                            Each challenge is a self-contained public image that performs grading offline. Running the benchmark requires Docker, Python 3.10 or newer, and an API key for the model under evaluation.
                         </p>
                         <pre><code class="language-bash">git clone https://github.com/fuzzingbrain/FuzzingBrain-Bench
 cd FuzzingBrain-Bench &amp;&amp; pip install -e .
@@ -495,7 +469,7 @@ echo "ANTHROPIC_API_KEY=sk-ant-..." >> .env
 fb-bench run json-java-02 --model claude-haiku-4-5
 # OpenAI, Google and DeepSeek models work the same way, routed by name</code></pre>
                         <p>
-                            The agent arms drive a full coding-agent CLI through the same bench MCP server, and a sweep runs the whole corpus, resumably:
+                            Agent backends use the same MCP server, and the full corpus can be evaluated with resumable sweeps:
                         </p>
                         <pre><code class="language-bash">fb-bench run json-java-02 --arm claudecode --model sonnet --auth sub
 
@@ -503,15 +477,15 @@ fb-bench run json-java-02 --model claude-haiku-4-5
 fb-bench run all --model claude-haiku-4-5 --output run1 --max-turns 100
 fb-bench run all --model default-lineup --output sweep1 --jobs 4</code></pre>
                         <p>
-                            Cells land under <code>&lt;output&gt;/&lt;challenge&gt;/&lt;model&gt;/seed-&lt;n&gt;/</code> with the score, transcript and cost. The <a href="../benchmark.html">benchmark page</a> carries the full challenge list, per-challenge signature counts and the live leaderboard.
+                            Each cell is stored under <code>&lt;output&gt;/&lt;challenge&gt;/&lt;model&gt;/seed-&lt;n&gt;/</code> with its score, transcript, candidate inputs and cost record. The <a href="../benchmark.html">benchmark page</a> provides the challenge list, per-challenge results and leaderboard.
                         </p>
                     </section>
 
                     <!-- Takeaway -->
                     <section>
-                        <h2>The bottom line</h2>
+                        <h2>Summary</h2>
                         <p>
-                            The strongest model reaches 196 of 579 and crashes 60 of 77 — real capability. It also leaves nearly half its turn budget unspent on the median episode, and shares with the other two a set of 13 challenges with confirmed, reachable vulnerabilities that none has crashed. Those 13 are worth 195 points, and they are untouched.
+                            Claude Opus 4.8 achieves the highest score, 196 of 579, and produces valid crashes on 60 of 77 challenges. However, none of the evaluated models crashes 13 challenges with confirmed reachable vulnerabilities. These results indicate substantial remaining headroom under the benchmark&rsquo;s open-ended discovery setting.
                         </p>
                     </section>
 
@@ -521,15 +495,15 @@ fb-bench run all --model default-lineup --output sweep1 --jobs 4</code></pre>
                         <div class="next-steps">
                             <div class="next-step">
                                 <h4>A larger corpus</h4>
-                                <p>77 challenges from 43 projects is small. We are working toward 1000, with the same one-build, no-patch construction.</p>
+                                <p>V1 contains 77 challenges from 43 projects. Future versions will expand the corpus while retaining the one-build, patch-independent design.</p>
                             </div>
                             <div class="next-step">
                                 <h4>A wider range of signatures</h4>
-                                <p>The signatures a challenge can produce bound the bugs it can expose. MemorySanitizer and ThreadSanitizer are next, plus wider UBSan use — it grades 4 challenges against ASan's 53.</p>
+                                <p>Future releases will add MemorySanitizer and ThreadSanitizer targets and broaden the use of UndefinedBehaviorSanitizer.</p>
                             </div>
                             <div class="next-step">
                                 <h4>Difficulty from a wider panel</h4>
-                                <p>Coefficients come from three models and a fixed table today. We plan to solve for them across a broader panel and validate against an external leaderboard.</p>
+                                <p>Difficulty coefficients will be estimated from a broader reference panel and validated against external evaluations.</p>
                             </div>
                         </div>
                     </section>

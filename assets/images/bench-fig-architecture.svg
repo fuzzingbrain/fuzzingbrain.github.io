@@ -1,0 +1,130 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="844" height="372" viewBox="0 0 844 372" role="img"
+           aria-label="One frame, the user's host machine, holds everything. Down its left side: the LLM under test, exchanging tool calls and results with the agent loop, which drives the turn and time budget and logs the full trajectory, and then a scoring box: the minimum of distinct crashes and three, times the difficulty coefficient from a frozen table. Two connectors cross to the challenge container, carrying the forwarded call over the container stdin and stdout, where a brace gathers the three tools behind that one channel and returning the harness output and a novelty verdict, but never the crash signature. Inside the container, three tools: setup shows the current challenge information: project, language, harness configuration and paths; exec reaches the read-only source tree and a writable workspace and has no network; run_poc_on_harness reaches the root-owned instrumented harness binary, runs a candidate three times and returns its standard output, standard error, exit code and terminating signal.">
+<style>
+
+  .bx   {fill:#FFFFFF;   stroke:#9DABB8; stroke-width:1;}
+  .bxt  {fill:#E7EDF3; stroke:#9DABB8; stroke-width:1;}
+  .bxa  {fill:#D5E0F3; stroke:#1B3D86;  stroke-width:1.2;}
+  .bxok {fill:#E6F1EA;  stroke:#6BA486;  stroke-width:1.2;}
+  .bxno {fill:#F8E8E4;  stroke:#C8836F;  stroke-width:1.2;}
+  .rail {fill:#1B3D86;}
+  .railok{fill:#6BA486;}
+  .bxmcp{fill:#D5E0F3; stroke:#1B3D86; stroke-width:1.3; stroke-dasharray:4 3;}
+  .arr  {stroke:#46535F; stroke-width:1.1; fill:none;}
+  .arrd {stroke:#6F7D8A; stroke-width:1.1; fill:none; stroke-dasharray:3.5 2.5;}
+  .hair {stroke:#9DABB8; stroke-width:1; fill:none;}
+  .band {stroke:#9DABB8; stroke-width:1; fill:none; stroke-dasharray:5 4;}
+  .bxd  {fill:none; stroke:#6F7D8A; stroke-width:1; stroke-dasharray:3.5 2.5;}
+  .hairok{stroke:#6BA486; stroke-width:1; fill:none;}
+  .hairno{stroke:#C8836F; stroke-width:1; fill:none;}
+  .t    {font-family:Tinos,"Times New Roman",Times,serif; fill:#0E1319;}
+  .tm   {font-family:Tinos,"Times New Roman",Times,serif; fill:#46535F;}
+  .tf   {font-family:Tinos,"Times New Roman",Times,serif; fill:#6F7D8A;}
+  .ta   {font-family:Tinos,"Times New Roman",Times,serif; fill:#1B3D86;}
+  .tok  {font-family:Tinos,"Times New Roman",Times,serif; fill:#2E6B4F;}
+  .tno  {font-family:Tinos,"Times New Roman",Times,serif; fill:#96382C;}
+  .mono {font-family:Cousine,"Courier New",monospace;  fill:#0E1319;}
+  .monoa{font-family:Cousine,"Courier New",monospace;  fill:#1B3D86;}
+  .monok{font-family:Cousine,"Courier New",monospace;  fill:#2E6B4F;}
+  .logo {fill:#6F7D8A;}
+  .dot  {fill:#6F7D8A; stroke:none;}
+  .ico  {fill:none; stroke:#6F7D8A; stroke-width:1.2; stroke-linecap:round;}
+  .col  {font-family:Arimo,Helvetica,sans-serif; fill:#0E1319; font-size:10px;
+         letter-spacing:.06em; font-weight:600;}
+  .cap  {font-family:Arimo,Helvetica,sans-serif; fill:#6F7D8A; font-size:9.5px;
+         letter-spacing:.12em; text-transform:uppercase; font-weight:600;}
+</style>
+
+
+        <defs>
+          <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5"
+                  markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 9 5 L 0 9 z" fill="#46535F"/>
+          </marker>
+        </defs>
+
+        <rect class="bx" x="6" y="40" width="832" height="316" rx="3"/>
+        <g class="ico" transform="translate(20,52)">
+          <rect x="0" y="0" width="15" height="10" rx="1"/>
+          <path d="M-2.5 13 H17.5"/>
+        </g>
+        <text class="cap" x="44" y="62">user&#8217;s host machine</text>
+        <text class="t" x="422" y="60" font-size="13" text-anchor="middle" font-weight="700">FB-Bench System Design</text>
+
+        <!-- ============ the model and the loop that drives it ============ -->
+        <rect class="bxt" x="24" y="84" width="190" height="44" rx="2"/>
+        <g transform="translate(92,99)">
+          <path class="ico" d="M7 0 V3"/>
+          <circle class="dot" cx="7" cy="0.6" r="1.4"/>
+          <rect class="ico" x="0" y="3.4" width="14" height="11" rx="2.6"/>
+          <circle class="dot" cx="4.6" cy="9" r="1.3"/>
+          <circle class="dot" cx="9.4" cy="9" r="1.3"/>
+        </g>
+        <text class="t"  x="132" y="112" font-size="12" text-anchor="middle" font-weight="700">LLMs</text>
+
+        <path class="arr" d="M95 128 V166"  marker-end="url(#ah)"/>
+        <path class="arr" d="M143 166 V128" marker-end="url(#ah)"/>
+        <text class="tf" x="88"  y="151" font-size="9" text-anchor="end">tool call</text>
+        <text class="tf" x="150" y="151" font-size="9">result</text>
+
+        <rect class="bx" x="24" y="168" width="190" height="76" rx="2"/>
+        <text class="t"  x="119" y="192" font-size="12"   text-anchor="middle" font-weight="700">Agent loop</text>
+        <text class="tm" x="119" y="212" font-size="10.5" text-anchor="middle">drives the turn and time budget</text>
+        <text class="tm" x="119" y="228" font-size="10.5" text-anchor="middle">logs the full trajectory</text>
+
+        <path class="arr" d="M119 244 V262" marker-end="url(#ah)"/>
+        <rect class="bxt" x="24" y="264" width="190" height="72" rx="2"/>
+        <rect class="rail" x="24" y="264" width="2.4" height="72"/>
+        <text class="t"  x="119" y="288" font-size="12"   text-anchor="middle" font-weight="700">Scoring</text>
+        <text class="tm" x="119" y="306" font-size="10.5" text-anchor="middle">min(distinct crashes, 3) &#215; D</text>
+        <text class="tm" x="119" y="321" font-size="9.5" text-anchor="middle">D = difficulty coefficient (1&#8211;5)</text>
+
+        <!-- ============ the boundary : everything crosses through MCP ============ -->
+        <text class="tf" x="334" y="166" font-size="9.5" text-anchor="middle">forwards tool calls</text>
+        <path class="arr" d="M214 196 H260"/>
+        
+
+        <rect class="bxmcp" x="264" y="176" width="140" height="72" rx="2"/>
+        <text class="ta" x="334" y="204" font-size="11"  text-anchor="middle" font-weight="700">MCP</text>
+        <text class="ta" x="334" y="221" font-size="9" text-anchor="middle">stdio transport</text>
+
+        <path class="arr" d="M470 228 H408"/>
+        <path class="arr" d="M260 228 H214" marker-end="url(#ah)"/>
+        <text class="tf" x="334" y="264" font-size="9.5" text-anchor="middle">harness output + novelty verdict</text>
+        <text class="tf" x="334" y="277" font-size="8.5" text-anchor="middle">no crash signature</text>
+
+        <!-- ============ the challenge container ============ -->
+        <rect class="bxt" x="454" y="84" width="370" height="240" rx="3"/>
+        <g class="logo" transform="translate(468,98) scale(0.5833)"><path d="M13.983 11.078h2.119a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.119a.185.185 0 00-.185.185v1.888c0 .102.083.185.185.185m-2.954-5.43h2.118a.186.186 0 00.186-.186V3.574a.186.186 0 00-.186-.185h-2.118a.185.185 0 00-.185.185v1.888c0 .102.082.185.185.185m0 2.716h2.118a.187.187 0 00.186-.186V6.29a.186.186 0 00-.186-.185h-2.118a.185.185 0 00-.185.185v1.887c0 .102.082.185.185.186m-2.93 0h2.12a.186.186 0 00.184-.186V6.29a.185.185 0 00-.185-.185H8.1a.185.185 0 00-.185.185v1.887c0 .102.083.185.185.186m-2.964 0h2.119a.186.186 0 00.185-.186V6.29a.185.185 0 00-.185-.185H5.136a.186.186 0 00-.186.185v1.887c0 .102.084.185.186.186m5.893 2.715h2.118a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.118a.185.185 0 00-.185.185v1.888c0 .102.082.185.185.185m-2.93 0h2.12a.185.185 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.185.185 0 00-.184.185v1.888c0 .102.083.185.185.185m-2.964 0h2.119a.185.185 0 00.185-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.186.186v1.887c0 .102.084.185.186.185m-2.92 0h2.12a.185.185 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.185.185 0 00-.184.185v1.888c0 .102.082.185.185.185M23.763 9.89c-.065-.051-.672-.51-1.954-.51-.338.001-.676.03-1.01.087-.248-1.7-1.653-2.53-1.716-2.566l-.344-.199-.226.327c-.284.438-.49.922-.612 1.43-.23.97-.09 1.882.403 2.661-.595.332-1.55.413-1.744.42H.751a.751.751 0 00-.75.748 11.376 11.376 0 00.692 4.062c.545 1.428 1.355 2.48 2.41 3.124 1.18.723 3.1 1.137 5.275 1.137.983.003 1.963-.086 2.93-.266a12.248 12.248 0 003.823-1.389c.98-.567 1.86-1.288 2.61-2.136 1.252-1.418 1.998-2.997 2.553-4.4h.221c1.372 0 2.215-.549 2.68-1.009.309-.293.55-.65.707-1.046l.098-.288Z"/></g>
+        <text class="cap" x="492" y="108">challenge container</text>
+
+        <path class="arr" d="M408 196 H450" marker-end="url(#ah)"/>
+        <path class="arr" d="M450 228 H408" marker-end="url(#ah)"/>
+
+        <rect class="bxd" x="460" y="140" width="176" height="162" rx="2"/>
+        <rect class="bxd" x="646" y="140" width="158" height="162" rx="2"/>
+        <path class="arr" d="M636 221 H646" marker-end="url(#ah)"/>
+        <text class="col" x="468" y="132">MCP tools</text>
+        <text class="col" x="654" y="132">path</text>
+        <text class="col" x="722" y="132" font-size="9.5">Agent permission</text>
+
+        <text class="mono" x="468" y="154" font-size="9.5">setup()</text>
+        <text class="tm"   x="478" y="167" font-size="8.5">&#8211; shows the challenge&#8217;s information</text>
+        <text class="tm"   x="654" y="154" font-size="9">none</text>
+        <text class="tm"   x="748" y="154" font-size="9">none</text>
+
+        <text class="mono"  x="468" y="200" font-size="9.5">exec(cmd)</text>
+        <text class="tm"    x="478" y="213" font-size="8.5">&#8211; one shell command in the source root</text>
+        <text class="tm"    x="478" y="224" font-size="8.5">&#8211; the only filesystem access</text>
+        <text class="tno"   x="478" y="235" font-size="8.5" font-style="italic">&#8211; no network</text>
+        <text class="monok" x="654" y="200" font-size="9.5">src/ harness/</text>
+        <text class="tok"   x="748" y="200" font-size="9">read only</text>
+        <text class="monok" x="654" y="218" font-size="9.5">workspace/</text>
+        <text class="tok"   x="748" y="218" font-size="9">read/write</text>
+
+        <text class="monoa" x="468" y="264" font-size="9">run_poc_on_harness(poc_path)</text>
+        <text class="tm"    x="478" y="277" font-size="8.5">&#8211; runs one PoC candidate three times</text>
+        <text class="tno"   x="478" y="288" font-size="8.5" font-style="italic">&#8211; returns stdout, stderr, exit_code, signal</text>
+        <text class="monoa" x="654" y="264" font-size="9.5">oracle/</text>
+        <text class="tno"   x="748" y="264" font-size="9">no access</text>
+</svg>
