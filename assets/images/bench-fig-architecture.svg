@@ -2,36 +2,36 @@
            aria-label="One frame, the user's host machine, holds everything. Down its left side: the LLM under test, exchanging tool calls and results with the agent loop, which drives the turn and time budget and logs the full trajectory, and then a scoring box: the minimum of distinct crashes and three, times the difficulty coefficient from a frozen table. Two connectors cross to the challenge container, carrying the forwarded call over the container stdin and stdout, where a brace gathers the three tools behind that one channel and returning the harness output and a novelty verdict, but never the crash signature. Inside the container, three tools: setup shows the current challenge information: project, language, harness configuration and paths; exec reaches the read-only source tree and a writable workspace and has no network; run_poc_on_harness reaches the root-owned instrumented harness binary, runs a candidate three times and returns its standard output, standard error, exit code and terminating signal.">
 <style>
 
-  .bx   {fill:#FFFFFF;   stroke:#9DABB8; stroke-width:1;}
-  .bxt  {fill:#E7EDF3; stroke:#9DABB8; stroke-width:1;}
-  .bxa  {fill:#D5E0F3; stroke:#1B3D86;  stroke-width:1.2;}
-  .bxok {fill:#E6F1EA;  stroke:#6BA486;  stroke-width:1.2;}
-  .bxno {fill:#F8E8E4;  stroke:#C8836F;  stroke-width:1.2;}
-  .rail {fill:#1B3D86;}
-  .railok{fill:#6BA486;}
-  .bxmcp{fill:#D5E0F3; stroke:#1B3D86; stroke-width:1.3; stroke-dasharray:4 3;}
-  .arr  {stroke:#46535F; stroke-width:1.1; fill:none;}
-  .arrd {stroke:#6F7D8A; stroke-width:1.1; fill:none; stroke-dasharray:3.5 2.5;}
-  .hair {stroke:#9DABB8; stroke-width:1; fill:none;}
-  .band {stroke:#9DABB8; stroke-width:1; fill:none; stroke-dasharray:5 4;}
-  .bxd  {fill:none; stroke:#6F7D8A; stroke-width:1; stroke-dasharray:3.5 2.5;}
-  .hairok{stroke:#6BA486; stroke-width:1; fill:none;}
-  .hairno{stroke:#C8836F; stroke-width:1; fill:none;}
-  .t    {font-family:Tinos,"Times New Roman",Times,serif; fill:#0E1319;}
-  .tm   {font-family:Tinos,"Times New Roman",Times,serif; fill:#46535F;}
-  .tf   {font-family:Tinos,"Times New Roman",Times,serif; fill:#6F7D8A;}
-  .ta   {font-family:Tinos,"Times New Roman",Times,serif; fill:#1B3D86;}
-  .tok  {font-family:Tinos,"Times New Roman",Times,serif; fill:#2E6B4F;}
-  .tno  {font-family:Tinos,"Times New Roman",Times,serif; fill:#96382C;}
-  .mono {font-family:Cousine,"Courier New",monospace;  fill:#0E1319;}
-  .monoa{font-family:Cousine,"Courier New",monospace;  fill:#1B3D86;}
-  .monok{font-family:Cousine,"Courier New",monospace;  fill:#2E6B4F;}
-  .logo {fill:#6F7D8A;}
-  .dot  {fill:#6F7D8A; stroke:none;}
-  .ico  {fill:none; stroke:#6F7D8A; stroke-width:1.2; stroke-linecap:round;}
-  .col  {font-family:Arimo,Helvetica,sans-serif; fill:#0E1319; font-size:10px;
+  .bx   {fill:#111827; stroke:#475569; stroke-width:1;}
+  .bxt  {fill:#1E293B; stroke:#475569; stroke-width:1;}
+  .bxa  {fill:#252D55; stroke:#818CF8; stroke-width:1.2;}
+  .bxok {fill:#102A26; stroke:#34D399; stroke-width:1.2;}
+  .bxno {fill:#321D27; stroke:#F87171; stroke-width:1.2;}
+  .rail {fill:#818CF8;}
+  .railok{fill:#34D399;}
+  .bxmcp{fill:#252D55; stroke:#818CF8; stroke-width:1.3; stroke-dasharray:4 3;}
+  .arr  {stroke:#CBD5E1; stroke-width:1.1; fill:none;}
+  .arrd {stroke:#94A3B8; stroke-width:1.1; fill:none; stroke-dasharray:3.5 2.5;}
+  .hair {stroke:#475569; stroke-width:1; fill:none;}
+  .band {stroke:#475569; stroke-width:1; fill:none; stroke-dasharray:5 4;}
+  .bxd  {fill:none; stroke:#94A3B8; stroke-width:1; stroke-dasharray:3.5 2.5;}
+  .hairok{stroke:#34D399; stroke-width:1; fill:none;}
+  .hairno{stroke:#F87171; stroke-width:1; fill:none;}
+  .t    {font-family:Tinos,"Times New Roman",Times,serif; fill:#F8FAFC;}
+  .tm   {font-family:Tinos,"Times New Roman",Times,serif; fill:#CBD5E1;}
+  .tf   {font-family:Tinos,"Times New Roman",Times,serif; fill:#94A3B8;}
+  .ta   {font-family:Tinos,"Times New Roman",Times,serif; fill:#A5B4FC;}
+  .tok  {font-family:Tinos,"Times New Roman",Times,serif; fill:#34D399;}
+  .tno  {font-family:Tinos,"Times New Roman",Times,serif; fill:#F87171;}
+  .mono {font-family:Cousine,"Courier New",monospace; fill:#F8FAFC;}
+  .monoa{font-family:Cousine,"Courier New",monospace; fill:#A5B4FC;}
+  .monok{font-family:Cousine,"Courier New",monospace; fill:#34D399;}
+  .logo {fill:#94A3B8;}
+  .dot  {fill:#94A3B8; stroke:none;}
+  .ico  {fill:none; stroke:#94A3B8; stroke-width:1.2; stroke-linecap:round;}
+  .col  {font-family:Arimo,Helvetica,sans-serif; fill:#F8FAFC; font-size:10px;
          letter-spacing:.06em; font-weight:600;}
-  .cap  {font-family:Arimo,Helvetica,sans-serif; fill:#6F7D8A; font-size:9.5px;
+  .cap  {font-family:Arimo,Helvetica,sans-serif; fill:#94A3B8; font-size:9.5px;
          letter-spacing:.12em; text-transform:uppercase; font-weight:600;}
 </style>
 
@@ -39,7 +39,7 @@
         <defs>
           <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5"
                   markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-            <path d="M 0 1 L 9 5 L 0 9 z" fill="#46535F"/>
+            <path d="M 0 1 L 9 5 L 0 9 z" fill="#CBD5E1"/>
           </marker>
         </defs>
 
