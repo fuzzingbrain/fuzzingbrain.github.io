@@ -40,15 +40,13 @@
     .bench-section h3.hd{font-size:1.7rem;margin:0 0 6px}
     .bench-section .sub{color:var(--text-muted);max-width:64ch;margin:0 0 26px;font-size:1rem}
 
-    .pillars{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px}
-    .pillar{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px}
-    .pillar{border-top:3px solid var(--border)}
-    .pillar.p1{border-top-color:#6366f1}.pillar.p2{border-top-color:#f59e0b}.pillar.p3{border-top-color:#10b981}
-    .pillar .ic{margin-bottom:12px;line-height:0}
-    .pillar .ic svg{width:38px;height:38px;display:block}
-    .pillar .kick{font-family:var(--font-mono);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin:0 0 10px}
-    .pillar h4{margin:0 0 8px;font-size:1.05rem}
-    .pillar p{margin:0;color:var(--text-secondary);font-size:.92rem;line-height:1.55}
+    .generations-figure{margin:24px 0 22px;padding:18px;background:#fff;border:1px solid var(--border);border-radius:12px}
+    .generations-figure img{display:block;width:100%;height:auto}
+    .generation-list{max-width:78ch;margin:0 0 22px;padding-left:1.4rem;color:var(--text-secondary)}
+    .generation-list li{margin:10px 0;line-height:1.65}
+    .generation-list strong{color:var(--text-primary)}
+    .generation-conclusion{max-width:78ch;margin:0;color:var(--text-secondary);font-size:1rem;line-height:1.7}
+    .generation-conclusion strong{color:var(--text-primary)}
 
     /* charts */
     .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px 26px 20px}
@@ -329,28 +327,17 @@
 
         <section class="bench-section">
             <div class="section-content">
-                <h3 class="hd">What is new</h3>
-                <p class="sub">Three design decisions separate FuzzingBrain Bench from the benchmarks it grew out of. Together they change the question from &ldquo;did you reproduce our bug?&rdquo; to &ldquo;what can you break?&rdquo;</p>
-                <div class="pillars" style="margin-top:22px">
-                    <div class="pillar p1">
-                        <div class="ic"><svg viewBox="0 0 40 40" role="img" aria-label="Magnifying glass over scattered findings"><g fill="none" stroke="#6366f1" stroke-width="2.4" stroke-linecap="round"><circle cx="17" cy="17" r="12"/><path d="M26,26 l10,10"/></g><circle cx="12.8" cy="13.5" r="2.4" fill="#818cf8"/><circle cx="21.2" cy="17.7" r="2.4" fill="#818cf8"/><circle cx="14.9" cy="21.9" r="2.4" fill="#818cf8"/></svg></div>
-                        <h4>Discovery, not reproduction</h4>
-                        <p class="kick">Every distinct crash counts</p>
-                        <p>Most benchmarks bind a challenge to one predefined vulnerability and score only inputs that trigger it, so a model that reads the harness, reasons about the reachable code and builds an input that reliably faults the sanitizer still scores zero if the crash is a different one. Here the goal is to produce <b>as many distinct crashes as possible</b>. Any reproducible fault reachable through the harness counts, wherever it lands.</p>
-                    </div>
-                    <div class="pillar p2">
-                        <div class="ic"><svg viewBox="0 0 40 40" role="img" aria-label="Padlock"><g fill="none" stroke="#f59e0b" stroke-width="2.4" stroke-linecap="round"><path d="M13,17 v-5 a7,7 0 0 1 14,0 v5"/><rect x="8" y="17" width="24" height="19" rx="3.5"/></g><circle cx="20" cy="26.5" r="2.6" fill="#f59e0b"/></svg></div>
-                        <h4>Grading inside the image</h4>
-                        <p class="kick">Offline and deterministic</p>
-                        <p>Every challenge grades itself. The verdict comes from the project&rsquo;s own sanitizer-instrumented harness running in the container, not from a remote service and not from another model judging the output. No answer key ships in any image, so there is nothing in the environment to leak &mdash; and any score can be reproduced from the published image alone.</p>
-                    </div>
-                    <div class="pillar p3">
-                        <div class="ic"><svg viewBox="0 0 40 40" role="img" aria-label="Checked box"><g fill="none" stroke="#10b981" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="11" width="28" height="22" rx="3"/><path d="M13,21 l4.5,4.5 l9,-10.5"/></g></svg></div>
-                        <h4>Realistic sandbox</h4>
-                        <p class="kick">Nothing tells the model it is being benchmarked</p>
-                        <p>Nothing in the sandbox says it is a benchmark. The challenge carries a neutral alias like <code>avro-03</code>, the shell has no internet, the model key never enters the container, and a submitted input returns only the raw harness output a fuzzer would show &mdash; no verdict, no score, no hint of how close it came.</p>
-                    </div>
-                </div>
+                <h3 class="hd">Why FuzzingBrain-Bench?</h3>
+                <p class="sub">Earlier evaluations of LLM bug-discovery capability evolved through three generations, each with a key limitation.</p>
+                <figure class="generations-figure">
+                    <img src="assets/images/fb-bench-generations.svg" alt="Four generations of evaluating the bug-discovery capability of large language models">
+                </figure>
+                <ol class="generation-list">
+                    <li><strong>Binary classification</strong> assigns a label to a single function, but does not show whether the model understands the defect and does not reflect the complexity of a real codebase.</li>
+                    <li><strong>Structured reports</strong> add the CWE class, location, and description, but matching a recorded answer neither validates the answer nor demonstrates that the defect can be triggered.</li>
+                    <li><strong>Target reproduction</strong> executes model-generated inputs, but scores only one predefined vulnerability and may discard other valid crashes.</li>
+                </ol>
+                <p class="generation-conclusion">To support a broader evaluation of real-world bug-discovery capability, we designed <strong>FuzzingBrain-Bench</strong>. It credits every distinct, reproducible crash a model triggers through the provided harness, including crashes beyond the vulnerability originally associated with the challenge.</p>
             </div>
         </section>
 
