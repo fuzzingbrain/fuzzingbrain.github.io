@@ -42,7 +42,11 @@
 
     .pillars{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px}
     .pillar{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px}
-    .pillar .ic{font-size:1.5rem;margin-bottom:10px}
+    .pillar{border-top:3px solid var(--border)}
+    .pillar.p1{border-top-color:#6366f1}.pillar.p2{border-top-color:#f59e0b}.pillar.p3{border-top-color:#10b981}
+    .pillar .ic{margin-bottom:12px;line-height:0}
+    .pillar .ic svg{width:38px;height:38px;display:block}
+    .pillar .kick{font-family:var(--font-mono);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin:0 0 10px}
     .pillar h4{margin:0 0 8px;font-size:1.05rem}
     .pillar p{margin:0;color:var(--text-secondary);font-size:.92rem;line-height:1.55}
 
@@ -327,56 +331,23 @@
             <div class="section-content">
                 <h3 class="hd">What is new</h3>
                 <p class="sub">Three design decisions separate FuzzingBrain Bench from the benchmarks it grew out of. Together they change the question from &ldquo;did you reproduce our bug?&rdquo; to &ldquo;what can you break?&rdquo;</p>
-                <svg class="arch-svg" style="max-width:720px" viewBox="0 0 720 190" role="img" aria-label="The three design pillars of FuzzingBrain Bench">
-                    <g font-family="Inter">
-                        <!-- pillar 1: discovery not reproduction -->
-                        <rect x="16" y="20" width="214" height="150" rx="11" fill="#1e293b" stroke="#6366f1"/>
-                        <text x="30" y="42" fill="#818cf8" font-family="JetBrains Mono" font-size="11">01</text>
-                        <g fill="none" stroke="#6366f1" stroke-width="2.5" stroke-linecap="round">
-                            <circle cx="123" cy="62" r="17"/>
-                            <path d="M136,75 l13,13"/>
-                        </g>
-                        <circle cx="117" cy="57" r="3.4" fill="#818cf8" stroke="none"/>
-                        <circle cx="129" cy="63" r="3.4" fill="#818cf8" stroke="none"/>
-                        <circle cx="120" cy="69" r="3.4" fill="#818cf8" stroke="none"/>
-                        <text x="123" y="112" fill="#fff" font-size="15" font-weight="700" text-anchor="middle">Discovery, not</text>
-                        <text x="123" y="130" fill="#fff" font-size="15" font-weight="700" text-anchor="middle">reproduction</text>
-                        <text x="123" y="150" fill="#94a3b8" font-size="11.5" text-anchor="middle">every distinct crash counts</text>
-                        <!-- pillar 2: offline in-image grading -->
-                        <rect x="253" y="20" width="214" height="150" rx="11" fill="#1e293b" stroke="#f59e0b"/>
-                        <text x="267" y="42" fill="#f59e0b" font-family="JetBrains Mono" font-size="11">02</text>
-                        <rect x="341" y="42" width="38" height="34" rx="5" fill="none" stroke="#f59e0b" stroke-width="2.5"/>
-                        <path d="M349,42 v-6 a11,11 0 0 1 22,0 v6" fill="none" stroke="#f59e0b" stroke-width="2.5"/>
-                        <circle cx="360" cy="58" r="4" fill="#f59e0b"/>
-                        <text x="360" y="112" fill="#fff" font-size="15" font-weight="700" text-anchor="middle">Grading inside</text>
-                        <text x="360" y="130" fill="#fff" font-size="15" font-weight="700" text-anchor="middle">the image</text>
-                        <text x="360" y="150" fill="#94a3b8" font-size="11.5" text-anchor="middle">offline and deterministic</text>
-                        <!-- pillar 3: blind realistic sandbox -->
-                        <rect x="490" y="20" width="214" height="150" rx="11" fill="#1e293b" stroke="#10b981"/>
-                        <text x="504" y="42" fill="#10b981" font-family="JetBrains Mono" font-size="11">03</text>
-                        <g fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="578" y="44" width="38" height="30" rx="4"/>
-                            <path d="M588,58 l6,6 l12,-14"/>
-                        </g>
-                        <text x="597" y="112" fill="#fff" font-size="15" font-weight="700" text-anchor="middle">Realistic sandbox</text>
-                        <text x="597" y="132" fill="#94a3b8" font-size="11.5" text-anchor="middle">nothing tells the model</text>
-                        <text x="597" y="148" fill="#94a3b8" font-size="11.5" text-anchor="middle">it is being benchmarked</text>
-                    </g>
-                </svg>
-                <div class="pillars" style="margin-top:26px">
-                    <div class="pillar">
-                        <div class="ic">&#128269;</div>
+                <div class="pillars" style="margin-top:22px">
+                    <div class="pillar p1">
+                        <div class="ic"><svg viewBox="0 0 40 40" role="img" aria-label="Magnifying glass over scattered findings"><g fill="none" stroke="#6366f1" stroke-width="2.4" stroke-linecap="round"><circle cx="17" cy="17" r="12"/><path d="M26,26 l10,10"/></g><circle cx="12.8" cy="13.5" r="2.4" fill="#818cf8"/><circle cx="21.2" cy="17.7" r="2.4" fill="#818cf8"/><circle cx="14.9" cy="21.9" r="2.4" fill="#818cf8"/></svg></div>
                         <h4>Discovery, not reproduction</h4>
+                        <p class="kick">Every distinct crash counts</p>
                         <p>Most benchmarks bind a challenge to one predefined vulnerability and score only inputs that trigger it, so a model that reads the harness, reasons about the reachable code and builds an input that reliably faults the sanitizer still scores zero if the crash is a different one. Here the goal is to produce <b>as many distinct crashes as possible</b>. Any reproducible fault reachable through the harness counts, wherever it lands.</p>
                     </div>
-                    <div class="pillar">
-                        <div class="ic">&#128274;</div>
+                    <div class="pillar p2">
+                        <div class="ic"><svg viewBox="0 0 40 40" role="img" aria-label="Padlock"><g fill="none" stroke="#f59e0b" stroke-width="2.4" stroke-linecap="round"><path d="M13,17 v-5 a7,7 0 0 1 14,0 v5"/><rect x="8" y="17" width="24" height="19" rx="3.5"/></g><circle cx="20" cy="26.5" r="2.6" fill="#f59e0b"/></svg></div>
                         <h4>Grading inside the image</h4>
+                        <p class="kick">Offline and deterministic</p>
                         <p>Every challenge grades itself. The verdict comes from the project&rsquo;s own sanitizer-instrumented harness running in the container, not from a remote service and not from another model judging the output. No answer key ships in any image, so there is nothing in the environment to leak &mdash; and any score can be reproduced from the published image alone.</p>
                     </div>
-                    <div class="pillar">
-                        <div class="ic">&#127981;</div>
+                    <div class="pillar p3">
+                        <div class="ic"><svg viewBox="0 0 40 40" role="img" aria-label="Checked box"><g fill="none" stroke="#10b981" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="11" width="28" height="22" rx="3"/><path d="M13,21 l4.5,4.5 l9,-10.5"/></g></svg></div>
                         <h4>Realistic sandbox</h4>
+                        <p class="kick">Nothing tells the model it is being benchmarked</p>
                         <p>Nothing in the sandbox says it is a benchmark. The challenge carries a neutral alias like <code>avro-03</code>, the shell has no internet, the model key never enters the container, and a submitted input returns only the raw harness output a fuzzer would show &mdash; no verdict, no score, no hint of how close it came.</p>
                     </div>
                 </div>
