@@ -2,30 +2,30 @@
            aria-label="Three phases as columns separated by dashed vertical rules, on a shared three-row grid. Column one, defect sources: the OSS-Fuzz bug tracker, GitHub issues and advisories, and other work, merging into column two. Column two, selection and challenge build: select a fuzzing finding, then extract defect info, then build the challenge image. Column three, verify and remove answer: verify the proof-of-concept over three runs, sending candidates that are not reproducible to a discarded box, then remove the answer, which splits into a green box describing the challenge image and a red box listing what is removed before publication.">
 <style>
 
-  .bx   {fill:#111827; stroke:#475569; stroke-width:1;}
-  .bxt  {fill:#1E293B; stroke:#475569; stroke-width:1;}
-  .bxa  {fill:#252D55; stroke:#818CF8; stroke-width:1.2;}
-  .bxok {fill:#102A26; stroke:#34D399; stroke-width:1.2;}
-  .bxno {fill:#321D27; stroke:#F87171; stroke-width:1.2;}
-  .rail {fill:#818CF8;}
-  .arr  {stroke:#CBD5E1; stroke-width:1.1; fill:none;}
-  .arrd {stroke:#94A3B8; stroke-width:1.1; fill:none; stroke-dasharray:3.5 2.5;}
-  .hair {stroke:#475569; stroke-width:1; fill:none;}
-  .band {stroke:#475569; stroke-width:1; fill:none; stroke-dasharray:5 4;}
-  .bxd  {fill:none; stroke:#94A3B8; stroke-width:1; stroke-dasharray:3.5 2.5;}
-  .hairok{stroke:#34D399; stroke-width:1; fill:none;}
-  .hairno{stroke:#F87171; stroke-width:1; fill:none;}
-  .t    {font-family:Tinos,"Times New Roman",Times,serif; fill:#F8FAFC;}
-  .tm   {font-family:Tinos,"Times New Roman",Times,serif; fill:#CBD5E1;}
-  .tf   {font-family:Tinos,"Times New Roman",Times,serif; fill:#94A3B8;}
-  .ta   {font-family:Tinos,"Times New Roman",Times,serif; fill:#A5B4FC;}
-  .tok  {font-family:Tinos,"Times New Roman",Times,serif; fill:#34D399;}
-  .tno  {font-family:Tinos,"Times New Roman",Times,serif; fill:#F87171;}
-  .mono {font-family:Cousine,"Courier New",monospace; fill:#F8FAFC;}
-  .monoa{font-family:Cousine,"Courier New",monospace; fill:#A5B4FC;}
-  .monok{font-family:Cousine,"Courier New",monospace; fill:#34D399;}
-  .logo {fill:#CBD5E1;}
-  .cap  {font-family:Arimo,Helvetica,sans-serif; fill:#94A3B8; font-size:9.5px;
+  .bx   {fill:#FFFFFF;   stroke:#9DABB8; stroke-width:1;}
+  .bxt  {fill:#E7EDF3; stroke:#9DABB8; stroke-width:1;}
+  .bxa  {fill:#D5E0F3; stroke:#1B3D86;  stroke-width:1.2;}
+  .bxok {fill:#E6F1EA;  stroke:#6BA486;  stroke-width:1.2;}
+  .bxno {fill:#F8E8E4;  stroke:#C8836F;  stroke-width:1.2;}
+  .rail {fill:#1B3D86;}
+  .arr  {stroke:#46535F; stroke-width:1.1; fill:none;}
+  .arrd {stroke:#6F7D8A; stroke-width:1.1; fill:none; stroke-dasharray:3.5 2.5;}
+  .hair {stroke:#9DABB8; stroke-width:1; fill:none;}
+  .band {stroke:#9DABB8; stroke-width:1; fill:none; stroke-dasharray:5 4;}
+  .bxd  {fill:none; stroke:#6F7D8A; stroke-width:1; stroke-dasharray:3.5 2.5;}
+  .hairok{stroke:#6BA486; stroke-width:1; fill:none;}
+  .hairno{stroke:#C8836F; stroke-width:1; fill:none;}
+  .t    {font-family:Tinos,"Times New Roman",Times,serif; fill:#0E1319;}
+  .tm   {font-family:Tinos,"Times New Roman",Times,serif; fill:#46535F;}
+  .tf   {font-family:Tinos,"Times New Roman",Times,serif; fill:#6F7D8A;}
+  .ta   {font-family:Tinos,"Times New Roman",Times,serif; fill:#1B3D86;}
+  .tok  {font-family:Tinos,"Times New Roman",Times,serif; fill:#2E6B4F;}
+  .tno  {font-family:Tinos,"Times New Roman",Times,serif; fill:#96382C;}
+  .mono {font-family:Cousine,"Courier New",monospace;  fill:#0E1319;}
+  .monoa{font-family:Cousine,"Courier New",monospace;  fill:#1B3D86;}
+  .monok{font-family:Cousine,"Courier New",monospace;  fill:#2E6B4F;}
+  .logo {fill:#46535F;}
+  .cap  {font-family:Arimo,Helvetica,sans-serif; fill:#6F7D8A; font-size:9.5px;
          letter-spacing:.12em; text-transform:uppercase; font-weight:600;}
 </style>
 
@@ -33,11 +33,11 @@
         <defs>
           <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5"
                   markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-            <path d="M 0 1 L 9 5 L 0 9 z" fill="#CBD5E1"/>
+            <path d="M 0 1 L 9 5 L 0 9 z" fill="#46535F"/>
           </marker>
           <marker id="ahd" viewBox="0 0 10 10" refX="9" refY="5"
                   markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-            <path d="M 0 1 L 9 5 L 0 9 z" fill="#94A3B8"/>
+            <path d="M 0 1 L 9 5 L 0 9 z" fill="#6F7D8A"/>
           </marker>
         </defs>
 

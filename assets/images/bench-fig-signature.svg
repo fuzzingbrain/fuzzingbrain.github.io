@@ -1,16 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="844" height="360" viewBox="0 0 844 360" role="img"
      aria-label="One AddressSanitizer report with the components of the signature boxed: the fault class on the SUMMARY line and three relevant function frames. Everything else in the report is greyed out. Below, the components joined by bars make the signature.">
 <style>
-  .bxt  {fill:#111827; stroke:#475569; stroke-width:1;}
-  .tm   {font-family:Tinos,"Times New Roman",Times,serif; fill:#CBD5E1;}
-  .tf   {font-family:Tinos,"Times New Roman",Times,serif; fill:#94A3B8;}
-  .tok  {font-family:Tinos,"Times New Roman",Times,serif; fill:#34D399;}
-  .ta   {font-family:Tinos,"Times New Roman",Times,serif; fill:#A5B4FC;}
-  .mono {font-family:Cousine,"Courier New",monospace; fill:#F8FAFC;}
-  .monf {font-family:Cousine,"Courier New",monospace; fill:#94A3B8;}
-  .hia  {fill:#2D3A6A; stroke:#818CF8; stroke-width:1.4;}
-  .hik  {fill:#163B34; stroke:#34D399; stroke-width:1.4;}
-  .cap  {font-family:Arimo,Helvetica,sans-serif; fill:#94A3B8; font-size:10.5px;
+  .bxt  {fill:#EEF2F6; stroke:#9DABB8; stroke-width:1;}
+  .tm   {font-family:Tinos,"Times New Roman",Times,serif; fill:#2A3540;}
+  .tf   {font-family:Tinos,"Times New Roman",Times,serif; fill:#3F4D5A;}
+  .tok  {font-family:Tinos,"Times New Roman",Times,serif; fill:#1F5C3E;}
+  .ta   {font-family:Tinos,"Times New Roman",Times,serif; fill:#17408F;}
+  .mono {font-family:Cousine,"Courier New",monospace; fill:#000000;}
+  .monf {font-family:Cousine,"Courier New",monospace; fill:#3F4D5A;}
+  .hia  {fill:#BBD0F0; stroke:#17408F; stroke-width:1.4;}
+  .hik  {fill:#BFE3CE; stroke:#2E7A52; stroke-width:1.4;}
+  .cap  {font-family:Arimo,Helvetica,sans-serif; fill:#46535F; font-size:10.5px;
          letter-spacing:.12em; text-transform:uppercase; font-weight:700;}
 </style>
 <rect class="bxt" x="6" y="8" width="832" height="344" rx="3"/>
